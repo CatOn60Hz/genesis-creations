@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+/* Genesis Creations brand palette — original warm scheme (spec §10) */
+@theme {
+  --color-maroon: #810b38;
+  --color-maroon-dark: #541a1a;
+  --color-tan: #dcc3aa;
+  --color-cream: #f1e2d1;
+}
+
+/* shadcn design tokens, mapped to the GC brand palette (light theme) */
+:root {
+  color-scheme: light;
+
+  --background: #f1e2d1; /* cream */
+  --foreground: #541a1a; /* maroon-dark */
+  --card: #ffffff;
+  --card-foreground: #541a1a;
+  --popover: #ffffff;
+  --popover-foreground: #541a1a;
+  --primary: #810b38; /* maroon */
+  --primary-foreground: #f1e2d1; /* cream */
+  --secondary: #dcc3aa; /* tan */
+  --secondary-foreground: #541a1a;
+  --muted: #ece0d2;
+  --muted-foreground: #6f5347;
+  --accent: #dcc3aa; /* tan */
+  --accent-foreground: #541a1a;
+  --destructive: #b3261e;
+  --destructive-foreground: #f1e2d1;
+  --border: #dcc3aa; /* tan */
+  --input: #dcc3aa;
+  --ring: #810b38; /* maroon */
+  --radius: 0.5rem;
+}
+
+/* Expose the shadcn tokens as Tailwind color utilities (bg-primary, text-muted-foreground, ...) */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+/* Continuous services marquee — never pauses (CSS-driven). */
+@keyframes gc-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.gc-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: gc-marquee 45s linear infinite;
+}
+
+/* Hide the scrollbar while keeping scroll behaviour intact */
+html {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* legacy Edge/IE */
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-cream);
+  color: var(--color-maroon-dark);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
