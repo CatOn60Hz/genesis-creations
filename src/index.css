@@ -5,7 +5,7 @@
   --color-maroon: #a30f47;
   --color-maroon-dark: #752525;
   --color-tan: #cba98a;
-  --color-cream: #e6d1bb;
+  --color-cream: #f1e2d1;
 }
 
 /* shadcn design tokens, mapped to the GC brand palette (light theme) */
@@ -13,13 +13,13 @@
   color-scheme: dark;
 
   --background: #752525; /* maroon-dark */
-  --foreground: #e6d1bb; /* cream */
+  --foreground: #f1e2d1; /* cream */
   --card: #ffffff;
   --card-foreground: #752525;
   --popover: #ffffff;
   --popover-foreground: #752525;
   --primary: #a30f47; /* maroon */
-  --primary-foreground: #e6d1bb; /* cream */
+  --primary-foreground: #f1e2d1; /* cream */
   --secondary: #cba98a; /* tan */
   --secondary-foreground: #752525;
   --muted: #ece0d2;
@@ -27,7 +27,7 @@
   --accent: #cba98a; /* tan */
   --accent-foreground: #752525;
   --destructive: #b3261e;
-  --destructive-foreground: #e6d1bb;
+  --destructive-foreground: #f1e2d1;
   --border: #cba98a; /* tan */
   --input: #cba98a;
   --ring: #a30f47; /* maroon */

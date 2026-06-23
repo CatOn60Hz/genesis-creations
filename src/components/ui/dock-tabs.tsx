@@ -161,7 +161,7 @@ export function DockTabs() {
     <motion.div
       onMouseMove={(e) => mouseX.set(e.pageX)}
       onMouseLeave={() => mouseX.set(Infinity)}
-      className="mx-auto flex h-20 items-end gap-3 rounded-3xl bg-tan/40 backdrop-blur-md px-4 pb-3.5 border-2 border-maroon-dark/30 shadow-xl"
+      className="mx-auto flex h-20 items-end gap-3 rounded-3xl bg-transparent px-4 pb-3.5 border-2 border-maroon-dark/30"
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{

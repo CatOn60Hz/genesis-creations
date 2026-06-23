@@ -1,5 +1,7 @@
 import { Wallet, Building2, GraduationCap } from "lucide-react"
 
+import { GlowCard } from "@/components/ui/spotlight-card"
+
 const advantages = [
   {
     icon: <Wallet />,
@@ -20,15 +22,21 @@ const advantages = [
 
 const About: React.FC = () => {
   return (
-    <section id="about" className="bg-maroon-dark text-cream py-24 px-6">
+    <section
+      id="about"
+      className="bg-maroon-dark text-cream py-24 px-6"
+    >
       <div className="mx-auto max-w-5xl text-center">
-        <p className="mb-3 text-xs uppercase tracking-[0.3em] text-maroon">
+        {/* Eyebrow — tan reads clearly on the deep maroon background */}
+        <p className="mb-4 text-xs font-medium uppercase tracking-[0.35em] text-tan">
           Welcome to Genesis Creations
         </p>
-        <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-maroon">
-          Preparing Young Minds for a Career in Media
+        {/* Heading — cream for strong contrast and easy reading */}
+        <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-cream">
+          Preparing Young Minds for a{" "}
+          <span className="text-tan">Career in Media</span>
         </h2>
-        <p className="mx-auto mt-6 max-w-3xl text-base md:text-lg text-cream">
+        <p className="mx-auto mt-6 max-w-3xl text-base md:text-lg leading-relaxed text-cream/85">
           We at Genesis Creation's Academy provide you with all the necessary skills
           tailored for a solid grounding to help you jumpstart your career as a media
           professional. Gaining the right balance of knowledge and skill is much
@@ -39,16 +47,20 @@ const About: React.FC = () => {
 
       <div className="mx-auto mt-16 grid max-w-5xl gap-6 sm:grid-cols-3">
         {advantages.map((a) => (
-          <div
+          <GlowCard
             key={a.title}
-            className="rounded-2xl border border-tan bg-white/40 p-8 text-center shadow-sm transition-transform hover:-translate-y-1"
+            glowColor="maroon"
+            customSize
+            className="h-full min-h-[280px]"
           >
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-maroon text-maroon-dark">
-              {a.icon}
+            <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-maroon text-cream shadow-lg [&>svg]:h-6 [&>svg]:w-6">
+                {a.icon}
+              </div>
+              <h3 className="text-lg font-semibold text-cream">{a.title}</h3>
+              <p className="text-sm leading-relaxed text-cream/75">{a.text}</p>
             </div>
-            <h3 className="text-lg font-semibold text-maroon">{a.title}</h3>
-            <p className="mt-2 text-sm text-cream">{a.text}</p>
-          </div>
+          </GlowCard>
         ))}
       </div>
     </section>
