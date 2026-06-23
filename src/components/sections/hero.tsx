@@ -39,7 +39,7 @@ const Hero: React.FC = () => {
       {/* Hero content — two columns on desktop.
           pointer-events-none so the PixelTrail behind keeps receiving the mouse;
           interactive elements re-enable pointer events individually. */}
-      <div className="relative z-10 flex flex-1 items-center px-6 py-8 pointer-events-none">
+      <div className="relative z-10 flex flex-1 items-start px-6 pt-12 md:pt-20 pb-8 pointer-events-none">
         <div className="mx-auto grid w-full max-w-7xl items-center gap-8 lg:grid-cols-2">
           {/* Left: brand + CTAs */}
           <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
