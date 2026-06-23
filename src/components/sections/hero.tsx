@@ -46,30 +46,30 @@ const Hero: React.FC = () => {
             <img
               src={logo}
               alt="Genesis Creations"
-              className="mb-6 h-32 w-auto md:h-44 drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
+              className="mb-7 h-40 w-auto md:h-56 drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
             />
 
-            <p className="mb-4 text-sm md:text-base uppercase tracking-[0.35em] text-black">
+            <p className="mb-5 text-base md:text-xl uppercase tracking-[0.35em] text-black">
               Chennai · Media House
             </p>
 
-            <p className="mt-2 max-w-xl text-base md:text-2xl text-maroon-dark">
+            <p className="mt-2 max-w-2xl text-lg md:text-3xl text-maroon-dark">
               Media Academy · Digital Marketing · Production · Studio · Broadcasting
             </p>
 
             {/* CTAs */}
-            <div className="mt-8 md:mt-10 flex flex-col sm:flex-row items-center gap-4 pointer-events-auto">
+            <div className="mt-10 md:mt-14 flex flex-col sm:flex-row items-center gap-5 pointer-events-auto">
               <button
                 type="button"
                 onClick={() => navigate("/workshops")}
-                className="rounded-full bg-maroon px-10 py-4 text-base md:text-lg font-medium text-maroon-dark shadow-lg transition-transform hover:scale-105 hover:bg-maroon/90"
+                className="rounded-full bg-maroon px-12 py-5 text-lg md:text-xl font-medium text-maroon-dark shadow-lg transition-transform hover:scale-105 hover:bg-maroon/90"
               >
                 Register for a Workshop
               </button>
               <button
                 type="button"
                 onClick={() => navigate("/services")}
-                className="rounded-full border-2 border-tan/70 px-10 py-4 text-base md:text-lg font-medium text-maroon-dark transition-colors hover:bg-tan/10"
+                className="rounded-full border-2 border-tan/70 px-12 py-5 text-lg md:text-xl font-medium text-maroon-dark transition-colors hover:bg-tan/10"
               >
                 Explore Services
               </button>
@@ -78,15 +78,15 @@ const Hero: React.FC = () => {
 
           {/* Right: gooey morphing text — what we do, brought to life */}
           <div className="flex flex-col items-center">
-            <p className="mb-6 md:mb-8 text-sm md:text-lg uppercase tracking-[0.35em] text-black">
+            <p className="mb-8 md:mb-10 text-base md:text-2xl uppercase tracking-[0.35em] text-black">
               We don't just make media. We
             </p>
             <GooeyText
               texts={MORPH_WORDS}
               morphTime={1.2}
               cooldownTime={2.5}
-              className="h-[140px] w-full font-bold md:h-[200px]"
-              textClassName="text-tan leading-none text-[clamp(2.5rem,7vw,6rem)] md:text-[clamp(2.5rem,7vw,6rem)]"
+              className="h-[200px] w-full font-bold md:h-[320px]"
+              textClassName="text-tan leading-none text-[clamp(3.5rem,9vw,8.5rem)] md:text-[clamp(3.5rem,9vw,8.5rem)]"
             />
           </div>
         </div>
