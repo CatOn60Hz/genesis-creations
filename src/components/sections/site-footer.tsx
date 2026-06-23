@@ -22,20 +22,20 @@ const WhatsAppIcon = () => (
 
 const SiteFooter: React.FC = () => {
   return (
-    <footer id="contact" className="bg-maroon-dark text-cream pt-20 pb-28 px-6">
+    <footer id="contact" className="bg-cream text-maroon-dark pt-20 pb-28 px-6">
       <div className="mx-auto grid max-w-6xl gap-12 md:grid-cols-2">
         {/* CTA / brand */}
         <div>
           <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
             Start Your Media Career Today
           </h2>
-          <p className="mt-4 max-w-md text-cream/75">
+          <p className="mt-4 max-w-md text-maroon-dark">
             Join Genesis Creations Media Academy and learn from working
             professionals in a fully equipped studio environment.
           </p>
           <a
             href="tel:+917824850999"
-            className="mt-8 inline-block rounded-full bg-maroon px-8 py-3 text-sm font-medium text-cream transition-transform hover:scale-105"
+            className="mt-8 inline-block rounded-full bg-maroon px-8 py-3 text-sm font-medium text-maroon-dark transition-transform hover:scale-105"
           >
             Call to Enroll
           </a>
@@ -45,20 +45,20 @@ const SiteFooter: React.FC = () => {
         <div className="space-y-5">
           <div className="flex items-start gap-3">
             <MapPin className="mt-1 h-5 w-5 shrink-0 text-tan" />
-            <p className="text-cream/85">
+            <p className="text-maroon-dark">
               #340B/1A3B1, Vinayaka Avenue, Okkiyam Thoraipakkam, Chennai 600097
             </p>
           </div>
           <a
             href="tel:+917824850999"
-            className="flex items-center gap-3 text-cream/85 transition-colors hover:text-tan"
+            className="flex items-center gap-3 text-maroon-dark transition-colors hover:text-tan"
           >
             <Phone className="h-5 w-5 shrink-0 text-tan" />
             +91 78248 50999
           </a>
           <a
             href="mailto:info@genesiscreations.in"
-            className="flex items-center gap-3 text-cream/85 transition-colors hover:text-tan"
+            className="flex items-center gap-3 text-maroon-dark transition-colors hover:text-tan"
           >
             <Mail className="h-5 w-5 shrink-0 text-tan" />
             info@genesiscreations.in
@@ -68,21 +68,21 @@ const SiteFooter: React.FC = () => {
             <a
               href="#"
               aria-label="Facebook"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-cream/10 transition-colors hover:bg-maroon"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-maroon-dark/10 transition-colors hover:bg-maroon"
             >
               <FacebookIcon />
             </a>
             <a
               href="#"
               aria-label="Instagram"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-cream/10 transition-colors hover:bg-maroon"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-maroon-dark/10 transition-colors hover:bg-maroon"
             >
               <InstagramIcon />
             </a>
             <a
               href="#"
               aria-label="WhatsApp"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-cream/10 transition-colors hover:bg-maroon"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-maroon-dark/10 transition-colors hover:bg-maroon"
             >
               <WhatsAppIcon />
             </a>
@@ -90,7 +90,7 @@ const SiteFooter: React.FC = () => {
         </div>
       </div>
 
-      <p className="mx-auto mt-16 max-w-6xl border-t border-cream/15 pt-6 text-center text-xs text-cream/50">
+      <p className="mx-auto mt-16 max-w-6xl border-t border-maroon-dark/15 pt-6 text-center text-xs text-maroon-dark">
         © {new Date().getFullYear()} Genesis Creations · genesiscreations.com
       </p>
     </footer>

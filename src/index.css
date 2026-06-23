@@ -2,35 +2,35 @@
 
 /* Genesis Creations brand palette — original warm scheme (spec §10) */
 @theme {
-  --color-maroon: #810b38;
-  --color-maroon-dark: #541a1a;
-  --color-tan: #dcc3aa;
-  --color-cream: #f1e2d1;
+  --color-maroon: #a30f47;
+  --color-maroon-dark: #752525;
+  --color-tan: #cba98a;
+  --color-cream: #e6d1bb;
 }
 
 /* shadcn design tokens, mapped to the GC brand palette (light theme) */
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 
-  --background: #f1e2d1; /* cream */
-  --foreground: #541a1a; /* maroon-dark */
+  --background: #752525; /* maroon-dark */
+  --foreground: #e6d1bb; /* cream */
   --card: #ffffff;
-  --card-foreground: #541a1a;
+  --card-foreground: #752525;
   --popover: #ffffff;
-  --popover-foreground: #541a1a;
-  --primary: #810b38; /* maroon */
-  --primary-foreground: #f1e2d1; /* cream */
-  --secondary: #dcc3aa; /* tan */
-  --secondary-foreground: #541a1a;
+  --popover-foreground: #752525;
+  --primary: #a30f47; /* maroon */
+  --primary-foreground: #e6d1bb; /* cream */
+  --secondary: #cba98a; /* tan */
+  --secondary-foreground: #752525;
   --muted: #ece0d2;
   --muted-foreground: #6f5347;
-  --accent: #dcc3aa; /* tan */
-  --accent-foreground: #541a1a;
+  --accent: #cba98a; /* tan */
+  --accent-foreground: #752525;
   --destructive: #b3261e;
-  --destructive-foreground: #f1e2d1;
-  --border: #dcc3aa; /* tan */
-  --input: #dcc3aa;
-  --ring: #810b38; /* maroon */
+  --destructive-foreground: #e6d1bb;
+  --border: #cba98a; /* tan */
+  --input: #cba98a;
+  --ring: #a30f47; /* maroon */
   --radius: 0.5rem;
 }
 
@@ -96,8 +96,8 @@ body::-webkit-scrollbar {
 
 body {
   margin: 0;
-  background-color: var(--color-cream);
-  color: var(--color-maroon-dark);
+  background-color: var(--color-maroon-dark);
+  color: var(--color-cream);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;

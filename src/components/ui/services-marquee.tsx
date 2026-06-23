@@ -45,7 +45,7 @@ interface ServicesMarqueeProps {
 const ServicesMarquee = ({
   services = defaultServices,
   className,
-  fadeFrom = "from-maroon-dark",
+  fadeFrom = "from-cream",
 }: ServicesMarqueeProps) => {
   return (
     <div className={cn("relative w-full overflow-hidden", className)}>
@@ -55,7 +55,7 @@ const ServicesMarquee = ({
           <div
             key={`${service.id}-${index}`}
             aria-hidden={index >= services.length}
-            className="mx-3 flex shrink-0 items-center gap-2 rounded-full border border-tan/30 bg-cream/5 px-5 py-2 text-cream backdrop-blur-sm"
+            className="mx-3 flex shrink-0 items-center gap-2 rounded-full border border-tan/30 bg-maroon-dark/5 px-5 py-2 text-maroon-dark backdrop-blur-sm"
           >
             <span className="text-tan [&>svg]:h-4 [&>svg]:w-4">
               {service.icon}

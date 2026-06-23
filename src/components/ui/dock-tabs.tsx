@@ -30,15 +30,15 @@ export interface DockItem {
 
 // Genesis Creations site navigation (spec §5), brand-tinted.
 export const dockItems: DockItem[] = [
-  { id: "home", name: "Home", to: "/", icon: <Home />, color: "bg-maroon" },
+  { id: "home", name: "Home", to: "/", icon: <Home />, color: "bg-maroon-dark" },
   { id: "academy", name: "Media Academy", to: "/academy", icon: <GraduationCap />, color: "bg-maroon-dark" },
-  { id: "workshops", name: "Workshops", to: "/workshops", icon: <CalendarDays />, color: "bg-maroon" },
+  { id: "workshops", name: "Workshops", to: "/workshops", icon: <CalendarDays />, color: "bg-maroon-dark" },
   { id: "digital-marketing", name: "Digital Marketing", to: "/digital-marketing", icon: <Megaphone />, color: "bg-maroon-dark" },
-  { id: "services", name: "Services", to: "/services", icon: <Clapperboard />, color: "bg-maroon" },
+  { id: "services", name: "Services", to: "/services", icon: <Clapperboard />, color: "bg-maroon-dark" },
   { id: "gallery", name: "Gallery", to: "/gallery", icon: <Images />, color: "bg-maroon-dark" },
-  { id: "videos", name: "Videos", to: "/videos", icon: <Play />, color: "bg-maroon" },
+  { id: "videos", name: "Videos", to: "/videos", icon: <Play />, color: "bg-maroon-dark" },
   { id: "updates", name: "Latest Updates", to: "/updates", icon: <Newspaper />, color: "bg-maroon-dark" },
-  { id: "about", name: "About", to: "/about", icon: <Info />, color: "bg-maroon" },
+  { id: "about", name: "About", to: "/about", icon: <Info />, color: "bg-maroon-dark" },
   { id: "contact", name: "Contact", to: "/contact", icon: <Mail />, color: "bg-maroon-dark" },
 ]
 
@@ -83,8 +83,8 @@ function DockIcon({
       whileTap={{ scale: 0.95 }}
     >
       <motion.div
-        className={`w-full h-full rounded-2xl shadow-lg flex items-center justify-center text-cream relative overflow-hidden ${item.color} ${
-          isActive ? "ring-2 ring-cream/80" : ""
+        className={`w-full h-full rounded-2xl shadow-lg flex items-center justify-center text-cream relative overflow-hidden transition-colors ${
+          isActive ? "bg-maroon ring-2 ring-tan/80" : "bg-maroon-dark hover:bg-maroon-dark/80"
         }`}
         animate={{
           y: isClicked ? 2 : isHovered ? -8 : 0,
@@ -132,14 +132,14 @@ function DockIcon({
           stiffness: 500,
           damping: 30,
         }}
-        className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-maroon-dark/90 text-cream text-xs px-2 py-1 rounded-md whitespace-nowrap pointer-events-none backdrop-blur-sm"
+        className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-maroon-dark text-cream text-xs px-2 py-1 rounded-md whitespace-nowrap pointer-events-none border border-tan/20 shadow-xl"
       >
         {item.name}
       </motion.div>
 
       {/* Active indicator dot */}
       <motion.div
-        className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-cream rounded-full"
+        className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-maroon rounded-full"
         animate={{
           scale: isClicked ? 1.5 : 1,
           opacity: isActive || isClicked ? 1 : 0,
@@ -161,7 +161,7 @@ export function DockTabs() {
     <motion.div
       onMouseMove={(e) => mouseX.set(e.pageX)}
       onMouseLeave={() => mouseX.set(Infinity)}
-      className="mx-auto flex h-20 items-end gap-3 rounded-3xl bg-tan/40 backdrop-blur-md px-4 pb-3.5 border-2 border-cream/30 shadow-xl"
+      className="mx-auto flex h-20 items-end gap-3 rounded-3xl bg-tan/40 backdrop-blur-md px-4 pb-3.5 border-2 border-maroon-dark/30 shadow-xl"
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{
