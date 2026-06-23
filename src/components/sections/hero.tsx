@@ -39,14 +39,14 @@ const Hero: React.FC = () => {
       {/* Hero content — two columns on desktop.
           pointer-events-none so the PixelTrail behind keeps receiving the mouse;
           interactive elements re-enable pointer events individually. */}
-      <div className="relative z-10 flex flex-1 items-center px-6 py-12 pointer-events-none">
-        <div className="mx-auto grid w-full max-w-7xl items-center gap-12 lg:grid-cols-2">
+      <div className="relative z-10 flex flex-1 items-center px-6 py-8 pointer-events-none">
+        <div className="mx-auto grid w-full max-w-7xl items-center gap-8 lg:grid-cols-2">
           {/* Left: brand + CTAs */}
           <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
             <img
               src={logo}
               alt="Genesis Creations"
-              className="mb-8 h-24 w-auto md:h-32 drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
+              className="mb-6 h-32 w-auto md:h-44 drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
             />
 
             <p className="mb-4 text-sm md:text-base uppercase tracking-[0.35em] text-black">
@@ -58,7 +58,7 @@ const Hero: React.FC = () => {
             </p>
 
             {/* CTAs */}
-            <div className="mt-12 flex flex-col sm:flex-row items-center gap-4 pointer-events-auto">
+            <div className="mt-8 md:mt-10 flex flex-col sm:flex-row items-center gap-4 pointer-events-auto">
               <button
                 type="button"
                 onClick={() => navigate("/workshops")}
@@ -78,14 +78,14 @@ const Hero: React.FC = () => {
 
           {/* Right: gooey morphing text — what we do, brought to life */}
           <div className="flex flex-col items-center">
-            <p className="mb-16 text-sm md:text-lg uppercase tracking-[0.35em] text-black">
+            <p className="mb-6 md:mb-8 text-sm md:text-lg uppercase tracking-[0.35em] text-black">
               We don't just make media. We
             </p>
             <GooeyText
               texts={MORPH_WORDS}
               morphTime={1.2}
               cooldownTime={2.5}
-              className="h-[200px] w-full font-bold md:h-[280px]"
+              className="h-[140px] w-full font-bold md:h-[200px]"
               textClassName="text-tan leading-none text-[clamp(2.5rem,7vw,6rem)] md:text-[clamp(2.5rem,7vw,6rem)]"
             />
           </div>

@@ -1,16 +1,12 @@
 // Auto-scrolling services strip — pure-CSS marquee so it never pauses.
 import {
-  Aperture,
-  Video,
+  Camera,
+  Lightbulb,
+  AudioLines,
   Scissors,
-  Plane,
-  Mic,
-  Music,
-  Megaphone,
   Clapperboard,
-  Building2,
-  Radio,
-  CalendarDays,
+  Aperture,
+  Plane,
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -22,17 +18,13 @@ interface ServiceItem {
 }
 
 const defaultServices: ServiceItem[] = [
+  { id: "camera", name: "Camera", icon: <Camera /> },
+  { id: "lighting", name: "Lighting", icon: <Lightbulb /> },
+  { id: "audio", name: "Audio", icon: <AudioLines /> },
+  { id: "editing", name: "Editing", icon: <Scissors /> },
+  { id: "production", name: "Video Production", icon: <Clapperboard /> },
   { id: "photography", name: "Photography", icon: <Aperture /> },
-  { id: "videography", name: "Videography", icon: <Video /> },
-  { id: "editing", name: "Video Editing", icon: <Scissors /> },
-  { id: "drone", name: "Drone Cinematography", icon: <Plane /> },
-  { id: "sound", name: "Live Sound Mixing", icon: <Mic /> },
-  { id: "recording", name: "Studio Recording", icon: <Music /> },
-  { id: "marketing", name: "Digital Marketing", icon: <Megaphone /> },
-  { id: "production", name: "Media Production", icon: <Clapperboard /> },
-  { id: "rental", name: "Studio Rental", icon: <Building2 /> },
-  { id: "broadcasting", name: "Broadcasting", icon: <Radio /> },
-  { id: "events", name: "Event Coverage", icon: <CalendarDays /> },
+  { id: "aerial", name: "Aerial Cinematography", icon: <Plane /> },
 ]
 
 interface ServicesMarqueeProps {
