@@ -51,7 +51,7 @@ const Courses: React.FC = () => {
             key={c.title}
             glowColor="maroon"
             customSize
-            className="group h-full min-h-[280px] transition-transform hover:-translate-y-1"
+            className="group h-full min-h-[280px]"
           >
             <div className="flex h-full flex-col p-2">
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-maroon text-maroon-dark">
