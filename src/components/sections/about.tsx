@@ -20,7 +20,7 @@ const advantages = [
 
 const About: React.FC = () => {
   return (
-    <section id="about" className="bg-cream text-maroon-dark py-24 px-6">
+    <section id="about" className="bg-maroon-dark text-cream py-24 px-6">
       <div className="mx-auto max-w-5xl text-center">
         <p className="mb-3 text-xs uppercase tracking-[0.3em] text-maroon">
           Welcome to Genesis Creations
@@ -28,7 +28,7 @@ const About: React.FC = () => {
         <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-maroon">
           Preparing Young Minds for a Career in Media
         </h2>
-        <p className="mx-auto mt-6 max-w-3xl text-base md:text-lg text-maroon-dark/80">
+        <p className="mx-auto mt-6 max-w-3xl text-base md:text-lg text-cream">
           We at Genesis Creation's Academy provide you with all the necessary skills
           tailored for a solid grounding to help you jumpstart your career as a media
           professional. Gaining the right balance of knowledge and skill is much
@@ -43,11 +43,11 @@ const About: React.FC = () => {
             key={a.title}
             className="rounded-2xl border border-tan bg-white/40 p-8 text-center shadow-sm transition-transform hover:-translate-y-1"
           >
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-maroon text-cream">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-maroon text-maroon-dark">
               {a.icon}
             </div>
             <h3 className="text-lg font-semibold text-maroon">{a.title}</h3>
-            <p className="mt-2 text-sm text-maroon-dark/75">{a.text}</p>
+            <p className="mt-2 text-sm text-cream">{a.text}</p>
           </div>
         ))}
       </div>

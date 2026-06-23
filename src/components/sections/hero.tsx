@@ -17,7 +17,7 @@ const Hero: React.FC = () => {
   const navigate = useNavigate()
 
   return (
-    <section className="relative w-full min-h-screen overflow-hidden bg-maroon-dark text-cream flex flex-col">
+    <section className="relative w-full min-h-screen overflow-hidden bg-cream text-maroon-dark flex flex-col">
       {/* Interactive pixel trail background */}
       <div className="absolute inset-0 z-0">
         <PixelTrail
@@ -30,7 +30,7 @@ const Hero: React.FC = () => {
 
       {/* Auto-scrolling services strip — fills the top of the hero */}
       <div className="relative z-10 pt-10 md:pt-14">
-        <p className="mb-4 text-center text-[0.65rem] uppercase tracking-[0.4em] text-tan/70">
+        <p className="mb-4 text-center text-[0.65rem] uppercase tracking-[0.4em] text-black">
           What We Do
         </p>
         <ServicesMarquee />
@@ -49,11 +49,11 @@ const Hero: React.FC = () => {
               className="mb-8 h-24 w-auto md:h-32 drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
             />
 
-            <p className="mb-4 text-sm md:text-base uppercase tracking-[0.35em] text-tan">
+            <p className="mb-4 text-sm md:text-base uppercase tracking-[0.35em] text-black">
               Chennai · Media House
             </p>
 
-            <p className="mt-2 max-w-xl text-base md:text-2xl text-cream/80">
+            <p className="mt-2 max-w-xl text-base md:text-2xl text-maroon-dark">
               Media Academy · Digital Marketing · Production · Studio · Broadcasting
             </p>
 
@@ -62,14 +62,14 @@ const Hero: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate("/workshops")}
-                className="rounded-full bg-maroon px-10 py-4 text-base md:text-lg font-medium text-cream shadow-lg transition-transform hover:scale-105 hover:bg-maroon/90"
+                className="rounded-full bg-maroon px-10 py-4 text-base md:text-lg font-medium text-maroon-dark shadow-lg transition-transform hover:scale-105 hover:bg-maroon/90"
               >
                 Register for a Workshop
               </button>
               <button
                 type="button"
                 onClick={() => navigate("/services")}
-                className="rounded-full border-2 border-tan/70 px-10 py-4 text-base md:text-lg font-medium text-cream transition-colors hover:bg-tan/10"
+                className="rounded-full border-2 border-tan/70 px-10 py-4 text-base md:text-lg font-medium text-maroon-dark transition-colors hover:bg-tan/10"
               >
                 Explore Services
               </button>
@@ -78,7 +78,7 @@ const Hero: React.FC = () => {
 
           {/* Right: gooey morphing text — what we do, brought to life */}
           <div className="flex flex-col items-center">
-            <p className="mb-16 text-sm md:text-lg uppercase tracking-[0.35em] text-tan/80">
+            <p className="mb-16 text-sm md:text-lg uppercase tracking-[0.35em] text-black">
               We don't just make media. We
             </p>
             <GooeyText
@@ -94,7 +94,7 @@ const Hero: React.FC = () => {
 
       {/* Scroll-down cue */}
       <motion.div
-        className="absolute bottom-28 md:bottom-10 left-1/2 z-10 -translate-x-1/2 text-tan/70 pointer-events-none"
+        className="absolute bottom-28 md:bottom-10 left-1/2 z-10 -translate-x-1/2 text-tan pointer-events-none"
         animate={{ y: [0, 10, 0] }}
         transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
       >

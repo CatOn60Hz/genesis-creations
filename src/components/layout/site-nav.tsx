@@ -24,13 +24,13 @@ const SiteNav: React.FC = () => {
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          className="fixed top-4 right-4 z-50 flex h-11 w-11 items-center justify-center rounded-full bg-maroon text-cream shadow-lg"
+          className="fixed top-4 right-4 z-50 flex h-11 w-11 items-center justify-center rounded-full bg-maroon text-maroon-dark shadow-lg"
         >
           {open ? <X size={20} /> : <Menu size={20} />}
         </button>
 
         {open && (
-          <div className="fixed inset-0 z-40 bg-maroon-dark/95 backdrop-blur-sm pt-20 px-6">
+          <div className="fixed inset-0 z-40 bg-cream/95 backdrop-blur-sm pt-20 px-6">
             <img
               src={logo}
               alt="Genesis Creations"
@@ -45,11 +45,11 @@ const SiteNav: React.FC = () => {
                       to={item.to}
                       onClick={() => setOpen(false)}
                       className={cn(
-                        "flex items-center gap-3 rounded-xl px-4 py-3 text-lg text-cream transition-colors",
+                        "flex items-center gap-3 rounded-xl px-4 py-3 text-lg text-maroon-dark transition-colors",
                         isActive ? "bg-maroon" : "hover:bg-maroon/40"
                       )}
                     >
-                      <span className="text-cream">{item.icon}</span>
+                      <span className="text-maroon-dark">{item.icon}</span>
                       {item.name}
                     </Link>
                   </li>

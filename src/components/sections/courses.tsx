@@ -33,7 +33,7 @@ const Courses: React.FC = () => {
   const navigate = useNavigate()
 
   return (
-    <section id="courses" className="bg-cream text-maroon-dark py-24 px-6">
+    <section id="courses" className="bg-maroon-dark text-cream py-24 px-6">
       <div className="mx-auto max-w-5xl text-center">
         <p className="mb-3 text-xs uppercase tracking-[0.3em] text-maroon">
           Workshops &amp; Courses
@@ -49,15 +49,15 @@ const Courses: React.FC = () => {
             key={c.title}
             className="group flex flex-col rounded-2xl border border-tan bg-white/40 p-8 shadow-sm transition-transform hover:-translate-y-1"
           >
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-maroon text-cream">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-maroon text-maroon-dark">
               {c.icon}
             </div>
             <h3 className="text-xl font-semibold text-maroon">{c.title}</h3>
-            <p className="mt-2 flex-1 text-sm text-maroon-dark/75">{c.text}</p>
+            <p className="mt-2 flex-1 text-sm text-cream">{c.text}</p>
             <button
               type="button"
               onClick={() => navigate("/workshops")}
-              className="mt-6 self-start rounded-full bg-maroon px-5 py-2 text-sm font-medium text-cream transition-transform group-hover:scale-105"
+              className="mt-6 self-start rounded-full bg-maroon px-5 py-2 text-sm font-medium text-maroon-dark transition-transform group-hover:scale-105"
             >
               Register &amp; Pay
             </button>

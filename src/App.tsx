@@ -10,19 +10,19 @@ function SectionStub() {
   const item = dockItems.find((i) => i.to === location.pathname)
 
   return (
-    <section className="min-h-screen flex flex-col items-center justify-center px-6 text-center bg-cream text-maroon-dark">
+    <section className="min-h-screen flex flex-col items-center justify-center px-6 text-center bg-maroon-dark text-cream">
       <p className="mb-3 text-xs uppercase tracking-[0.3em] text-maroon">
         Genesis Creations
       </p>
       <h1 className="text-4xl md:text-6xl font-semibold tracking-tight text-maroon">
         {item?.name ?? "Page"}
       </h1>
-      <p className="mt-4 max-w-md text-maroon-dark/70">
+      <p className="mt-4 max-w-md text-cream">
         This section is coming soon. The page scaffold is wired and ready for content.
       </p>
       <Link
         to="/"
-        className="mt-8 rounded-full bg-maroon px-6 py-3 text-sm font-medium text-cream transition-transform hover:scale-105"
+        className="mt-8 rounded-full bg-maroon px-6 py-3 text-sm font-medium text-maroon-dark transition-transform hover:scale-105"
       >
         Back to Home
       </Link>

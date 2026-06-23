@@ -42,7 +42,7 @@ const Testimonials: React.FC = () => {
       subtitle="Hear from students who launched their media careers with Genesis Creations."
       testimonials={testimonials}
       showVerifiedBadge={true}
-      className="bg-tan/40 text-maroon-dark"
+      className="bg-tan/40 text-cream"
     />
   )
 }
