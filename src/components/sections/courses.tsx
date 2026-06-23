@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router-dom"
 import { RotateCw, PlaneTakeoff, Plane, Clapperboard, Camera } from "lucide-react"
 
+import { GlowCard } from "@/components/ui/spotlight-card"
+
 const courses = [
   {
     icon: <RotateCw />,
@@ -45,23 +47,27 @@ const Courses: React.FC = () => {
 
       <div className="mx-auto mt-16 grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {courses.map((c) => (
-          <div
+          <GlowCard
             key={c.title}
-            className="group flex flex-col rounded-2xl border border-tan/25 bg-white/[0.06] p-8 shadow-sm transition-transform hover:-translate-y-1"
+            glowColor="maroon"
+            customSize
+            className="group h-full min-h-[280px] transition-transform hover:-translate-y-1"
           >
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-maroon text-maroon-dark">
-              {c.icon}
+            <div className="flex h-full flex-col p-2">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-maroon text-maroon-dark">
+                {c.icon}
+              </div>
+              <h3 className="text-xl font-semibold text-maroon">{c.title}</h3>
+              <p className="mt-2 flex-1 text-sm text-cream">{c.text}</p>
+              <button
+                type="button"
+                onClick={() => navigate("/workshops")}
+                className="mt-6 self-start rounded-full bg-maroon px-5 py-2 text-sm font-medium text-maroon-dark transition-transform group-hover:scale-105"
+              >
+                Register &amp; Pay
+              </button>
             </div>
-            <h3 className="text-xl font-semibold text-maroon">{c.title}</h3>
-            <p className="mt-2 flex-1 text-sm text-cream">{c.text}</p>
-            <button
-              type="button"
-              onClick={() => navigate("/workshops")}
-              className="mt-6 self-start rounded-full bg-maroon px-5 py-2 text-sm font-medium text-maroon-dark transition-transform group-hover:scale-105"
-            >
-              Register &amp; Pay
-            </button>
-          </div>
+          </GlowCard>
         ))}
       </div>
     </section>

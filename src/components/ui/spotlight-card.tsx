@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, type ReactNode } from 'react';
+import React, { useEffect, type ReactNode } from 'react';
 
 interface GlowCardProps {
   children: ReactNode;
@@ -27,6 +27,34 @@ const sizeMap = {
   lg: 'w-80 h-96'
 };
 
+// Every card reads the same window pointer position, so a single shared
+// listener writes the coordinates onto the document root once. CSS custom
+// properties inherit, so each card's glow picks them up automatically. A
+// ref-count keeps exactly one listener alive while any GlowCard is mounted.
+let pointerSubscribers = 0;
+
+const handlePointerMove = (e: PointerEvent) => {
+  const root = document.documentElement.style;
+  root.setProperty('--x', e.clientX.toFixed(2));
+  root.setProperty('--xp', (e.clientX / window.innerWidth).toFixed(2));
+  root.setProperty('--y', e.clientY.toFixed(2));
+  root.setProperty('--yp', (e.clientY / window.innerHeight).toFixed(2));
+};
+
+const subscribePointer = () => {
+  if (pointerSubscribers === 0) {
+    document.addEventListener('pointermove', handlePointerMove);
+  }
+  pointerSubscribers += 1;
+
+  return () => {
+    pointerSubscribers -= 1;
+    if (pointerSubscribers === 0) {
+      document.removeEventListener('pointermove', handlePointerMove);
+    }
+  };
+};
+
 const GlowCard: React.FC<GlowCardProps> = ({
   children,
   className = '',
@@ -36,24 +64,7 @@ const GlowCard: React.FC<GlowCardProps> = ({
   height,
   customSize = false
 }) => {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const syncPointer = (e: PointerEvent) => {
-      const { clientX: x, clientY: y } = e;
-
-      if (cardRef.current) {
-        cardRef.current.style.setProperty('--x', x.toFixed(2));
-        cardRef.current.style.setProperty('--xp', (x / window.innerWidth).toFixed(2));
-        cardRef.current.style.setProperty('--y', y.toFixed(2));
-        cardRef.current.style.setProperty('--yp', (y / window.innerHeight).toFixed(2));
-      }
-    };
-
-    document.addEventListener('pointermove', syncPointer);
-    return () => document.removeEventListener('pointermove', syncPointer);
-  }, []);
+  useEffect(() => subscribePointer(), []);
 
   const { base, spread } = glowColorMap[glowColor];
 
@@ -164,7 +175,6 @@ const GlowCard: React.FC<GlowCardProps> = ({
     <>
       <style dangerouslySetInnerHTML={{ __html: beforeAfterStyles }} />
       <div
-        ref={cardRef}
         data-glow
         style={getInlineStyles()}
         className={`
@@ -181,7 +191,7 @@ const GlowCard: React.FC<GlowCardProps> = ({
           ${className}
         `}
       >
-        <div ref={innerRef} data-glow></div>
+        <div data-glow></div>
         {children}
       </div>
     </>

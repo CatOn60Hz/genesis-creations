@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { GlowCard } from "@/components/ui/spotlight-card"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 import { ChevronLeft, ChevronRight, Quote, Star } from "lucide-react"
@@ -136,25 +136,27 @@ export function TestimonialsSection({
             {/* Testimonial cards */}
             <div className="relative h-[320px] md:h-[280px]">
               {testimonials.map((testimonial, index) => (
-                <Card
+                <GlowCard
                   key={testimonial.id}
+                  glowColor="maroon"
+                  customSize
                   className={cn(
-                    "absolute inset-0 transition-all duration-500 border",
+                    "absolute inset-0 transition-all duration-500",
                     index === activeIndex
                       ? "opacity-100 translate-x-0 shadow-lg"
                       : "opacity-0 translate-x-[100px] pointer-events-none",
                   )}
                 >
-                  <CardContent className="p-6 md:p-8 h-full flex flex-col">
+                  <div className="flex h-full flex-col p-2 md:p-4 text-cream">
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex items-center gap-4">
-                        <Avatar className="h-12 w-12 border-2 border-primary/10">
+                        <Avatar className="h-12 w-12 border-2 border-primary/30">
                           <AvatarImage src={testimonial.avatar} alt={testimonial.name} />
                           <AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="text-left">
                           <h4 className="font-semibold">{testimonial.name}</h4>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-cream/70">
                             {testimonial.role}, {testimonial.company}
                           </p>
                         </div>
@@ -166,15 +168,15 @@ export function TestimonialsSection({
                       </div>
                     </div>
 
-                    <Separator className="my-4" />
+                    <Separator className="my-4 bg-cream/20" />
 
                     <p className="flex-1 italic text-base/relaxed">"{testimonial.content}"</p>
 
                     {showVerifiedBadge && (
-                      <div className="mt-4 text-xs text-right text-muted-foreground">Verified Customer</div>
+                      <div className="mt-4 text-xs text-right text-cream/70">Verified Customer</div>
                     )}
-                  </CardContent>
-                </Card>
+                  </div>
+                </GlowCard>
               ))}
             </div>
           </motion.div>

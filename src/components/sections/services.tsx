@@ -9,6 +9,8 @@ import {
   Joystick,
 } from "lucide-react"
 
+import { GlowCard } from "@/components/ui/spotlight-card"
+
 const areas = [
   { icon: <Camera />, name: "Camera" },
   { icon: <Lightbulb />, name: "Lighting" },
@@ -38,15 +40,19 @@ const Services: React.FC = () => {
 
       <div className="mx-auto mt-16 grid max-w-5xl grid-cols-2 gap-5 sm:grid-cols-4">
         {areas.map((a) => (
-          <div
+          <GlowCard
             key={a.name}
-            className="flex flex-col items-center gap-3 rounded-2xl border border-tan/20 bg-maroon-dark/5 p-6 text-center transition-colors hover:bg-maroon-dark/10"
+            glowColor="maroon"
+            customSize
+            className="h-full min-h-[160px]"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-maroon text-cream">
-              {a.icon}
+            <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-maroon text-cream">
+                {a.icon}
+              </div>
+              <span className="text-sm font-medium">{a.name}</span>
             </div>
-            <span className="text-sm font-medium">{a.name}</span>
-          </div>
+          </GlowCard>
         ))}
       </div>
     </section>
