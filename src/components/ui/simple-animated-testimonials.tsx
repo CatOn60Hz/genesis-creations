@@ -126,7 +126,7 @@ export function TestimonialsSection({
           initial="hidden"
           animate={controls}
           variants={containerVariants}
-          className="md:grid md:grid-cols-[1fr_auto] gap-8 items-center max-w-[1200px]"
+          className="md:grid md:grid-cols-[1fr_auto] gap-8 items-center max-w-[1200px] mx-auto"
         >
           <motion.div variants={itemVariants} className="relative">
             <div className="absolute -top-6 -left-6 z-10">

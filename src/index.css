@@ -86,7 +86,9 @@ body,
 .gc-marquee-track {
   display: flex;
   width: max-content;
-  animation: gc-marquee 45s linear infinite;
+  /* 90s because the track is now four copies wide; translateX(-50%) covers
+     two copies per cycle, so this keeps the original scroll speed. */
+  animation: gc-marquee 90s linear infinite;
 }
 
 /* Hide the scrollbar while keeping scroll behaviour intact */

@@ -33,7 +33,9 @@ const Hero: React.FC = () => {
         <p className="mb-4 text-center text-[0.65rem] uppercase tracking-[0.4em] text-black">
           What We Do
         </p>
-        <ServicesMarquee />
+        {/* fadeFrom matches the hero gradient colour at this height so the
+            edge fades blend in instead of showing as grey bands. */}
+        <ServicesMarquee fadeFrom="from-[#f4eaed]" />
       </div>
 
       {/* Hero content — two columns on desktop.

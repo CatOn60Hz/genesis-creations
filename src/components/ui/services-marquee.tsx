@@ -41,9 +41,11 @@ const ServicesMarquee = ({
 }: ServicesMarqueeProps) => {
   return (
     <div className={cn("relative w-full overflow-hidden", className)}>
-      {/* Two identical copies so translateX(-50%) loops seamlessly */}
+      {/* Four copies: translateX(-50%) shifts by two copies, which must be
+          wider than the viewport for the loop to stay seamless (a single copy
+          of the short list isn't, so we repeat it). */}
       <div className="gc-marquee-track">
-        {[...services, ...services].map((service, index) => (
+        {[...services, ...services, ...services, ...services].map((service, index) => (
           <div
             key={`${service.id}-${index}`}
             aria-hidden={index >= services.length}
