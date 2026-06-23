@@ -1,36 +1,41 @@
 @import "tailwindcss";
 
-/* Genesis Creations brand palette — original warm scheme (spec §10) */
+/* Genesis Creations brand palette — crimson / black / greys.
+   Token names are kept for continuity; their roles are:
+     maroon       → #cb2957  primary accent (crimson)
+     maroon-dark  → #000000  secondary / dark anchor (black)
+     tan          → #dddddd  neutral grey (borders, muted surfaces)
+     cream        → #eeeeee  light background & light text */
 @theme {
-  --color-maroon: #a30f47;
-  --color-maroon-dark: #752525;
-  --color-tan: #cba98a;
-  --color-cream: #f1e2d1;
+  --color-maroon: #cb2957;
+  --color-maroon-dark: #000000;
+  --color-tan: #dddddd;
+  --color-cream: #eeeeee;
 }
 
 /* shadcn design tokens, mapped to the GC brand palette (light theme) */
 :root {
   color-scheme: dark;
 
-  --background: #752525; /* maroon-dark */
-  --foreground: #f1e2d1; /* cream */
+  --background: #000000; /* black */
+  --foreground: #eeeeee; /* near-white */
   --card: #ffffff;
-  --card-foreground: #752525;
+  --card-foreground: #000000;
   --popover: #ffffff;
-  --popover-foreground: #752525;
-  --primary: #a30f47; /* maroon */
-  --primary-foreground: #f1e2d1; /* cream */
-  --secondary: #cba98a; /* tan */
-  --secondary-foreground: #752525;
-  --muted: #ece0d2;
-  --muted-foreground: #6f5347;
-  --accent: #cba98a; /* tan */
-  --accent-foreground: #752525;
+  --popover-foreground: #000000;
+  --primary: #cb2957; /* crimson — primary */
+  --primary-foreground: #eeeeee; /* near-white */
+  --secondary: #000000; /* black — secondary */
+  --secondary-foreground: #eeeeee;
+  --muted: #dddddd;
+  --muted-foreground: #555555;
+  --accent: #dddddd; /* grey */
+  --accent-foreground: #000000;
   --destructive: #b3261e;
-  --destructive-foreground: #f1e2d1;
-  --border: #cba98a; /* tan */
-  --input: #cba98a;
-  --ring: #a30f47; /* maroon */
+  --destructive-foreground: #eeeeee;
+  --border: #dddddd; /* grey */
+  --input: #dddddd;
+  --ring: #cb2957; /* crimson */
   --radius: 0.5rem;
 }
 

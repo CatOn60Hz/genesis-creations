@@ -22,7 +22,7 @@ const WhatsAppIcon = () => (
 
 const SiteFooter: React.FC = () => {
   return (
-    <footer id="contact" className="bg-cream text-maroon-dark pt-20 pb-28 px-6">
+    <footer id="contact" className="bg-[linear-gradient(180deg,#f6e8ec_0%,#eeeeee_45%,#e4e4e7_100%)] text-maroon-dark pt-20 pb-28 px-6">
       <div className="mx-auto grid max-w-6xl gap-12 md:grid-cols-2">
         {/* CTA / brand */}
         <div>
@@ -44,23 +44,23 @@ const SiteFooter: React.FC = () => {
         {/* Contact details */}
         <div className="space-y-5">
           <div className="flex items-start gap-3">
-            <MapPin className="mt-1 h-5 w-5 shrink-0 text-tan" />
+            <MapPin className="mt-1 h-5 w-5 shrink-0 text-maroon" />
             <p className="text-maroon-dark">
               #340B/1A3B1, Vinayaka Avenue, Okkiyam Thoraipakkam, Chennai 600097
             </p>
           </div>
           <a
             href="tel:+917824850999"
-            className="flex items-center gap-3 text-maroon-dark transition-colors hover:text-tan"
+            className="flex items-center gap-3 text-maroon-dark transition-colors hover:text-maroon"
           >
-            <Phone className="h-5 w-5 shrink-0 text-tan" />
+            <Phone className="h-5 w-5 shrink-0 text-maroon" />
             +91 78248 50999
           </a>
           <a
             href="mailto:info@genesiscreations.in"
-            className="flex items-center gap-3 text-maroon-dark transition-colors hover:text-tan"
+            className="flex items-center gap-3 text-maroon-dark transition-colors hover:text-maroon"
           >
-            <Mail className="h-5 w-5 shrink-0 text-tan" />
+            <Mail className="h-5 w-5 shrink-0 text-maroon" />
             info@genesiscreations.in
           </a>
 

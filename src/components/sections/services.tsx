@@ -22,9 +22,9 @@ const areas = [
 
 const Services: React.FC = () => {
   return (
-    <section id="services" className="bg-cream text-maroon-dark py-24 px-6">
+    <section id="services" className="bg-[linear-gradient(180deg,#f6e8ec_0%,#eeeeee_45%,#e4e4e7_100%)] text-maroon-dark py-24 px-6">
       <div className="mx-auto max-w-5xl text-center">
-        <p className="mb-3 text-xs uppercase tracking-[0.3em] text-tan">
+        <p className="mb-3 text-xs uppercase tracking-[0.3em] text-maroon">
           What You'll Master
         </p>
         <h2 className="text-3xl md:text-5xl font-semibold tracking-tight">
@@ -42,7 +42,7 @@ const Services: React.FC = () => {
             key={a.name}
             className="flex flex-col items-center gap-3 rounded-2xl border border-tan/20 bg-maroon-dark/5 p-6 text-center transition-colors hover:bg-maroon-dark/10"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-tan text-cream">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-maroon text-cream">
               {a.icon}
             </div>
             <span className="text-sm font-medium">{a.name}</span>

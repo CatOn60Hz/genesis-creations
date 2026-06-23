@@ -27,17 +27,17 @@ export function GooeyText({
     let morph = 0;
     let cooldown = cooldownTime;
 
-    // Cap the blur low so the morph stays tight and its halo doesn't bleed
-    // up into surrounding text.
-    const maxBlur = 24;
+    // Keep the blur low and ramp it gently so the morph stays tight and
+    // legible instead of melting into blobs mid-transition.
+    const maxBlur = 8;
 
     const setMorph = (fraction: number) => {
       if (text1Ref.current && text2Ref.current) {
-        text2Ref.current.style.filter = `blur(${Math.min(8 / fraction - 8, maxBlur)}px)`;
+        text2Ref.current.style.filter = `blur(${Math.min(6 / fraction - 6, maxBlur)}px)`;
         text2Ref.current.style.opacity = `${Math.pow(fraction, 0.4) * 100}%`;
 
         fraction = 1 - fraction;
-        text1Ref.current.style.filter = `blur(${Math.min(8 / fraction - 8, maxBlur)}px)`;
+        text1Ref.current.style.filter = `blur(${Math.min(6 / fraction - 6, maxBlur)}px)`;
         text1Ref.current.style.opacity = `${Math.pow(fraction, 0.4) * 100}%`;
       }
     };

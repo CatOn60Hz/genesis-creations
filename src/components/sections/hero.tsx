@@ -17,7 +17,7 @@ const Hero: React.FC = () => {
   const navigate = useNavigate()
 
   return (
-    <section className="relative w-full min-h-screen overflow-hidden bg-cream text-maroon-dark flex flex-col">
+    <section className="relative w-full min-h-screen overflow-hidden bg-[linear-gradient(180deg,#f6e8ec_0%,#eeeeee_45%,#e4e4e7_100%)] text-maroon-dark flex flex-col">
       {/* Interactive pixel trail background */}
       <div className="absolute inset-0 z-0">
         <PixelTrail
@@ -86,7 +86,7 @@ const Hero: React.FC = () => {
               morphTime={1.2}
               cooldownTime={2.5}
               className="h-[200px] w-full font-bold md:h-[320px]"
-              textClassName="text-tan leading-none text-[clamp(3.5rem,9vw,8.5rem)] md:text-[clamp(3.5rem,9vw,8.5rem)]"
+              textClassName="text-maroon leading-none text-[clamp(3.5rem,9vw,8.5rem)] md:text-[clamp(3.5rem,9vw,8.5rem)]"
             />
           </div>
         </div>
@@ -94,7 +94,7 @@ const Hero: React.FC = () => {
 
       {/* Scroll-down cue */}
       <motion.div
-        className="absolute bottom-28 md:bottom-10 left-1/2 z-10 -translate-x-1/2 text-tan pointer-events-none"
+        className="absolute bottom-28 md:bottom-10 left-1/2 z-10 -translate-x-1/2 text-maroon pointer-events-none"
         animate={{ y: [0, 10, 0] }}
         transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
       >

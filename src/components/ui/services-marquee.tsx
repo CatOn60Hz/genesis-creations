@@ -49,7 +49,7 @@ const ServicesMarquee = ({
             aria-hidden={index >= services.length}
             className="mx-3 flex shrink-0 items-center gap-2 rounded-full border border-tan/30 bg-maroon-dark/5 px-5 py-2 text-maroon-dark backdrop-blur-sm"
           >
-            <span className="text-tan [&>svg]:h-4 [&>svg]:w-4">
+            <span className="text-maroon [&>svg]:h-4 [&>svg]:w-4">
               {service.icon}
             </span>
             <span className="whitespace-nowrap text-sm font-medium tracking-wide">

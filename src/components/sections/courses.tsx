@@ -47,7 +47,7 @@ const Courses: React.FC = () => {
         {courses.map((c) => (
           <div
             key={c.title}
-            className="group flex flex-col rounded-2xl border border-tan bg-white/40 p-8 shadow-sm transition-transform hover:-translate-y-1"
+            className="group flex flex-col rounded-2xl border border-tan/25 bg-white/[0.06] p-8 shadow-sm transition-transform hover:-translate-y-1"
           >
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-maroon text-maroon-dark">
               {c.icon}
