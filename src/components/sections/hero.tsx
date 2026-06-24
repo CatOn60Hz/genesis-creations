@@ -71,7 +71,7 @@ const Hero: React.FC = () => {
           </div>
 
           {/* Right: gooey morphing text — what we do, brought to life */}
-          <div className="flex flex-col items-center -mt-16 md:-mt-24">
+          <div className="flex flex-col items-center md:-mt-24">
             <p className="mb-8 md:mb-10 text-base md:text-2xl uppercase tracking-[0.35em] text-black">
               We don't just make media. We
             </p>

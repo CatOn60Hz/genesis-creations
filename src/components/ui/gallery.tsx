@@ -2,35 +2,43 @@ import { useState, useEffect, useRef } from "react"
 import { motion, useMotionValue, AnimatePresence } from "framer-motion"
 
 import { cn } from "@/lib/utils"
+import { useScreenSize } from "@/components/hooks/use-screen-size"
 
 import photo28 from "@/assets/showcase/28.jpg"
 import photo27 from "@/assets/showcase/27.jpg"
 import photo20 from "@/assets/showcase/20.jpg"
 import photo32 from "@/assets/showcase/32.jpg"
 import photo33 from "@/assets/showcase/33.jpg"
+import photo1 from "@/assets/showcase/1.jpg"
+import photo46 from "@/assets/showcase/46.jpg"
+import photo24 from "@/assets/showcase/24.jpg"
 
 type Direction = "left" | "right"
 
 type GalleryPhoto = {
   id: number
   order: number
-  x: string
-  y: string
+  /** Horizontal offset from centre, in px at desktop scale. */
+  x: number
+  /** Vertical offset, in px at desktop scale. */
+  y: number
   zIndex: number
   direction: Direction
   src: string
 }
 
-// The five Genesis Creations shots, fanned out left-to-right.
+// The Genesis Creations shots, fanned out left-to-right. Eight photos packed
+// into the same overall width the original five used (more overlap).
 const PHOTOS: GalleryPhoto[] = [
-  { id: 1, order: 0, x: "-200px", y: "10px", zIndex: 50, direction: "left", src: photo28 },
-  { id: 2, order: 1, x: "-100px", y: "22px", zIndex: 40, direction: "left", src: photo27 },
-  { id: 3, order: 2, x: "0px", y: "5px", zIndex: 30, direction: "right", src: photo20 },
-  { id: 4, order: 3, x: "100px", y: "16px", zIndex: 20, direction: "right", src: photo32 },
-  { id: 5, order: 4, x: "200px", y: "30px", zIndex: 10, direction: "left", src: photo33 },
+  { id: 1, order: 0, x: -200, y: 10, zIndex: 80, direction: "left", src: photo28 },
+  { id: 2, order: 1, x: -143, y: 24, zIndex: 70, direction: "left", src: photo27 },
+  { id: 3, order: 2, x: -86, y: 6, zIndex: 60, direction: "right", src: photo20 },
+  { id: 4, order: 3, x: -29, y: 18, zIndex: 50, direction: "right", src: photo32 },
+  { id: 5, order: 4, x: 29, y: 8, zIndex: 40, direction: "left", src: photo33 },
+  { id: 6, order: 5, x: 86, y: 26, zIndex: 30, direction: "right", src: photo1 },
+  { id: 7, order: 6, x: 143, y: 14, zIndex: 20, direction: "left", src: photo46 },
+  { id: 8, order: 7, x: 200, y: 30, zIndex: 10, direction: "right", src: photo24 },
 ]
-
-const PHOTO_SIZE = 150
 
 export const PhotoGallery = ({
   animationDelay = 0.5,
@@ -44,6 +52,13 @@ export const PhotoGallery = ({
   const [isVisible, setIsVisible] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
   const [openSrc, setOpenSrc] = useState<string | null>(null)
+
+  // On phones the fan must shrink and tuck in or it spills off both edges.
+  const isMobile = useScreenSize().lessThan("md")
+  const photoSize = isMobile ? 104 : 150
+  const xScale = isMobile ? 0.46 : 1
+  const yScale = isMobile ? 0.6 : 1
+  const areaHeight = isMobile ? 130 : 165
 
   // Close the lightbox on Escape, and lock body scroll while it's open.
   useEffect(() => {
@@ -103,7 +118,7 @@ export const PhotoGallery = ({
       rotate: 0,
       scale: 1,
     }),
-    visible: (custom: { x: string; y: string; order: number }) => ({
+    visible: (custom: { x: number; y: number; order: number }) => ({
       x: custom.x,
       y: custom.y,
       rotate: 0,
@@ -130,7 +145,10 @@ export const PhotoGallery = ({
           {caption}
         </motion.p>
       )}
-      <div className="relative flex h-[165px] w-full items-center justify-center">
+      <div
+        className="relative flex w-full items-center justify-center"
+        style={{ height: areaHeight }}
+      >
         <motion.div
           className="relative mx-auto flex w-full justify-center"
           initial={{ opacity: 0 }}
@@ -143,7 +161,7 @@ export const PhotoGallery = ({
             initial="hidden"
             animate={isLoaded ? "visible" : "hidden"}
           >
-            <div className="relative" style={{ height: PHOTO_SIZE, width: PHOTO_SIZE }}>
+            <div className="relative" style={{ height: photoSize, width: photoSize }}>
               {/* Render photos in reverse order so higher z-index photos come later in the DOM */}
               {[...PHOTOS].reverse().map((photo) => (
                 <motion.div
@@ -151,11 +169,15 @@ export const PhotoGallery = ({
                   className="absolute left-0 top-0"
                   style={{ zIndex: photo.zIndex }}
                   variants={photoVariants}
-                  custom={{ x: photo.x, y: photo.y, order: photo.order }}
+                  custom={{
+                    x: photo.x * xScale,
+                    y: photo.y * yScale,
+                    order: photo.order,
+                  }}
                 >
                   <Photo
-                    width={PHOTO_SIZE}
-                    height={PHOTO_SIZE}
+                    width={photoSize}
+                    height={photoSize}
                     src={photo.src}
                     alt="Genesis Creations"
                     direction={photo.direction}
