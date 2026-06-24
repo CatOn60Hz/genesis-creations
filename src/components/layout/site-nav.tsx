@@ -13,12 +13,15 @@ const SiteNav: React.FC = () => {
   return (
     <>
       {/* Desktop: floating dock (md and up) */}
-      <nav className="hidden md:block fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+      <nav
+        data-site-nav
+        className="hidden md:block fixed bottom-6 left-1/2 -translate-x-1/2 z-50"
+      >
         <DockTabs />
       </nav>
 
       {/* Mobile: hamburger button + slide-down menu (below md) */}
-      <div className="md:hidden">
+      <div data-site-nav className="md:hidden">
         <button
           type="button"
           aria-label={open ? "Close menu" : "Open menu"}

@@ -1,10 +1,9 @@
 import { useNavigate } from "react-router-dom"
-import { motion } from "framer-motion"
-import { ChevronDown } from "lucide-react"
 
 import { PixelTrail } from "@/components/ui/pixel-trail"
 import { ServicesMarquee } from "@/components/ui/services-marquee"
 import { GooeyText } from "@/components/ui/gooey-text-morphing"
+import { PhotoGallery } from "@/components/ui/gallery"
 import { useScreenSize } from "@/components/hooks/use-screen-size"
 import logo from "@/assets/logo.png"
 
@@ -29,13 +28,13 @@ const Hero: React.FC = () => {
       </div>
 
       {/* Auto-scrolling services strip — fills the top of the hero */}
-      <div className="relative z-10 pt-10 md:pt-14">
-        <p className="mb-4 text-center text-[0.65rem] uppercase tracking-[0.4em] text-black">
-          What We Do
-        </p>
+      <div className="relative z-10 pt-4 md:pt-6">
         {/* fadeFrom matches the hero gradient colour at this height so the
             edge fades blend in instead of showing as grey bands. */}
         <ServicesMarquee fadeFrom="from-[#f4eaed]" />
+        <p className="mt-4 text-center text-[0.65rem] uppercase tracking-[0.4em] text-black">
+          What We Do
+        </p>
       </div>
 
       {/* Hero content — two columns on desktop.
@@ -68,18 +67,11 @@ const Hero: React.FC = () => {
               >
                 Register for a Workshop
               </button>
-              <button
-                type="button"
-                onClick={() => navigate("/services")}
-                className="rounded-full border-2 border-tan/70 px-12 py-5 text-lg md:text-xl font-medium text-maroon-dark transition-colors hover:bg-tan/10"
-              >
-                Explore Services
-              </button>
             </div>
           </div>
 
           {/* Right: gooey morphing text — what we do, brought to life */}
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center -mt-16 md:-mt-24">
             <p className="mb-8 md:mb-10 text-base md:text-2xl uppercase tracking-[0.35em] text-black">
               We don't just make media. We
             </p>
@@ -87,21 +79,18 @@ const Hero: React.FC = () => {
               texts={MORPH_WORDS}
               morphTime={1.2}
               cooldownTime={2.5}
-              className="h-[200px] w-full font-bold md:h-[320px]"
+              className="h-[130px] w-full font-bold md:h-[165px]"
               textClassName="text-maroon leading-none text-[clamp(3.5rem,9vw,8.5rem)] md:text-[clamp(3.5rem,9vw,8.5rem)]"
+            />
+
+            {/* Draggable photo fan — sits just beneath the morphing word */}
+            <PhotoGallery
+              className="pointer-events-auto -mt-2 w-full"
+              caption="Moments from Genesis Creations"
             />
           </div>
         </div>
       </div>
-
-      {/* Scroll-down cue */}
-      <motion.div
-        className="absolute bottom-28 md:bottom-10 left-1/2 z-10 -translate-x-1/2 text-maroon pointer-events-none"
-        animate={{ y: [0, 10, 0] }}
-        transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-      >
-        <ChevronDown className="h-7 w-7" />
-      </motion.div>
     </section>
   )
 }

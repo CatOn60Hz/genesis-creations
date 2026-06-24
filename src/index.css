@@ -101,6 +101,11 @@ body::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Edge */
 }
 
+/* Hide the floating nav/dock while a gallery lightbox is open. */
+body.lightbox-open [data-site-nav] {
+  display: none;
+}
+
 body {
   margin: 0;
   background-color: var(--color-maroon-dark);
