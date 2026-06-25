@@ -85,6 +85,13 @@ export function saveAnnouncement(
 
 /* ------------------------------- Workshops ------------------------------ */
 
+export type WorkshopSession = {
+  city: string
+  dates?: string
+  timing?: string
+  venue?: string
+}
+
 export type Workshop = {
   id: string
   title: string
@@ -92,6 +99,16 @@ export type Workshop = {
   date: string
   location: string
   banner: { name: string; url: string } | null
+  // Rich card fields (all optional — older records render with sensible
+  // fallbacks built from title/description/date/location).
+  tagline?: string
+  badge?: string
+  icon?: string
+  registerUrl?: string
+  note?: string
+  sessions?: WorkshopSession[]
+  learn?: string[]
+  included?: string[]
   createdAt?: string
   updatedAt?: string
 }
@@ -112,6 +129,14 @@ export async function saveWorkshop(
     description: string
     date: string
     location: string
+    tagline?: string
+    badge?: string
+    icon?: string
+    registerUrl?: string
+    note?: string
+    sessions?: WorkshopSession[]
+    learn?: string[]
+    included?: string[]
     banner?: File
   },
   password: string
@@ -124,6 +149,15 @@ export async function saveWorkshop(
       description: fields.description,
       date: fields.date,
       location: fields.location,
+      tagline: fields.tagline ?? "",
+      badge: fields.badge ?? "",
+      icon: fields.icon ?? "",
+      registerUrl: fields.registerUrl ?? "",
+      note: fields.note ?? "",
+      // Lists/objects travel as JSON strings (FormData is flat).
+      sessions: JSON.stringify(fields.sessions ?? []),
+      learn: JSON.stringify(fields.learn ?? []),
+      included: JSON.stringify(fields.included ?? []),
       banner: fields.banner,
     },
     password

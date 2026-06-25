@@ -22,6 +22,7 @@ import {
   saveWorkshop,
   deleteWorkshop,
   type Workshop,
+  type WorkshopSession,
   fetchProjectorImages,
   uploadProjectorImages,
   deleteProjectorImage,
@@ -153,7 +154,53 @@ function AnnouncementEditor({
 
 /* ------------------------------- Workshops ------------------------------ */
 
-const EMPTY_FORM = { id: "", title: "", description: "", date: "", location: "" }
+const EMPTY_FORM = {
+  id: "",
+  title: "",
+  description: "",
+  date: "",
+  location: "",
+  tagline: "",
+  badge: "",
+  icon: "",
+  registerUrl: "",
+  note: "",
+  // Multi-line text inputs (one item / one session per line).
+  learn: "",
+  included: "",
+  sessions: "",
+}
+
+// Icon keys offered in the admin (must match the map in workshops.tsx).
+const ICON_OPTIONS = [
+  { value: "", label: "Default (cap)" },
+  { value: "drone", label: "Drone" },
+  { value: "gimbal", label: "Gimbal / Video" },
+  { value: "camera", label: "Camera / Photography" },
+  { value: "editing", label: "Editing" },
+  { value: "audio", label: "Audio" },
+]
+
+// One item per non-empty line.
+const parseList = (text: string): string[] =>
+  text.split("\n").map((s) => s.trim()).filter(Boolean)
+
+// One session per line: "City | Dates | Timing | Venue" (city required).
+const parseSessions = (text: string): WorkshopSession[] =>
+  text
+    .split("\n")
+    .map((line) => {
+      const [city = "", dates = "", timing = "", venue = ""] = line
+        .split("|")
+        .map((s) => s.trim())
+      return { city, dates, timing, venue }
+    })
+    .filter((s) => s.city)
+
+const serializeSessions = (sessions?: WorkshopSession[]): string =>
+  (sessions ?? [])
+    .map((s) => [s.city, s.dates ?? "", s.timing ?? "", s.venue ?? ""].join(" | "))
+    .join("\n")
 
 function WorkshopsManager({
   password,
@@ -165,6 +212,8 @@ function WorkshopsManager({
   const [items, setItems] = useState<Workshop[]>([])
   const [loading, setLoading] = useState(true)
   const [form, setForm] = useState({ ...EMPTY_FORM })
+  // True when the icon is a free-typed keyword rather than a preset.
+  const [customIcon, setCustomIcon] = useState(false)
   const [banner, setBanner] = useState<File | undefined>()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -179,6 +228,7 @@ function WorkshopsManager({
 
   const resetForm = () => {
     setForm({ ...EMPTY_FORM })
+    setCustomIcon(false)
     setBanner(undefined)
     if (fileRef.current) fileRef.current.value = ""
   }
@@ -202,6 +252,14 @@ function WorkshopsManager({
           description: form.description,
           date: form.date,
           location: form.location,
+          tagline: form.tagline,
+          badge: form.badge,
+          icon: form.icon,
+          registerUrl: form.registerUrl,
+          note: form.note,
+          sessions: parseSessions(form.sessions),
+          learn: parseList(form.learn),
+          included: parseList(form.included),
           banner,
         },
         password
@@ -224,7 +282,16 @@ function WorkshopsManager({
       description: w.description,
       date: w.date,
       location: w.location,
+      tagline: w.tagline ?? "",
+      badge: w.badge ?? "",
+      icon: w.icon ?? "",
+      registerUrl: w.registerUrl ?? "",
+      note: w.note ?? "",
+      learn: (w.learn ?? []).join("\n"),
+      included: (w.included ?? []).join("\n"),
+      sessions: serializeSessions(w.sessions),
     })
+    setCustomIcon(!!w.icon && !ICON_OPTIONS.some((o) => o.value === w.icon))
     setBanner(undefined)
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
@@ -254,31 +321,117 @@ function WorkshopsManager({
         </h3>
         <input
           className={inputCls}
-          placeholder="Title *"
+          placeholder="Title * (e.g. Professional Drone Workshop)"
           value={form.title}
           onChange={(e) => setForm({ ...form, title: e.target.value })}
+        />
+        <input
+          className={inputCls}
+          placeholder="Tagline (short line under the title)"
+          value={form.tagline}
+          onChange={(e) => setForm({ ...form, tagline: e.target.value })}
         />
         <div className="grid gap-4 sm:grid-cols-2">
           <input
             className={inputCls}
-            placeholder="Date (e.g. 12 July 2026)"
-            value={form.date}
-            onChange={(e) => setForm({ ...form, date: e.target.value })}
+            placeholder='Badge (e.g. "3 Days")'
+            value={form.badge}
+            onChange={(e) => setForm({ ...form, badge: e.target.value })}
           />
+          <select
+            className={inputCls}
+            value={customIcon ? "__custom" : form.icon}
+            onChange={(e) => {
+              if (e.target.value === "__custom") {
+                setCustomIcon(true)
+                setForm({ ...form, icon: "" })
+              } else {
+                setCustomIcon(false)
+                setForm({ ...form, icon: e.target.value })
+              }
+            }}
+          >
+            {ICON_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value} className="bg-maroon-dark">
+                {o.label}
+              </option>
+            ))}
+            <option value="__custom" className="bg-maroon-dark">
+              Custom…
+            </option>
+          </select>
+        </div>
+        {customIcon && (
           <input
             className={inputCls}
-            placeholder="Location (e.g. Chennai)"
-            value={form.location}
-            onChange={(e) => setForm({ ...form, location: e.target.value })}
+            placeholder="Custom icon keyword (e.g. rocket, film, music, design, broadcast)"
+            value={form.icon}
+            onChange={(e) => setForm({ ...form, icon: e.target.value })}
           />
-        </div>
+        )}
         <textarea
           className={inputCls}
           rows={3}
-          placeholder="Description"
+          placeholder="Intro paragraph (description)"
           value={form.description}
           onChange={(e) => setForm({ ...form, description: e.target.value })}
         />
+
+        <div>
+          <label className="mb-1 block text-sm text-cream/70">
+            Sessions — one per line:{" "}
+            <span className="text-cream/50">City | Dates | Timing | Venue</span>
+          </label>
+          <textarea
+            className={inputCls}
+            rows={3}
+            placeholder={"Chennai | July 16–18 | 10:00 AM – 4:00 PM | 340B/1A3B1, Vinayaka Avenue, Chennai 600097\nCoimbatore | July 27–29 | 10:00 AM – 4:00 PM | 34, Siruvani Main Rd, Coimbatore 641101"}
+            value={form.sessions}
+            onChange={(e) => setForm({ ...form, sessions: e.target.value })}
+          />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="mb-1 block text-sm text-cream/70">
+              What you'll learn — one per line
+            </label>
+            <textarea
+              className={inputCls}
+              rows={5}
+              placeholder={"Drone theory & safety\nDGCA rules & regulations\nAerial cinematography"}
+              value={form.learn}
+              onChange={(e) => setForm({ ...form, learn: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm text-cream/70">
+              What's included — one per line
+            </label>
+            <textarea
+              className={inputCls}
+              rows={5}
+              placeholder={"3 days of intensive training\nDaily lunch & refreshments\nCompletion certificate"}
+              value={form.included}
+              onChange={(e) => setForm({ ...form, included: e.target.value })}
+            />
+          </div>
+        </div>
+
+        <input
+          className={inputCls}
+          placeholder="Register link (https://forms.gle/…)"
+          value={form.registerUrl}
+          onChange={(e) => setForm({ ...form, registerUrl: e.target.value })}
+        />
+        <textarea
+          className={inputCls}
+          rows={2}
+          placeholder="Note (e.g. instructor / limited seats) — optional"
+          value={form.note}
+          onChange={(e) => setForm({ ...form, note: e.target.value })}
+        />
+
         <div>
           <label className="mb-1 block text-sm text-cream/70">
             Banner image {form.id && "(leave empty to keep current)"}
@@ -331,7 +484,16 @@ function WorkshopsManager({
               <div className="flex flex-1 flex-col gap-1 p-4">
                 <h4 className="font-semibold text-cream">{w.title}</h4>
                 <p className="text-xs text-maroon">
-                  {[w.date, w.location].filter(Boolean).join(" · ")}
+                  {[
+                    w.badge,
+                    w.sessions?.length
+                      ? w.sessions
+                          .map((s) => [s.city, s.dates].filter(Boolean).join(" "))
+                          .join(", ")
+                      : [w.date, w.location].filter(Boolean).join(" · "),
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
                 </p>
                 <p className="line-clamp-2 text-sm text-cream/70">
                   {w.description}
