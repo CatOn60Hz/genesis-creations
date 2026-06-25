@@ -45,7 +45,7 @@ const Hero: React.FC = () => {
       <div className="relative z-10 flex flex-1 items-start px-6 pt-12 md:pt-20 pb-8 pointer-events-none">
         <div className="mx-auto grid w-full max-w-[100rem] items-center gap-10 lg:grid-cols-[0.95fr_1.6fr]">
           {/* Left: gooey morphing brand words + tagline */}
-          <div className="flex flex-col items-center text-center lg:-translate-x-6">
+          <div className="flex flex-col items-center text-center lg:-translate-x-10">
             <p className="text-3xl md:text-5xl uppercase tracking-[0.2em] text-maroon-dark">
               Genesis Creations
             </p>
