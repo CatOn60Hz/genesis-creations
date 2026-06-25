@@ -82,7 +82,7 @@ const Hero: React.FC = () => {
               Width is driven by viewport HEIGHT (so the hero always fits and stays
               centered) but never more than 57vw, so the pair fits side-by-side. */}
           <div className="flex w-full flex-col items-center lg:w-[min(57vw,calc((100vh_-_24rem)_*_16_/_9))] lg:flex-none">
-            <p className="mb-4 text-sm md:text-lg uppercase tracking-[0.3em] text-black">
+            <p className="mb-4 text-center text-xs sm:text-sm md:text-base uppercase tracking-[0.2em] text-black md:whitespace-nowrap">
               We don't just make media. We bring it to life
             </p>
             <div className="w-full">
