@@ -24,7 +24,10 @@ function absolutize(photos: GalleryPhoto[]): GalleryPhoto[] {
 }
 
 export async function fetchGalleryPhotos(): Promise<GalleryPhoto[]> {
-  const res = await fetch(`${API_BASE}/list.php`, { cache: "no-store" })
+  // `?t=` busts any server/proxy (LiteSpeed) cache so the list is always fresh.
+  const res = await fetch(`${API_BASE}/list.php?t=${Date.now()}`, {
+    cache: "no-store",
+  })
   if (!res.ok) throw new Error(`List failed: ${res.status}`)
   const data = await res.json()
   return absolutize(data.photos ?? [])

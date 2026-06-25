@@ -17,11 +17,16 @@ function send_cors(): void
     }
 }
 
-// Send a JSON response and stop.
+// Send a JSON response and stop. API responses must never be cached —
+// LiteSpeed/proxies would otherwise serve a stale list (e.g. an empty gallery)
+// long after photos are uploaded.
 function json_out($data, int $code = 200): void
 {
     http_response_code($code);
     header('Content-Type: application/json');
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+    header('X-LiteSpeed-Cache-Control: no-cache');
     echo json_encode($data);
     exit;
 }
