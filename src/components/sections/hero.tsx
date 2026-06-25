@@ -42,10 +42,13 @@ const Hero: React.FC = () => {
       {/* Hero content — two columns on desktop.
           pointer-events-none so the PixelTrail behind keeps receiving the mouse;
           interactive elements re-enable pointer events individually. */}
-      <div className="relative z-10 flex flex-1 items-start px-6 pt-12 md:pt-20 pb-8 pointer-events-none">
-        <div className="mx-auto grid w-full max-w-[100rem] items-center gap-10 lg:grid-cols-[0.95fr_1.6fr]">
+      <div className="relative z-10 flex flex-1 items-center justify-center px-6 pt-6 pb-28 pointer-events-none">
+        {/* Centered as a single unit (text + projector), so the leftover space is
+            always split evenly on both sides — even though the projector's width
+            changes with screen height. Fixed-fraction columns can't do that. */}
+        <div className="mx-auto flex w-full max-w-[110rem] flex-col items-center justify-center gap-10 lg:flex-row lg:gap-14">
           {/* Left: gooey morphing brand words + tagline */}
-          <div className="flex flex-col items-center text-center lg:-translate-x-10">
+          <div className="flex w-full min-w-0 flex-col items-center text-center lg:w-[30rem] lg:flex-none lg:-translate-x-20">
             <p className="text-3xl md:text-5xl uppercase tracking-[0.2em] text-maroon-dark">
               Genesis Creations
             </p>
@@ -57,25 +60,34 @@ const Hero: React.FC = () => {
               logo={logo}
               logoAlt="Genesis Creations"
               logoClassName="h-[90%] drop-shadow-sm"
-              className="mt-8 mb-8 h-[120px] w-full md:h-[150px]"
-              textClassName="text-maroon font-bold leading-none text-[clamp(2rem,5vw,3.5rem)]"
+              className="mt-6 mb-6 h-[clamp(120px,18vh,180px)] w-full"
+              // `!` forces this size over GooeyText's own md:text-[60pt] default.
+              // Fluid with viewport width so the longest word ("Broadcast") stays
+              // big but never overflows the column on narrower desktops.
+              textClassName="text-maroon font-bold leading-none text-[clamp(3rem,6vw,6.5rem)]!"
             />
 
             <p className="mb-5 whitespace-nowrap text-sm md:text-base uppercase tracking-[0.3em] text-black">
               Chennai | Coimbatore | Nagercoil
             </p>
 
-            <p className="max-w-2xl text-lg md:text-3xl text-maroon-dark">
+            {/* w-full + max-w caps the width at the column, never wider — so it
+                wraps inside the column instead of spilling off the viewport. */}
+            <p className="w-full max-w-2xl text-lg md:text-3xl text-maroon-dark">
               Media Academy · Digital Marketing · Production · Studio Rental · Broadcasting
             </p>
           </div>
 
-          {/* Right: projector throwing Genesis Creations moments onto a screen */}
-          <div className="flex flex-col items-center lg:-translate-y-6">
+          {/* Right: projector throwing Genesis Creations moments onto a screen.
+              Width is driven by viewport HEIGHT (so the hero always fits and stays
+              centered) but never more than 57vw, so the pair fits side-by-side. */}
+          <div className="flex w-full flex-col items-center lg:w-[min(57vw,calc((100vh_-_24rem)_*_16_/_9))] lg:flex-none">
             <p className="mb-4 text-sm md:text-lg uppercase tracking-[0.3em] text-black">
               We don't just make media. We bring it to life
             </p>
-            <ProjectorScreen className="pointer-events-auto" />
+            <div className="w-full">
+              <ProjectorScreen className="pointer-events-auto" />
+            </div>
             <p className="mt-4 text-center text-xs uppercase tracking-[0.3em] text-black/60 md:text-sm">
               Moments from Genesis Creations
             </p>
