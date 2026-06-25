@@ -13,7 +13,6 @@ import {
   CalendarDays,
   Clapperboard,
   Images,
-  Newspaper,
   Info,
   Mail,
 } from "lucide-react"
@@ -33,7 +32,6 @@ export const dockItems: DockItem[] = [
   { id: "workshops", name: "Workshops", to: "/workshops", icon: <CalendarDays />, color: "bg-maroon-dark" },
   { id: "services", name: "Services", to: "/services", icon: <Clapperboard />, color: "bg-maroon-dark" },
   { id: "gallery", name: "Gallery", to: "/gallery", icon: <Images />, color: "bg-maroon-dark" },
-  { id: "updates", name: "Latest Updates", to: "/updates", icon: <Newspaper />, color: "bg-maroon-dark" },
   { id: "about", name: "About", to: "/about", icon: <Info />, color: "bg-maroon-dark" },
   { id: "contact", name: "Contact", to: "/contact", icon: <Mail />, color: "bg-maroon-dark" },
 ]

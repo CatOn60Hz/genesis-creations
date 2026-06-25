@@ -1,5 +1,3 @@
-import { useNavigate } from "react-router-dom"
-
 import { PixelTrail } from "@/components/ui/pixel-trail"
 import { ServicesMarquee } from "@/components/ui/services-marquee"
 import { ProjectorScreen } from "@/components/ui/projector-screen"
@@ -13,7 +11,6 @@ const MORPH_WORDS = ["Create", "Capture", "Produce", "Broadcast"]
 
 const Hero: React.FC = () => {
   const screenSize = useScreenSize()
-  const navigate = useNavigate()
 
   return (
     <section className="snap-section relative w-full min-h-screen overflow-hidden bg-[linear-gradient(180deg,#f6e8ec_0%,#eeeeee_45%,#e4e4e7_100%)] text-maroon-dark flex flex-col">
@@ -46,9 +43,9 @@ const Hero: React.FC = () => {
           pointer-events-none so the PixelTrail behind keeps receiving the mouse;
           interactive elements re-enable pointer events individually. */}
       <div className="relative z-10 flex flex-1 items-start px-6 pt-12 md:pt-20 pb-8 pointer-events-none">
-        <div className="mx-auto grid w-full max-w-7xl items-center gap-8 lg:grid-cols-[0.9fr_1.5fr]">
-          {/* Left: gooey morphing brand words + tagline + CTA */}
-          <div className="flex flex-col items-center text-center">
+        <div className="mx-auto grid w-full max-w-[100rem] items-center gap-10 lg:grid-cols-[0.95fr_1.6fr]">
+          {/* Left: gooey morphing brand words + tagline */}
+          <div className="flex flex-col items-center text-center lg:-translate-x-6">
             <p className="text-3xl md:text-5xl uppercase tracking-[0.2em] text-maroon-dark">
               Genesis Creations
             </p>
@@ -64,28 +61,17 @@ const Hero: React.FC = () => {
               textClassName="text-maroon font-bold leading-none text-[clamp(2rem,5vw,3.5rem)]"
             />
 
-            <p className="mb-5 text-xs md:text-sm uppercase tracking-[0.3em] text-black">
-              Chennai | Coimbatore | Nagercoil — where stories come to life
+            <p className="mb-5 whitespace-nowrap text-sm md:text-base uppercase tracking-[0.3em] text-black">
+              Chennai | Coimbatore | Nagercoil
             </p>
 
             <p className="max-w-2xl text-lg md:text-3xl text-maroon-dark">
               Media Academy · Digital Marketing · Production · Studio Rental · Broadcasting
             </p>
-
-            {/* CTAs */}
-            <div className="mt-10 md:mt-14 flex flex-col sm:flex-row items-center gap-5 pointer-events-auto">
-              <button
-                type="button"
-                onClick={() => navigate("/workshops")}
-                className="rounded-full bg-maroon px-12 py-5 text-lg md:text-xl font-medium text-maroon-dark shadow-lg transition-transform hover:scale-105 hover:bg-maroon/90"
-              >
-                Register for a Workshop
-              </button>
-            </div>
           </div>
 
           {/* Right: projector throwing Genesis Creations moments onto a screen */}
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center lg:-translate-y-6">
             <p className="mb-4 text-sm md:text-lg uppercase tracking-[0.3em] text-black">
               We don't just make media. We bring it to life
             </p>
