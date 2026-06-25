@@ -17,7 +17,7 @@ function abs(url: string | null | undefined): string {
 }
 
 async function getJSON<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`)
+  const res = await fetch(`${API_BASE}${path}`, { cache: "no-store" })
   if (!res.ok) throw new Error(`Request failed: ${res.status}`)
   return res.json()
 }

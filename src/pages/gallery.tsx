@@ -16,11 +16,14 @@ const FALLBACK_PHOTOS = Object.keys(FALLBACK_MODULES)
   .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
   .map((key) => FALLBACK_MODULES[key])
 
-// The marquee reads richest with three full columns. Repeat the set when there
-// are only a handful of photos so the columns never look sparse.
+// Repeat the available photos up to a generous tile count so the wide tilted
+// field stays full (every column packed) no matter how many photos exist.
 function buildMarqueeImages(photos: string[]): string[] {
   if (photos.length === 0) return []
-  return photos.length >= 9 ? photos : [...photos, ...photos, ...photos]
+  const TARGET = 98
+  const out: string[] = []
+  while (out.length < TARGET) out.push(...photos)
+  return out
 }
 
 const Gallery: React.FC = () => {

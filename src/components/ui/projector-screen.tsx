@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { useEffect, useRef, useState } from "react"
+import { motion, AnimatePresence, useSpring } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 import { fetchProjectorImages } from "@/lib/cms-api"
@@ -43,18 +43,44 @@ export function ProjectorScreen({ className }: { className?: string }) {
 
   const current = images[index % Math.max(images.length, 1)]
 
+  // Tilt the screen toward the mouse cursor, smoothed with springs.
+  const screenRef = useRef<HTMLDivElement>(null)
+  const rotateX = useSpring(0, { stiffness: 120, damping: 18 })
+  const rotateY = useSpring(0, { stiffness: 120, damping: 18 })
+
+  useEffect(() => {
+    const MAX = 16 // degrees
+    const onMove = (e: MouseEvent) => {
+      const el = screenRef.current
+      if (!el) return
+      const rect = el.getBoundingClientRect()
+      const cx = rect.left + rect.width / 2
+      const cy = rect.top + rect.height / 2
+      const dx = (e.clientX - cx) / (window.innerWidth / 2)
+      const dy = (e.clientY - cy) / (window.innerHeight / 2)
+      rotateY.set(Math.max(-1, Math.min(1, dx)) * MAX)
+      rotateX.set(Math.max(-1, Math.min(1, -dy)) * MAX)
+    }
+    window.addEventListener("mousemove", onMove)
+    return () => window.removeEventListener("mousemove", onMove)
+  }, [rotateX, rotateY])
+
   return (
     <div
       className={cn(
-        "relative mx-auto flex w-full max-w-xl select-none flex-col items-center",
+        "relative mx-auto flex w-full max-w-none select-none flex-col items-center [perspective:1600px]",
         className
       )}
     >
       {/* Ambient glow behind the screen */}
-      <div className="pointer-events-none absolute left-1/2 top-0 h-[60%] w-[85%] -translate-x-1/2 rounded-[40%] bg-maroon/20 blur-3xl" />
+      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[80%] w-[90%] -translate-x-1/2 -translate-y-1/2 rounded-[40%] bg-maroon/20 blur-3xl" />
 
-      {/* Projection screen */}
-      <div className="relative z-20 aspect-video w-full overflow-hidden rounded-xl border-[6px] border-black/80 bg-black shadow-[0_24px_70px_rgba(0,0,0,0.5)]">
+      {/* Display screen — tilts toward the mouse cursor in 3D */}
+      <motion.div
+        ref={screenRef}
+        className="relative z-20 aspect-video w-full overflow-hidden rounded-2xl border-[8px] border-black/80 bg-black shadow-[0_30px_80px_rgba(0,0,0,0.55)]"
+        style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+      >
         <AnimatePresence>
           {current && (
             <motion.img
@@ -94,34 +120,7 @@ export function ProjectorScreen({ className }: { className?: string }) {
           className="pointer-events-none absolute inset-0"
           style={{ boxShadow: "inset 0 0 80px rgba(0,0,0,0.6)" }}
         />
-      </div>
-
-      {/* Light beam: wide at the screen (top), narrowing to the lens (bottom) */}
-      <motion.div
-        className="pointer-events-none z-10 -mt-1 h-24 w-[112%]"
-        style={{
-          clipPath: "polygon(0 0, 100% 0, 58% 100%, 42% 100%)",
-          background:
-            "linear-gradient(to bottom, rgba(255,255,255,0.28), rgba(255,255,255,0))",
-          filter: "blur(4px)",
-          mixBlendMode: "screen",
-        }}
-        animate={{ opacity: [0.5, 0.85, 0.6, 0.9, 0.55] }}
-        transition={{ duration: 0.6, repeat: Infinity, repeatType: "mirror" }}
-      />
-
-      {/* Projector device */}
-      <div className="relative z-20 -mt-1 flex w-44 max-w-[55%] flex-col items-center">
-        <div className="relative h-14 w-full rounded-lg bg-gradient-to-b from-neutral-700 to-neutral-900 shadow-lg ring-1 ring-white/10">
-          {/* Lens */}
-          <div className="absolute -top-2 left-1/2 h-5 w-5 -translate-x-1/2 rounded-full bg-neutral-200 ring-2 ring-neutral-500 shadow-[0_0_14px_rgba(255,255,255,0.8)]" />
-          {/* Reels */}
-          <div className="absolute right-3 top-2.5 h-4 w-4 rounded-full border-2 border-neutral-500" />
-          <div className="absolute right-8 top-2.5 h-4 w-4 rounded-full border-2 border-neutral-500" />
-        </div>
-        {/* Stand */}
-        <div className="h-2 w-12 rounded-b-md bg-neutral-800" />
-      </div>
+      </motion.div>
     </div>
   )
 }
