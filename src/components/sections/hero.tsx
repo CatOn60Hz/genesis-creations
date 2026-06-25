@@ -3,8 +3,13 @@ import { useNavigate } from "react-router-dom"
 import { PixelTrail } from "@/components/ui/pixel-trail"
 import { ServicesMarquee } from "@/components/ui/services-marquee"
 import { ProjectorScreen } from "@/components/ui/projector-screen"
+import { GooeyText } from "@/components/ui/gooey-text-morphing"
 import { useScreenSize } from "@/components/hooks/use-screen-size"
-import logo from "@/assets/logo.png"
+import logo from "@/assets/logo-mark.png"
+
+// Defined once at module scope so its identity is stable across re-renders —
+// otherwise GooeyText's effect tears down and restarts the morph each render.
+const MORPH_WORDS = ["Create", "Capture", "Produce", "Broadcast"]
 
 const Hero: React.FC = () => {
   const screenSize = useScreenSize()
@@ -41,21 +46,30 @@ const Hero: React.FC = () => {
           pointer-events-none so the PixelTrail behind keeps receiving the mouse;
           interactive elements re-enable pointer events individually. */}
       <div className="relative z-10 flex flex-1 items-start px-6 pt-12 md:pt-20 pb-8 pointer-events-none">
-        <div className="mx-auto grid w-full max-w-7xl items-center gap-8 lg:grid-cols-[0.8fr_1.7fr]">
-          {/* Left: brand + CTAs */}
-          <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
-            <img
-              src={logo}
-              alt="Genesis Creations"
-              className="mb-7 h-40 w-auto md:h-56 drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
-            />
-
-            <p className="mb-5 text-base md:text-xl uppercase tracking-[0.35em] text-black">
-              Chennai · Media House
+        <div className="mx-auto grid w-full max-w-7xl items-center gap-8 lg:grid-cols-[0.9fr_1.5fr]">
+          {/* Left: gooey morphing brand words + tagline + CTA */}
+          <div className="flex flex-col items-center text-center">
+            <p className="text-3xl md:text-5xl uppercase tracking-[0.2em] text-maroon-dark">
+              Genesis Creations
             </p>
 
-            <p className="mt-2 max-w-2xl text-lg md:text-3xl text-maroon-dark">
-              Media Academy · Digital Marketing · Production · Studio · Broadcasting
+            <GooeyText
+              texts={MORPH_WORDS}
+              morphTime={1.2}
+              cooldownTime={2.5}
+              logo={logo}
+              logoAlt="Genesis Creations"
+              logoClassName="h-[90%] drop-shadow-sm"
+              className="mt-8 mb-8 h-[120px] w-full md:h-[150px]"
+              textClassName="text-maroon font-bold leading-none text-[clamp(2rem,5vw,3.5rem)]"
+            />
+
+            <p className="mb-5 text-xs md:text-sm uppercase tracking-[0.3em] text-black">
+              Chennai | Coimbatore | Nagercoil — where stories come to life
+            </p>
+
+            <p className="max-w-2xl text-lg md:text-3xl text-maroon-dark">
+              Media Academy · Digital Marketing · Production · Studio Rental · Broadcasting
             </p>
 
             {/* CTAs */}
@@ -71,12 +85,12 @@ const Hero: React.FC = () => {
           </div>
 
           {/* Right: projector throwing Genesis Creations moments onto a screen */}
-          <div className="flex flex-col items-center md:-mt-10">
-            <p className="mb-8 md:mb-10 text-base md:text-2xl uppercase tracking-[0.35em] text-black">
+          <div className="flex flex-col items-center">
+            <p className="mb-4 text-sm md:text-lg uppercase tracking-[0.3em] text-black">
               We don't just make media. We bring it to life
             </p>
             <ProjectorScreen className="pointer-events-auto" />
-            <p className="mt-6 text-center text-xs uppercase tracking-[0.3em] text-black/60 md:text-sm">
+            <p className="mt-4 text-center text-xs uppercase tracking-[0.3em] text-black/60 md:text-sm">
               Moments from Genesis Creations
             </p>
           </div>

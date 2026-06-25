@@ -66,7 +66,7 @@ const Gallery: React.FC = () => {
   }, [openSrc])
 
   return (
-    <main className="h-screen snap-y snap-mandatory overflow-y-auto overflow-x-hidden bg-maroon-dark text-cream [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <main className="h-screen snap-y snap-proximity overflow-y-auto overflow-x-hidden bg-maroon-dark text-cream [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {/* Page 1 — the 3D marquee hero */}
       <section
         id="gallery-marquee"

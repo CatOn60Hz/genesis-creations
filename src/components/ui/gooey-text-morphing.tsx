@@ -9,6 +9,12 @@ interface GooeyTextProps {
   cooldownTime?: number;
   className?: string;
   textClassName?: string;
+  /** Optional image (e.g. the company logo) appended as a frame in the morph
+   *  cycle. It fades cleanly instead of going through the gooey threshold
+   *  filter, so a detailed/colour logo stays crisp while the words still melt. */
+  logo?: string;
+  logoClassName?: string;
+  logoAlt?: string;
 }
 
 export function GooeyText({
@@ -16,40 +22,74 @@ export function GooeyText({
   morphTime = 1,
   cooldownTime = 0.25,
   className,
-  textClassName
+  textClassName,
+  logo,
+  logoClassName,
+  logoAlt = "",
 }: GooeyTextProps) {
   const text1Ref = React.useRef<HTMLSpanElement>(null);
   const text2Ref = React.useRef<HTMLSpanElement>(null);
+  const logoRef = React.useRef<HTMLImageElement>(null);
 
   React.useEffect(() => {
-    let textIndex = texts.length - 1;
-    let time = new Date();
-    let morph = 0;
-    let cooldown = cooldownTime;
+    // The morph cycles through these frames. A `null` frame is the logo, which
+    // fades cleanly (it lives outside the threshold filter) while words melt.
+    // The logo goes first so it's the very first thing shown.
+    const frames: (string | null)[] = logo ? [null, ...texts] : [...texts];
+    const n = frames.length;
 
     // Keep the blur low and ramp it gently so the morph stays tight and
     // legible instead of melting into blobs mid-transition.
     const maxBlur = 8;
 
-    const setMorph = (fraction: number) => {
-      if (text1Ref.current && text2Ref.current) {
-        text2Ref.current.style.filter = `blur(${Math.min(6 / fraction - 6, maxBlur)}px)`;
-        text2Ref.current.style.opacity = `${Math.pow(fraction, 0.4) * 100}%`;
+    // Drive a single frame to "visibility" v (1 = sharp & solid, 0 = gone).
+    // Text frames melt via blur + the alpha threshold; the logo just fades.
+    const setText = (el: HTMLSpanElement | null, v: number) => {
+      if (!el) return;
+      const f = Math.max(v, 0.0001);
+      el.style.filter = `blur(${Math.min(6 / f - 6, maxBlur)}px)`;
+      el.style.opacity = `${Math.pow(f, 0.4) * 100}%`;
+    };
+    const setLogo = (v: number) => {
+      const el = logoRef.current;
+      if (!el) return;
+      el.style.filter = `blur(${(1 - Math.max(v, 0)) * 4}px)`;
+      el.style.opacity = `${Math.pow(Math.max(v, 0), 0.6) * 100}%`;
+    };
 
-        fraction = 1 - fraction;
-        text1Ref.current.style.filter = `blur(${Math.min(6 / fraction - 6, maxBlur)}px)`;
-        text1Ref.current.style.opacity = `${Math.pow(fraction, 0.4) * 100}%`;
-      }
+    let index = n - 1; // current "from" frame; first cooldown reveals frame 0
+    let time = new Date();
+    let morph = 0;
+    let cooldown = cooldownTime;
+    let active = { from: frames[index], to: frames[(index + 1) % n] };
+
+    // Assign content to the slots for the transition frames[index] -> next,
+    // hide everything first so stale frames don't bleed through.
+    const prepare = () => {
+      if (text1Ref.current) text1Ref.current.style.opacity = "0%";
+      if (text2Ref.current) text2Ref.current.style.opacity = "0%";
+      setLogo(0);
+
+      const from = frames[index];
+      const to = frames[(index + 1) % n];
+      if (from !== null && text1Ref.current) text1Ref.current.textContent = from;
+      if (to !== null && text2Ref.current) text2Ref.current.textContent = to;
+      active = { from, to };
+    };
+
+    // fraction 0 -> 1: the "from" frame fades out, the "to" frame fades in.
+    const renderFraction = (fraction: number) => {
+      const outV = 1 - fraction;
+      const inV = fraction;
+      if (active.from === null) setLogo(outV);
+      else setText(text1Ref.current, outV);
+      if (active.to === null) setLogo(inV);
+      else setText(text2Ref.current, inV);
     };
 
     const doCooldown = () => {
       morph = 0;
-      if (text1Ref.current && text2Ref.current) {
-        text2Ref.current.style.filter = "";
-        text2Ref.current.style.opacity = "100%";
-        text1Ref.current.style.filter = "";
-        text1Ref.current.style.opacity = "0%";
-      }
+      renderFraction(1); // settle fully on the current "to" frame
     };
 
     const doMorph = () => {
@@ -62,13 +102,16 @@ export function GooeyText({
         fraction = 1;
       }
 
-      setMorph(fraction);
+      renderFraction(fraction);
     };
 
+    prepare();
+
+    let rafId = 0;
     function animate() {
-      requestAnimationFrame(animate);
+      rafId = requestAnimationFrame(animate);
       const newTime = new Date();
-      const shouldIncrementIndex = cooldown > 0;
+      const shouldAdvance = cooldown > 0;
       let dt = (newTime.getTime() - time.getTime()) / 1000;
       // Clamp large deltas (e.g. after the tab was backgrounded and rAF paused)
       // so the morph resumes smoothly instead of lurching forward.
@@ -78,12 +121,9 @@ export function GooeyText({
       cooldown -= dt;
 
       if (cooldown <= 0) {
-        if (shouldIncrementIndex) {
-          textIndex = (textIndex + 1) % texts.length;
-          if (text1Ref.current && text2Ref.current) {
-            text1Ref.current.textContent = texts[textIndex % texts.length];
-            text2Ref.current.textContent = texts[(textIndex + 1) % texts.length];
-          }
+        if (shouldAdvance) {
+          index = (index + 1) % n;
+          prepare();
         }
         doMorph();
       } else {
@@ -93,10 +133,8 @@ export function GooeyText({
 
     animate();
 
-    return () => {
-      // Cleanup function if needed
-    };
-  }, [texts, morphTime, cooldownTime]);
+    return () => cancelAnimationFrame(rafId);
+  }, [texts, morphTime, cooldownTime, logo]);
 
   return (
     <div className={cn("relative", className)}>
@@ -115,8 +153,9 @@ export function GooeyText({
         </defs>
       </svg>
 
+      {/* Gooey text layer */}
       <div
-        className="flex items-center justify-center"
+        className="absolute inset-0 flex items-center justify-center"
         style={{ filter: "url(#threshold)" }}
       >
         <span
@@ -136,6 +175,21 @@ export function GooeyText({
           )}
         />
       </div>
+
+      {/* Clean logo layer — outside the threshold filter so it stays crisp */}
+      {logo && (
+        <img
+          ref={logoRef}
+          src={logo}
+          alt={logoAlt}
+          aria-hidden={logoAlt ? undefined : true}
+          className={cn(
+            "pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 select-none object-contain opacity-0",
+            "h-[150%] w-auto max-w-none",
+            logoClassName
+          )}
+        />
+      )}
     </div>
   );
 }
