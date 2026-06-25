@@ -188,3 +188,17 @@ export async function deleteProjectorImage(
   )
   return (data.images ?? []).map((i) => ({ ...i, url: abs(i.url) }))
 }
+
+// Pin one home-screen photo to appear first in the rotation. Returns the
+// reordered list (the chosen image is at index 0).
+export async function featureProjectorImage(
+  name: string,
+  password: string
+): Promise<ProjectorImage[]> {
+  const data = await postForm<{ images: ProjectorImage[] }>(
+    "/projector/feature.php",
+    { name },
+    password
+  )
+  return (data.images ?? []).map((i) => ({ ...i, url: abs(i.url) }))
+}

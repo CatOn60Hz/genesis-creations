@@ -12,8 +12,11 @@ $url = GC_UPLOADS_URL . '/projector';
 
 $result = save_uploaded_images('photos', $dir);
 
+$first = json_load(GC_DATA_DIR . '/projector.json', [])['first'] ?? null;
+
 json_out([
     'saved'  => $result['saved'],
     'errors' => $result['errors'],
-    'images' => list_images($dir, $url),
+    'images' => order_first(list_images($dir, $url), $first),
+    'first'  => $first,
 ]);

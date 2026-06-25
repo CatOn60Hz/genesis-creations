@@ -113,6 +113,24 @@ function list_images(string $dir, string $urlBase): array
     }, $files);
 }
 
+// Move the admin-chosen "first" image to the front of a list (stable order).
+function order_first(array $images, ?string $first): array
+{
+    if ($first === null || $first === '') {
+        return $images;
+    }
+    $featured = null;
+    $rest = [];
+    foreach ($images as $img) {
+        if ($featured === null && ($img['name'] ?? null) === $first) {
+            $featured = $img;
+        } else {
+            $rest[] = $img;
+        }
+    }
+    return $featured !== null ? array_merge([$featured], $rest) : $images;
+}
+
 // Validate + save one uploaded image. Returns the saved filename, or null on
 // failure (with a reason pushed onto &$errors).
 function save_one_image(string $name, $tmp, int $err, int $size, string $destDir, array &$errors): ?string

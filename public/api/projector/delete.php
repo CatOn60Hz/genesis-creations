@@ -15,4 +15,16 @@ if (!delete_named($dir, $name)) {
     json_out(['error' => 'Invalid name'], 400);
 }
 
-json_out(['images' => list_images($dir, $url)]);
+// If the removed image was pinned to show first, forget that choice.
+$store = GC_DATA_DIR . '/projector.json';
+$meta = json_load($store, []);
+if (($meta['first'] ?? null) === $name) {
+    unset($meta['first']);
+    json_save($store, $meta);
+}
+$first = $meta['first'] ?? null;
+
+json_out([
+    'images' => order_first(list_images($dir, $url), $first),
+    'first'  => $first,
+]);

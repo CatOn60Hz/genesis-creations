@@ -11,6 +11,7 @@ import {
   Plus,
   Save,
   Pencil,
+  Star,
 } from "lucide-react"
 
 import {
@@ -24,6 +25,7 @@ import {
   fetchProjectorImages,
   uploadProjectorImages,
   deleteProjectorImage,
+  featureProjectorImage,
 } from "@/lib/cms-api"
 import {
   fetchGalleryPhotos,
@@ -40,7 +42,7 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "announcement", label: "Announcement", icon: <Megaphone className="h-4 w-4" /> },
   { id: "workshops", label: "Workshops", icon: <CalendarDays className="h-4 w-4" /> },
   { id: "gallery", label: "Gallery", icon: <Images className="h-4 w-4" /> },
-  { id: "projector", label: "Projector", icon: <Projector className="h-4 w-4" /> },
+  { id: "projector", label: "Home Screen Photos", icon: <Projector className="h-4 w-4" /> },
 ]
 
 /* ----------------------------- shared styles ---------------------------- */
@@ -367,6 +369,7 @@ function ImageManager({
   list,
   upload,
   remove,
+  onMakeFirst,
   onAuthError,
 }: {
   password: string
@@ -374,6 +377,9 @@ function ImageManager({
   list: () => Promise<Img[]>
   upload: (files: FileList, pw: string) => Promise<{ items: Img[]; errors: string[] }>
   remove: (name: string, pw: string) => Promise<Img[]>
+  // When provided, each image gets a "make first" control and the first image
+  // is badged as the one shown first (used for the home-screen photos).
+  onMakeFirst?: (name: string, pw: string) => Promise<Img[]>
   onAuthError: () => void
 }) {
   const [images, setImages] = useState<Img[]>([])
@@ -425,6 +431,21 @@ function ImageManager({
     }
   }
 
+  const doMakeFirst = async (name: string) => {
+    if (!onMakeFirst) return
+    setBusy(true)
+    setError(null)
+    try {
+      setImages(await onMakeFirst(name, password))
+    } catch (e) {
+      const m = e instanceof Error ? e.message : "Couldn't set first"
+      setError(m)
+      handleAuthErr(m)
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <label
@@ -461,21 +482,42 @@ function ImageManager({
         <Loader2 className="h-6 w-6 animate-spin text-maroon" />
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {images.map((p) => (
+          {images.map((p, i) => (
             <div
               key={p.name}
               className="group relative aspect-[4/3] overflow-hidden rounded-xl ring-1 ring-white/10"
             >
               <img src={p.url} alt={p.name} loading="lazy" className="h-full w-full object-cover" />
-              <button
-                type="button"
-                onClick={() => doDelete(p.name)}
-                disabled={busy}
-                aria-label="Delete"
-                className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity hover:bg-red-600 group-hover:opacity-100"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+
+              {onMakeFirst && i === 0 && (
+                <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-maroon px-2 py-1 text-[0.65rem] font-medium text-cream">
+                  <Star className="h-3 w-3 fill-current" /> Shown first
+                </span>
+              )}
+
+              <div className="absolute right-2 top-2 flex gap-2">
+                {onMakeFirst && i !== 0 && (
+                  <button
+                    type="button"
+                    onClick={() => doMakeFirst(p.name)}
+                    disabled={busy}
+                    aria-label="Make this appear first"
+                    title="Make this appear first"
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity hover:bg-maroon group-hover:opacity-100"
+                  >
+                    <Star className="h-4 w-4" />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => doDelete(p.name)}
+                  disabled={busy}
+                  aria-label="Delete"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity hover:bg-red-600 group-hover:opacity-100"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           ))}
           {images.length === 0 && (
@@ -602,13 +644,14 @@ const AdminDashboard: React.FC = () => {
         {tab === "projector" && (
           <ImageManager
             password={password}
-            note="These images play in the projector animation on the home page"
+            note="These photos play in the slideshow on the home page · hover a photo and tap ★ to make it appear first"
             list={fetchProjectorImages}
             upload={async (files, pw) => {
               const r = await uploadProjectorImages(files, pw)
               return { items: r.images, errors: r.errors }
             }}
             remove={deleteProjectorImage}
+            onMakeFirst={featureProjectorImage}
             onAuthError={onAuthError}
           />
         )}
