@@ -28,24 +28,31 @@ function buildMarqueeImages(photos: string[]): string[] {
 
 const Gallery: React.FC = () => {
   const [openSrc, setOpenSrc] = useState<string | null>(null)
-  // Live photos from the backend, falling back to the bundled set on failure.
-  const [photos, setPhotos] = useState<string[]>(FALLBACK_PHOTOS)
+  // Real uploaded photos from the backend. The grid shows exactly these, so an
+  // empty gallery reads as empty instead of a wall of bundled demo images.
+  const [photos, setPhotos] = useState<string[]>([])
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     let active = true
     fetchGalleryPhotos()
       .then((list) => {
-        if (active && list.length) setPhotos(list.map((p) => p.url))
+        if (active) setPhotos(list.map((p) => p.url))
       })
       .catch(() => {
-        /* keep the bundled fallback */
+        /* leave empty; the decorative marquee falls back to bundled images */
+      })
+      .finally(() => {
+        if (active) setLoaded(true)
       })
     return () => {
       active = false
     }
   }, [])
 
-  const marqueeImages = buildMarqueeImages(photos)
+  // The hero marquee is purely decorative — never let it go blank, so fall back
+  // to the bundled images until real photos exist.
+  const marqueeImages = buildMarqueeImages(photos.length ? photos : FALLBACK_PHOTOS)
 
   // Close the lightbox on Escape and lock body scroll while it's open.
   useEffect(() => {
@@ -124,28 +131,34 @@ const Gallery: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
-            {photos.map((src, i) => (
-              <motion.button
-                type="button"
-                key={src}
-                onClick={() => setOpenSrc(src)}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-10%" }}
-                transition={{ duration: 0.5, delay: (i % 3) * 0.08 }}
-                className="group relative aspect-[4/3] overflow-hidden rounded-2xl ring-1 ring-white/10"
-              >
-                <img
-                  src={src}
-                  alt={`Genesis Creations ${i + 1}`}
-                  loading="lazy"
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-maroon-dark/0 transition-colors duration-300 group-hover:bg-maroon-dark/20" />
-              </motion.button>
-            ))}
-          </div>
+          {photos.length > 0 ? (
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
+              {photos.map((src, i) => (
+                <motion.button
+                  type="button"
+                  key={src}
+                  onClick={() => setOpenSrc(src)}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-10%" }}
+                  transition={{ duration: 0.5, delay: (i % 3) * 0.08 }}
+                  className="group relative aspect-[4/3] overflow-hidden rounded-2xl ring-1 ring-white/10"
+                >
+                  <img
+                    src={src}
+                    alt={`Genesis Creations ${i + 1}`}
+                    loading="lazy"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-maroon-dark/0 transition-colors duration-300 group-hover:bg-maroon-dark/20" />
+                </motion.button>
+              ))}
+            </div>
+          ) : (
+            loaded && (
+              <p className="text-center text-cream/60">Photos coming soon.</p>
+            )
+          )}
         </div>
       </section>
 
