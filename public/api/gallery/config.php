@@ -7,13 +7,10 @@ require_once __DIR__ . '/../config.php';
 
 const ADMIN_PASSWORD = GC_ADMIN_PASSWORD;
 
-// Filesystem directory where photos are stored (created automatically on first
-// upload). Relative to this file:
-//   public_html/api/gallery  ->  public_html/uploads/gallery
-const UPLOAD_DIR = __DIR__ . '/../../uploads/gallery';
-
-// Public URL path that maps to UPLOAD_DIR (served as static files by Hostinger).
-const UPLOAD_URL_BASE = '/uploads/gallery';
+// Photos live under the shared persistent uploads dir (outside the web root, so
+// deploys can't wipe them — see ../config.php) and are served via media.php.
+define('UPLOAD_DIR', GC_UPLOADS_DIR . '/gallery');
+const UPLOAD_URL_BASE = '/api/media.php?f=gallery';
 
 // Allowed image types: extension => expected MIME.
 const ALLOWED = [

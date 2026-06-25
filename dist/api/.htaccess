@@ -1,13 +1,11 @@
-# API responses must always be fresh. LiteSpeed's page cache would otherwise
-# store GET responses (e.g. gallery/projector list.php) and keep serving a
-# stale/empty list after photos are uploaded.
+# The JSON list endpoints must always be fresh — the GitHub build + LiteSpeed
+# page cache would otherwise serve a stale list (e.g. an empty gallery) after
+# photos are uploaded. The PHP endpoints also send no-cache headers themselves.
+# Image bytes are streamed by media.php with their own long-lived cache headers,
+# so we deliberately do NOT force no-store across the whole folder here.
 <IfModule LiteSpeed>
   CacheDisable public /
-  RewriteEngine On
-  RewriteRule .* - [E=Cache-Control:no-cache]
 </IfModule>
 
-<IfModule mod_headers.c>
-  Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
-  Header set Pragma "no-cache"
-</IfModule>
+# Let media.php receive /api/media.php/<section>/<file> via PATH_INFO.
+AcceptPathInfo On

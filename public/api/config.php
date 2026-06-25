@@ -23,8 +23,24 @@ const GC_MAX_BYTES = 15 * 1024 * 1024;
 // the live API). '*' allows any; set to your domain to lock down; '' disables.
 const GC_CORS_ORIGIN = '*';
 
-// Filesystem locations, relative to the web root (this file lives in
-// <webroot>/api). Created automatically as needed.
-define('GC_DATA_DIR', dirname(__DIR__) . '/data');        // <webroot>/data
-define('GC_UPLOADS_DIR', dirname(__DIR__) . '/uploads');  // <webroot>/uploads
-const GC_UPLOADS_URL = '/uploads';                        // public URL base
+// Persistent storage that SURVIVES deploys. The site auto-builds on every push,
+// which wipes the web root — so runtime data (uploaded images + the
+// announcement / workshops / projector JSON) must live OUTSIDE the web root.
+// This file is <webroot>/api/config.php, so dirname(dirname(__DIR__)) is the
+// folder ABOVE the web root, which the build never touches.
+//
+// If your host wipes that folder too, hard-code an absolute path to any
+// persistent folder outside the deployed tree, e.g.:
+//   define('GC_PERSIST_DIR', '/home/uXXXXXXXX/gc-data');
+if (!defined('GC_PERSIST_DIR')) {
+    define('GC_PERSIST_DIR', dirname(dirname(__DIR__)) . '/gc-data');
+}
+
+// Data + uploads live under the persistent dir (created automatically).
+// Uploaded images sit outside the web root, so they are NOT reachable as static
+// files — they are streamed by media.php instead (see GC_UPLOADS_URL).
+define('GC_DATA_DIR', GC_PERSIST_DIR . '/data');
+define('GC_UPLOADS_DIR', GC_PERSIST_DIR . '/uploads');
+// Image URL base. Callers append "/<section>/<file>", giving e.g.
+// /api/media.php?f=/projector/abc.jpg — media.php strips the leading slash.
+const GC_UPLOADS_URL = '/api/media.php?f=';
