@@ -8,9 +8,14 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
 dist-ssr
 *.local
+
+# The built site IS committed so Hostinger's Git auto-deploy can serve it
+# (Hostinger doesn't run `npm run build`). Point the domain's document root at
+# this dist/ folder. Server-generated content under dist/uploads/ stays out of
+# git so deploys never carry or wipe user uploads.
+dist/uploads/
 
 # Editor directories and files
 .vscode/*

@@ -5,7 +5,8 @@ import { AnnouncementBanner } from "@/components/ui/announcement-banner"
 import { Home } from "@/pages/home"
 import { Academy } from "@/pages/academy"
 import { Gallery } from "@/pages/gallery"
-import { GalleryAdmin } from "@/pages/gallery-admin"
+import { Workshops } from "@/pages/workshops"
+import { AdminDashboard } from "@/pages/admin"
 import { dockItems } from "@/components/ui/dock-tabs"
 
 // Placeholder page for sections not yet built.
@@ -43,9 +44,18 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/academy" element={<Academy />} />
         <Route path="/gallery" element={<Gallery />} />
-        <Route path="/gallery-admin" element={<GalleryAdmin />} />
+        <Route path="/workshops" element={<Workshops />} />
+        {/* Unified admin dashboard (gallery-admin kept as an alias). */}
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/gallery-admin" element={<AdminDashboard />} />
         {dockItems
-          .filter((item) => item.to !== "/" && item.to !== "/academy" && item.to !== "/gallery")
+          .filter(
+            (item) =>
+              item.to !== "/" &&
+              item.to !== "/academy" &&
+              item.to !== "/gallery" &&
+              item.to !== "/workshops"
+          )
           .map((item) => (
             <Route key={item.id} path={item.to} element={<SectionStub />} />
           ))}

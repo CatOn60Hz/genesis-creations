@@ -1,46 +1,64 @@
-# Gallery backend (Hostinger)
+# Genesis Creations admin / backend (Hostinger)
 
-The gallery photos are no longer bundled into the build — they live on the
-Hostinger server and are managed from a browser. Adding/removing photos no
-longer requires a rebuild or redeploy.
+Site content that changes often — the announcement banner, workshops, gallery
+photos, and the home-page projector images — is managed from a browser at
+**`/admin`** and stored on the Hostinger server. None of it requires a rebuild
+or redeploy to change.
 
-## Pieces
+## One login for everything
 
-| Path | Role |
-| --- | --- |
-| `public/api/gallery/*.php` | PHP API (ships into `dist/api/gallery/` on build) |
-| `public_html/uploads/gallery/` | Where photos are stored on the server (created automatically) |
-| `src/pages/gallery.tsx` | Public page — fetches photos from the API at runtime |
-| `src/pages/gallery-admin.tsx` | `/gallery-admin` — password-protected upload/delete UI |
-| `src/lib/gallery-api.ts` | Frontend API client |
+- Admin URL: `https://<your-domain>/admin` (the old `/gallery-admin` still works).
+- Password: `GC_ADMIN_PASSWORD` in **`public/api/config.php`** — one secret for
+  all tabs. Change it there before going live (currently `gcweb@2026`).
 
-## One-time setup
+## Tabs
 
-1. **Set your password.** Edit `public/api/gallery/config.php` and change
-   `ADMIN_PASSWORD` from the default to your own secret. (Do this before the
-   first deploy, or edit it directly on the server via hPanel File Manager.)
-2. **Deploy as usual:** `npm run build`, then upload the contents of `dist/`
-   to `public_html/` on Hostinger. This includes `api/` and `.htaccess`.
-3. The `uploads/gallery/` folder is created automatically the first time you
-   upload a photo — nothing to set up by hand.
+| Tab | What it does | Stored at |
+| --- | --- | --- |
+| Announcement | Edit banner text + button, toggle it on/off | `data/announcement.json` |
+| Workshops | Add/edit/delete workshops, each with a banner image | `data/workshops.json` + `uploads/workshops/` |
+| Gallery | Upload/delete the `/gallery` photos | `uploads/gallery/` |
+| Projector | Upload/delete the home-page projector images | `uploads/projector/` |
 
-## Adding photos
+All `data/` and `uploads/` folders are created automatically on first use and
+live **outside the build**, so deploys never wipe them.
 
-- Go to `https://<your-domain>/gallery-admin`
-- Enter the admin password
-- Click the upload box, select one or many images (JPG/PNG/WebP/GIF, ≤15 MB each)
-- They appear immediately on `/gallery`. Hover a photo in the admin to delete it.
+## Backend layout (`public/` → ships into `dist/` on build)
 
-## Notes
+```
+public/api/
+  config.php          # password + shared settings (single source)
+  _shared.php         # cors, auth, json store, image upload/list helpers
+  announcement/get.php  save.php
+  workshops/list.php    save.php   delete.php
+  gallery/list.php      upload.php delete.php
+  projector/list.php    upload.php delete.php
+```
 
-- **Fallback:** if the API can't be reached (e.g. local `npm run dev`, where PHP
-  doesn't run), the page shows the bundled photos in `src/assets/gallery/` so it
-  is never empty. On the live site the backend photos take over.
-- **Local dev against live API:** create a `.env` file with
-  `VITE_GALLERY_API=https://<your-domain>/api/gallery` to test uploads locally.
-- **Security:** uploads are validated as real images and the uploads folder is
-  given an `.htaccess` that disables script execution. The admin password is a
-  shared secret sent over HTTPS — fine for this use, but keep it private.
-- **Existing `.htaccess`:** if `public_html` already has one for SPA routing,
-  make sure it does **not** rewrite `/api/...` or `/uploads/...` to `index.html`.
-  The `.htaccess` shipped here excludes real files/folders, so it is safe.
+Frontend clients: `src/lib/cms-api.ts` (announcement, workshops, projector) and
+`src/lib/gallery-api.ts` (gallery).
+
+## How the front end uses it
+
+- **Announcement banner** (`src/components/ui/announcement-banner.tsx`) fetches
+  the current message; hidden entirely when you toggle it off.
+- **Home projector** (`src/components/ui/projector-screen.tsx`) plays the
+  projector images (replaced the old morph text + photo fan).
+- **`/workshops`** renders the posted workshops with their banners.
+- **`/gallery`** renders the gallery photos.
+- All four fall back to bundled images / default text when the API can't be
+  reached (e.g. local `npm run dev`, where PHP doesn't run).
+
+## Deploy
+
+`npm run build`, then publish `dist/` to `public_html/` (your usual Hostinger
+flow). The PHP under `dist/api/` and the SPA `.htaccess` go with it. To test the
+admin locally against the live API, add `VITE_API_BASE=https://<domain>/api`
+(and `VITE_GALLERY_API=https://<domain>/api/gallery`) to a `.env` file.
+
+## Security notes
+
+- One shared password over HTTPS gates all writes. Uploads are validated as real
+  images and the upload folders get an `.htaccess` that disables script
+  execution.
+- Keep the `/admin` URL + password private — there's no per-user login.

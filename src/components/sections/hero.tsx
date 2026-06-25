@@ -2,14 +2,9 @@ import { useNavigate } from "react-router-dom"
 
 import { PixelTrail } from "@/components/ui/pixel-trail"
 import { ServicesMarquee } from "@/components/ui/services-marquee"
-import { GooeyText } from "@/components/ui/gooey-text-morphing"
-import { PhotoGallery } from "@/components/ui/gallery"
+import { ProjectorScreen } from "@/components/ui/projector-screen"
 import { useScreenSize } from "@/components/hooks/use-screen-size"
 import logo from "@/assets/logo.png"
-
-// Defined once at module scope so its identity is stable across re-renders —
-// otherwise GooeyText's effect tears down and restarts the morph each render.
-const MORPH_WORDS = ["Create", "Capture", "Produce", "Broadcast"]
 
 const Hero: React.FC = () => {
   const screenSize = useScreenSize()
@@ -75,24 +70,15 @@ const Hero: React.FC = () => {
             </div>
           </div>
 
-          {/* Right: gooey morphing text — what we do, brought to life */}
-          <div className="flex flex-col items-center md:-mt-24">
+          {/* Right: projector throwing Genesis Creations moments onto a screen */}
+          <div className="flex flex-col items-center md:-mt-10">
             <p className="mb-8 md:mb-10 text-base md:text-2xl uppercase tracking-[0.35em] text-black">
-              We don't just make media. We
+              We don't just make media. We bring it to life
             </p>
-            <GooeyText
-              texts={MORPH_WORDS}
-              morphTime={1.2}
-              cooldownTime={2.5}
-              className="h-[130px] w-full font-bold md:h-[165px]"
-              textClassName="text-maroon leading-none text-[clamp(3.5rem,9vw,8.5rem)] md:text-[clamp(3.5rem,9vw,8.5rem)]"
-            />
-
-            {/* Draggable photo fan — sits just beneath the morphing word */}
-            <PhotoGallery
-              className="pointer-events-auto -mt-2 w-full"
-              caption="Moments from Genesis Creations"
-            />
+            <ProjectorScreen className="pointer-events-auto" />
+            <p className="mt-6 text-center text-xs uppercase tracking-[0.3em] text-black/60 md:text-sm">
+              Moments from Genesis Creations
+            </p>
           </div>
         </div>
       </div>
