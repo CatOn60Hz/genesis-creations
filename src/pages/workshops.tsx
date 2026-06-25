@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 import { motion } from "framer-motion"
 import {
   CalendarDays,
@@ -46,6 +46,13 @@ import {
 
 import { fetchWorkshops, type Workshop, type WorkshopSession } from "@/lib/cms-api"
 import { PixelTrail } from "@/components/ui/pixel-trail"
+import TextCursorProximity from "@/components/ui/text-cursor-proximity"
+
+// Letters grow + turn crimson as the cursor approaches them.
+const PROXIMITY_STYLES = {
+  transform: { from: "scale(1)", to: "scale(1.3)" },
+  color: { from: "#000000", to: "#cb2957" },
+} as const
 
 // Resolve the admin-chosen icon. Accepts the preset keys AND any free-text
 // keyword the admin types ("Custom…") — normalised and matched here. Anything
@@ -323,6 +330,7 @@ const Workshops: React.FC = () => {
   const [workshops, setWorkshops] = useState<Workshop[]>([])
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<Workshop | null>(null)
+  const heroRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetchWorkshops()
@@ -350,12 +358,28 @@ const Workshops: React.FC = () => {
         <div className="absolute inset-0 z-0 opacity-40">
           <PixelTrail pixelSize={60} fadeDuration={500} pixelClassName="bg-maroon-dark/10" />
         </div>
-        <div className="relative z-10 mx-auto max-w-5xl text-center">
+        <div ref={heroRef} className="relative z-10 mx-auto max-w-7xl text-center">
           <p className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-maroon">
             Genesis Creations
           </p>
-          <h1 className="mb-8 text-5xl font-bold tracking-tight md:text-7xl">
-            Workshops &amp; <span className="text-maroon">Masterclasses</span>
+          {/* Interactive headline — letters react to cursor proximity. */}
+          <h1 className="mb-8 flex flex-col items-center font-bold uppercase leading-[0.95] tracking-tight">
+            <TextCursorProximity
+              label="WORKSHOPS"
+              className="text-7xl will-change-transform md:text-9xl lg:text-[11rem]"
+              styles={PROXIMITY_STYLES}
+              falloff="gaussian"
+              radius={200}
+              containerRef={heroRef}
+            />
+            <TextCursorProximity
+              label="& MASTERCLASSES"
+              className="text-5xl will-change-transform md:text-8xl lg:text-9xl"
+              styles={PROXIMITY_STYLES}
+              falloff="gaussian"
+              radius={200}
+              containerRef={heroRef}
+            />
           </h1>
           <p className="mx-auto max-w-3xl text-lg leading-relaxed text-maroon-dark/80 md:text-xl">
             Hands-on sessions led by working professionals — gimbal, drone,
