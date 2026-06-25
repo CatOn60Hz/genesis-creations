@@ -16,8 +16,10 @@ const GC_ALLOWED = [
     'gif'  => 'image/gif',
 ];
 
-// Maximum size per uploaded file, in bytes (15 MB).
-const GC_MAX_BYTES = 15 * 1024 * 1024;
+// Maximum size per uploaded file, in bytes (50 MB). NOTE: PHP's own
+// upload_max_filesize / post_max_size (set in .user.ini at the web root) must be
+// >= this, or large uploads are rejected before this check ever runs.
+const GC_MAX_BYTES = 50 * 1024 * 1024;
 
 // CORS origin allowed to call the API (so the local Vite dev server can reach
 // the live API). '*' allows any; set to your domain to lock down; '' disables.

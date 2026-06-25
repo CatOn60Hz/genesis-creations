@@ -21,8 +21,9 @@ const ALLOWED = [
     'gif'  => 'image/gif',
 ];
 
-// Maximum size per uploaded file, in bytes (15 MB).
-const MAX_BYTES = 15 * 1024 * 1024;
+// Maximum size per uploaded file — shares the single source of truth in
+// ../config.php (currently 50 MB).
+const MAX_BYTES = GC_MAX_BYTES;
 
 // CORS origin allowed to call this API. Needed so the local Vite dev server can
 // talk to the live API. '*' allows any origin; set to your domain to lock down,

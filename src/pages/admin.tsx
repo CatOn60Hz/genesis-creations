@@ -589,7 +589,7 @@ const AdminDashboard: React.FC = () => {
         {tab === "gallery" && (
           <ImageManager
             password={password}
-            note="JPG, PNG, WebP or GIF · up to 15 MB each · shows on the Gallery page"
+            note="JPG, PNG, WebP or GIF · up to 50 MB each · shows on the Gallery page"
             list={fetchGalleryPhotos}
             upload={async (files, pw) => {
               const r = await uploadGalleryPhotos(files, pw)
