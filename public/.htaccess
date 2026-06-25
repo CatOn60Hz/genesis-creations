@@ -1,0 +1,15 @@
+# SPA routing for the React app on Hostinger (Apache).
+# Real files and folders — JS/CSS assets, /api/*.php, /uploads/* — are served
+# as-is; every other path falls back to index.html so react-router can handle it.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Never rewrite requests that map to an existing file or directory.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Everything else -> SPA entry point.
+  RewriteRule ^ index.html [L]
+</IfModule>

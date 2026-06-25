@@ -24,7 +24,7 @@ const areas = [
 
 const Services: React.FC = () => {
   return (
-    <section id="services" className="bg-[linear-gradient(180deg,#f6e8ec_0%,#eeeeee_45%,#e4e4e7_100%)] text-maroon-dark py-24 px-6">
+    <section id="services" className="flex min-h-screen flex-col justify-center bg-[linear-gradient(180deg,#f6e8ec_0%,#eeeeee_45%,#e4e4e7_100%)] text-maroon-dark py-24 px-6">
       <div className="mx-auto max-w-5xl text-center">
         <p className="mb-3 text-xs uppercase tracking-[0.3em] text-maroon">
           What You'll Master

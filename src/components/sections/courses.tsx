@@ -35,7 +35,7 @@ const Courses: React.FC = () => {
   const navigate = useNavigate()
 
   return (
-    <section id="courses" className="bg-maroon-dark text-cream py-24 px-6">
+    <section id="courses" className="flex min-h-screen flex-col justify-center bg-maroon-dark text-cream py-24 px-6">
       <div className="mx-auto max-w-5xl text-center">
         <p className="mb-3 text-xs uppercase tracking-[0.3em] text-maroon">
           Workshops &amp; Courses

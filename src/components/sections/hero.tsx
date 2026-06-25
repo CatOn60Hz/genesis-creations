@@ -16,7 +16,7 @@ const Hero: React.FC = () => {
   const navigate = useNavigate()
 
   return (
-    <section className="relative w-full min-h-screen overflow-hidden bg-[linear-gradient(180deg,#f6e8ec_0%,#eeeeee_45%,#e4e4e7_100%)] text-maroon-dark flex flex-col">
+    <section className="snap-section relative w-full min-h-screen overflow-hidden bg-[linear-gradient(180deg,#f6e8ec_0%,#eeeeee_45%,#e4e4e7_100%)] text-maroon-dark flex flex-col">
       {/* Interactive pixel trail background */}
       <div className="absolute inset-0 z-0">
         <PixelTrail
@@ -27,8 +27,13 @@ const Hero: React.FC = () => {
         />
       </div>
 
-      {/* Auto-scrolling services strip — fills the top of the hero */}
-      <div className="relative z-10 pt-4 md:pt-6">
+      {/* Auto-scrolling services strip — fills the top of the hero.
+          marginTop clears the announcement banner when one is showing
+          (--announcement-h is published by AnnouncementBanner; 0 otherwise). */}
+      <div
+        className="relative z-10 pt-4 md:pt-6"
+        style={{ marginTop: "var(--announcement-h, 0px)" }}
+      >
         {/* fadeFrom matches the hero gradient colour at this height so the
             edge fades blend in instead of showing as grey bands. */}
         <ServicesMarquee fadeFrom="from-[#f4eaed]" />

@@ -55,10 +55,10 @@ export const PhotoGallery = ({
 
   // On phones the fan must shrink and tuck in or it spills off both edges.
   const isMobile = useScreenSize().lessThan("md")
-  const photoSize = isMobile ? 104 : 150
-  const xScale = isMobile ? 0.46 : 1
-  const yScale = isMobile ? 0.6 : 1
-  const areaHeight = isMobile ? 130 : 165
+  const photoSize = isMobile ? 104 : 200
+  const xScale = isMobile ? 0.46 : 1.33
+  const yScale = isMobile ? 0.6 : 1.33
+  const areaHeight = isMobile ? 130 : 220
 
   // Close the lightbox on Escape, and lock body scroll while it's open.
   useEffect(() => {

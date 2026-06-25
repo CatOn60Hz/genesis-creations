@@ -1,7 +1,11 @@
 import { Routes, Route, Link, useLocation } from "react-router-dom"
 
 import { SiteNav } from "@/components/layout/site-nav"
+import { AnnouncementBanner } from "@/components/ui/announcement-banner"
 import { Home } from "@/pages/home"
+import { Academy } from "@/pages/academy"
+import { Gallery } from "@/pages/gallery"
+import { GalleryAdmin } from "@/pages/gallery-admin"
 import { dockItems } from "@/components/ui/dock-tabs"
 
 // Placeholder page for sections not yet built.
@@ -33,11 +37,15 @@ function SectionStub() {
 function App() {
   return (
     <>
+      <AnnouncementBanner />
       <SiteNav />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/academy" element={<Academy />} />
+        <Route path="/gallery" element={<Gallery />} />
+        <Route path="/gallery-admin" element={<GalleryAdmin />} />
         {dockItems
-          .filter((item) => item.to !== "/")
+          .filter((item) => item.to !== "/" && item.to !== "/academy" && item.to !== "/gallery")
           .map((item) => (
             <Route key={item.id} path={item.to} element={<SectionStub />} />
           ))}

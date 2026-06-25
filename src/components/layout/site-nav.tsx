@@ -27,7 +27,10 @@ const SiteNav: React.FC = () => {
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          className="fixed top-4 right-4 z-50 flex h-11 w-11 items-center justify-center rounded-full bg-maroon text-maroon-dark shadow-lg"
+          // top sits below the announcement banner when one is showing
+          // (--announcement-h is published by AnnouncementBanner; 0 otherwise).
+          style={{ top: "calc(var(--announcement-h, 0px) + 1rem)" }}
+          className="fixed right-4 z-50 flex h-11 w-11 items-center justify-center rounded-full bg-maroon text-maroon-dark shadow-lg"
         >
           {open ? <X size={20} /> : <Menu size={20} />}
         </button>
