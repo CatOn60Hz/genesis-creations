@@ -48,15 +48,18 @@ import { fetchWorkshops, type Workshop, type WorkshopSession } from "@/lib/cms-a
 import { PixelTrail } from "@/components/ui/pixel-trail"
 import TextCursorProximity from "@/components/ui/text-cursor-proximity"
 import { Reveal } from "@/components/ui/reveal"
+import { LampContainer } from "@/components/ui/lamp"
+import workshopsHero from "@/assets/workshops-hero.jpg"
 
 // Strong ease-out curve — matches the shared Reveal component (Emil Kowalski:
 // the built-in easings are too weak to feel intentional).
 const EASE_OUT = [0.23, 1, 0.32, 1] as const
 
-// Letters grow + turn crimson as the cursor approaches them.
+// Letters glow brighter + turn crimson as the cursor approaches them. Light
+// base so they read over the darkened hero photo.
 const PROXIMITY_STYLES = {
   transform: { from: "scale(1)", to: "scale(1.3)" },
-  color: { from: "#000000", to: "#cb2957" },
+  color: { from: "#f4eef0", to: "#cb2957" },
 } as const
 
 // Resolve the admin-chosen icon. Accepts the preset keys AND any free-text
@@ -360,19 +363,25 @@ const Workshops: React.FC = () => {
 
   return (
     <main className="min-h-screen bg-maroon-dark/40 pb-32 text-cream">
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-[linear-gradient(180deg,#f6e8ec_0%,#eeeeee_45%,#e4e4e7_100%)] px-6 py-28 text-maroon-dark md:py-40">
-        <div className="absolute inset-0 z-0 opacity-40">
-          <PixelTrail pixelSize={60} fadeDuration={500} pixelClassName="bg-maroon-dark/10" />
-        </div>
-        <div ref={heroRef} className="relative z-10 mx-auto max-w-7xl text-center">
+      {/* Hero: workshop photo background under a dark scrim, full viewport height */}
+      <section className="relative flex min-h-[100dvh] items-center overflow-hidden px-6 py-24 text-cream">
+        <img
+          src={workshopsHero}
+          alt=""
+          aria-hidden
+          className="absolute inset-0 h-full w-full object-cover object-[center_30%]"
+        />
+        {/* Medium overall scrim for readability, solid at the bottom edge so it
+            blends into the dark sections below. */}
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.62)_0%,rgba(0,0,0,0.55)_45%,rgba(0,0,0,0.96)_100%)]" />
+        <div ref={heroRef} className="relative z-10 mx-auto w-full max-w-7xl text-center">
           <Reveal>
             <p className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-maroon">
               Genesis Creations
             </p>
           </Reveal>
           {/* Interactive headline — letters react to cursor proximity. */}
-          <h1 className="mb-8 flex flex-col items-center font-bold uppercase leading-[0.95] tracking-tight">
+          <h1 className="mb-8 flex flex-col items-center font-bold uppercase leading-[0.95] tracking-tight [text-shadow:0_4px_28px_rgba(0,0,0,0.6)]">
             <TextCursorProximity
               label="WORKSHOPS"
               className="text-7xl will-change-transform md:text-9xl lg:text-[11rem]"
@@ -391,8 +400,8 @@ const Workshops: React.FC = () => {
             />
           </h1>
           <Reveal delay={0.1}>
-            <p className="mx-auto max-w-3xl text-lg leading-relaxed text-maroon-dark/80 md:text-xl">
-              Hands-on sessions led by working professionals — gimbal, drone,
+            <p className="mx-auto max-w-3xl text-lg leading-relaxed text-cream/85 [text-shadow:0_2px_14px_rgba(0,0,0,0.7)] md:text-xl">
+              Hands-on sessions led by working professionals: gimbal, drone,
               cinematography, photography and more. Find an upcoming session and
               register.
             </p>
@@ -400,25 +409,30 @@ const Workshops: React.FC = () => {
         </div>
       </section>
 
-      {/* Listing */}
-      <section className="px-6 py-20">
-        <div className="mx-auto max-w-6xl">
-          {loading ? (
-            <div className="flex items-center justify-center gap-3 py-20 text-cream/60">
-              <Loader2 className="h-6 w-6 animate-spin" /> Loading workshops…
+      {/* Listing — opens on a studio tube light glowing down from the top,
+          the same effect as the academy and home sections. */}
+      <section className="gc-sep relative overflow-hidden text-cream">
+        <LampContainer className="bg-transparent">
+          <div className="w-full px-6 pb-20">
+            <div className="mx-auto max-w-6xl">
+              {loading ? (
+                <div className="flex items-center justify-center gap-3 py-20 text-cream/60">
+                  <Loader2 className="h-6 w-6 animate-spin" /> Loading workshops…
+                </div>
+              ) : workshops.length === 0 ? (
+                <p className="py-20 text-center text-cream/60">
+                  No workshops are scheduled right now. Check back soon!
+                </p>
+              ) : (
+                <div className="grid items-start gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                  {workshops.map((w, i) => (
+                    <ThumbCard key={w.id} w={w} index={i} onOpen={() => setSelected(w)} />
+                  ))}
+                </div>
+              )}
             </div>
-          ) : workshops.length === 0 ? (
-            <p className="py-20 text-center text-cream/60">
-              No workshops are scheduled right now. Check back soon!
-            </p>
-          ) : (
-            <div className="grid items-start gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {workshops.map((w, i) => (
-                <ThumbCard key={w.id} w={w} index={i} onOpen={() => setSelected(w)} />
-              ))}
-            </div>
-          )}
-        </div>
+          </div>
+        </LampContainer>
       </section>
 
       {/* Detail modal */}

@@ -10,6 +10,7 @@ import { useLocation, useNavigate } from "react-router-dom"
 import {
   Home,
   GraduationCap,
+  Clapperboard,
   CalendarDays,
   Images,
   Info,
@@ -28,6 +29,7 @@ export interface DockItem {
 export const dockItems: DockItem[] = [
   { id: "home", name: "Home", to: "/", icon: <Home />, color: "bg-maroon-dark" },
   { id: "academy", name: "Media Academy", to: "/academy", icon: <GraduationCap />, color: "bg-maroon-dark" },
+  { id: "services", name: "Services", to: "/services", icon: <Clapperboard />, color: "bg-maroon-dark" },
   { id: "workshops", name: "Workshops", to: "/workshops", icon: <CalendarDays />, color: "bg-maroon-dark" },
   { id: "gallery", name: "Gallery", to: "/gallery", icon: <Images />, color: "bg-maroon-dark" },
   { id: "about", name: "About", to: "/about", icon: <Info />, color: "bg-maroon-dark" },

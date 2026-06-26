@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/sections/site-footer"
 import { BeamsBackground } from "@/components/ui/beams-background"
 import { Home } from "@/pages/home"
 import { Academy } from "@/pages/academy"
+import { Services } from "@/pages/services"
 import { Gallery } from "@/pages/gallery"
 import { Workshops } from "@/pages/workshops"
 import { AdminDashboard } from "@/pages/admin"
@@ -52,6 +53,7 @@ function App() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/academy" element={<Academy />} />
+      <Route path="/services" element={<Services />} />
       <Route path="/gallery" element={<Gallery />} />
       <Route path="/workshops" element={<Workshops />} />
       {/* Unified admin dashboard (gallery-admin kept as an alias). */}
@@ -62,6 +64,7 @@ function App() {
           (item) =>
             item.to !== "/" &&
             item.to !== "/academy" &&
+            item.to !== "/services" &&
             item.to !== "/gallery" &&
             item.to !== "/workshops"
         )
