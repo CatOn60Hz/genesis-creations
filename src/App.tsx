@@ -1,7 +1,9 @@
 import { Routes, Route, Link, useLocation } from "react-router-dom"
+import { ReactLenis } from "lenis/react"
 
 import { SiteNav } from "@/components/layout/site-nav"
 import { AnnouncementBanner } from "@/components/ui/announcement-banner"
+import { SiteFooter } from "@/components/sections/site-footer"
 import { Home } from "@/pages/home"
 import { Academy } from "@/pages/academy"
 import { Gallery } from "@/pages/gallery"
@@ -40,32 +42,51 @@ function App() {
   const location = useLocation()
   const isAdmin =
     location.pathname === "/admin" || location.pathname === "/gallery-admin"
+  // Home renders its own SiteFooter inside the Lenis snap container, so the
+  // global footer is for every other public page.
+  const isHome = location.pathname === "/"
+
+  const routes = (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/academy" element={<Academy />} />
+      <Route path="/gallery" element={<Gallery />} />
+      <Route path="/workshops" element={<Workshops />} />
+      {/* Unified admin dashboard (gallery-admin kept as an alias). */}
+      <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/gallery-admin" element={<AdminDashboard />} />
+      {dockItems
+        .filter(
+          (item) =>
+            item.to !== "/" &&
+            item.to !== "/academy" &&
+            item.to !== "/gallery" &&
+            item.to !== "/workshops"
+        )
+        .map((item) => (
+          <Route key={item.id} path={item.to} element={<SectionStub />} />
+        ))}
+      <Route path="*" element={<SectionStub />} />
+    </Routes>
+  )
 
   return (
     <>
       {!isAdmin && <AnnouncementBanner />}
       {!isAdmin && <SiteNav />}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/academy" element={<Academy />} />
-        <Route path="/gallery" element={<Gallery />} />
-        <Route path="/workshops" element={<Workshops />} />
-        {/* Unified admin dashboard (gallery-admin kept as an alias). */}
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/gallery-admin" element={<AdminDashboard />} />
-        {dockItems
-          .filter(
-            (item) =>
-              item.to !== "/" &&
-              item.to !== "/academy" &&
-              item.to !== "/gallery" &&
-              item.to !== "/workshops"
-          )
-          .map((item) => (
-            <Route key={item.id} path={item.to} element={<SectionStub />} />
-          ))}
-        <Route path="*" element={<SectionStub />} />
-      </Routes>
+      {/* Home drives its own scoped Lenis (with snap); admin stays a plain
+          dashboard. Every other page gets the same smooth scroll, root-bound. */}
+      {isHome || isAdmin ? (
+        routes
+      ) : (
+        <ReactLenis
+          root
+          options={{ lerp: 0.09, smoothWheel: true, syncTouch: true }}
+        >
+          {routes}
+          <SiteFooter />
+        </ReactLenis>
+      )}
     </>
   )
 }
