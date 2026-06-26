@@ -38,6 +38,7 @@ import {
   deleteGalleryPhoto,
 } from "@/lib/gallery-api"
 import { MultiDatePicker } from "@/components/ui/multi-date-picker"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 
 const PW_KEY = "gc-admin-pw"
 
@@ -229,6 +230,8 @@ function WorkshopsManager({
   const [banner, setBanner] = useState<File | undefined>()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Id of the workshop awaiting delete confirmation (null = dialog closed).
+  const [confirmId, setConfirmId] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -308,12 +311,14 @@ function WorkshopsManager({
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
-  const remove = async (id: string) => {
-    if (!confirm("Delete this workshop?")) return
+  const confirmRemove = async () => {
+    if (!confirmId) return
+    const id = confirmId
     setBusy(true)
     try {
       setItems(await deleteWorkshop(id, password))
       if (form.id === id) resetForm()
+      setConfirmId(null)
     } catch (e) {
       const m = e instanceof Error ? e.message : "Delete failed"
       setError(m)
@@ -635,7 +640,7 @@ function WorkshopsManager({
                   </button>
                   <button
                     type="button"
-                    onClick={() => remove(w.id)}
+                    onClick={() => setConfirmId(w.id)}
                     className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1.5 text-xs text-red-300 hover:bg-red-600 hover:text-white"
                   >
                     <Trash2 className="h-3.5 w-3.5" /> Delete
@@ -646,6 +651,19 @@ function WorkshopsManager({
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmId !== null}
+        title="Delete this workshop?"
+        message={
+          items.find((w) => w.id === confirmId)?.title
+            ? `“${items.find((w) => w.id === confirmId)?.title}” will be permanently removed.`
+            : "This workshop will be permanently removed."
+        }
+        busy={busy}
+        onConfirm={confirmRemove}
+        onCancel={() => setConfirmId(null)}
+      />
     </div>
   )
 }
@@ -675,6 +693,8 @@ function ImageManager({
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Name of the image awaiting delete confirmation (null = dialog closed).
+  const [confirmName, setConfirmName] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -706,11 +726,12 @@ function ImageManager({
     }
   }
 
-  const doDelete = async (name: string) => {
-    if (!confirm("Delete this image?")) return
+  const confirmDelete = async () => {
+    if (!confirmName) return
     setBusy(true)
     try {
-      setImages(await remove(name, password))
+      setImages(await remove(confirmName, password))
+      setConfirmName(null)
     } catch (e) {
       const m = e instanceof Error ? e.message : "Delete failed"
       setError(m)
@@ -799,7 +820,7 @@ function ImageManager({
                 )}
                 <button
                   type="button"
-                  onClick={() => doDelete(p.name)}
+                  onClick={() => setConfirmName(p.name)}
                   disabled={busy}
                   aria-label="Delete"
                   className="flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity hover:bg-red-600 group-hover:opacity-100"
@@ -814,6 +835,15 @@ function ImageManager({
           )}
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmName !== null}
+        title="Delete this image?"
+        message="This image will be permanently removed."
+        busy={busy}
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmName(null)}
+      />
     </div>
   )
 }
