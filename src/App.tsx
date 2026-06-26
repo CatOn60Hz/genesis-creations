@@ -36,10 +36,15 @@ function SectionStub() {
 }
 
 function App() {
+  // The announcement banner and site nav are for visitors, not the admin dashboard.
+  const location = useLocation()
+  const isAdmin =
+    location.pathname === "/admin" || location.pathname === "/gallery-admin"
+
   return (
     <>
-      <AnnouncementBanner />
-      <SiteNav />
+      {!isAdmin && <AnnouncementBanner />}
+      {!isAdmin && <SiteNav />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/academy" element={<Academy />} />
