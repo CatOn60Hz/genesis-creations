@@ -9,6 +9,7 @@ import { Courses } from "@/components/sections/courses"
 import { Testimonials } from "@/components/sections/testimonials"
 import { SiteFooter } from "@/components/sections/site-footer"
 import { Reveal } from "@/components/ui/reveal"
+import { BeamsBackground } from "@/components/ui/beams-background"
 
 const Home: React.FC = () => {
   const lenisRef = useRef<LenisRef>(null)
@@ -35,11 +36,16 @@ const Home: React.FC = () => {
   }, [])
 
   return (
-    <ReactLenis
-      ref={lenisRef}
-      className="h-screen overflow-y-auto overflow-x-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      options={{ lerp: 0.09, smoothWheel: true, syncTouch: true }}
-    >
+    <>
+      {/* Fixed crimson beams behind the whole page. The opaque Hero hides them
+          on page 1; the translucent dark sections let them glow through from
+          the second page onward. */}
+      <BeamsBackground className="fixed inset-0 -z-10" intensity="medium" />
+      <ReactLenis
+        ref={lenisRef}
+        className="h-screen overflow-y-auto overflow-x-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        options={{ lerp: 0.09, smoothWheel: true, syncTouch: true }}
+      >
       <Hero />
       <Reveal className="snap-section">
         <About />
@@ -56,7 +62,8 @@ const Home: React.FC = () => {
       <Reveal className="snap-section">
         <SiteFooter />
       </Reveal>
-    </ReactLenis>
+      </ReactLenis>
+    </>
   )
 }
 

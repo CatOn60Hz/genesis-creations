@@ -1,3 +1,4 @@
+import { useState } from "react"
 import {
   Camera,
   Lightbulb,
@@ -9,51 +10,107 @@ import {
   Joystick,
 } from "lucide-react"
 
-import { GlowCard } from "@/components/ui/spotlight-card"
+import { Reveal, RevealStagger, RevealItem } from "@/components/ui/reveal"
+import { Grain } from "@/components/ui/grain"
+import { MagneticTile } from "@/components/ui/magnetic-tile"
+import {
+  AnimatedSkillIcon,
+  type SkillKind,
+} from "@/components/ui/animated-skill-icon"
 
-const areas = [
-  { icon: <Camera />, name: "Camera" },
-  { icon: <Lightbulb />, name: "Lighting" },
-  { icon: <Mic />, name: "Audio" },
-  { icon: <Scissors />, name: "Editing" },
-  { icon: <Video />, name: "Video Production" },
-  { icon: <Aperture />, name: "Photography" },
-  { icon: <Plane />, name: "Aerial Cinematography" },
-  { icon: <Joystick />, name: "Drone Pilot Training" },
+// Bento layout on a 6-col grid. `span` widths per row sum to 6 so the grid
+// has exactly 8 cells with no gaps. `fill` marks crimson-filled feature tiles;
+// `kind` selects the icon's thematic click animation.
+type Area = {
+  icon: React.ReactNode
+  name: string
+  kind: SkillKind
+  span: string
+  blurb?: string
+  fill?: boolean
+}
+
+const areas: Area[] = [
+  { icon: <Camera />, name: "Camera", kind: "camera", blurb: "Exposure, lenses and movement.", span: "md:col-span-2", fill: true },
+  { icon: <Lightbulb />, name: "Lighting", kind: "lighting", blurb: "Shape and control light.", span: "md:col-span-2" },
+  { icon: <Mic />, name: "Audio", kind: "audio", span: "md:col-span-1" },
+  { icon: <Scissors />, name: "Editing", kind: "editing", span: "md:col-span-1" },
+  { icon: <Video />, name: "Video Production", kind: "video", span: "md:col-span-1" },
+  { icon: <Aperture />, name: "Photography", kind: "photo", span: "md:col-span-1" },
+  { icon: <Plane />, name: "Aerial Cinematography", kind: "aerial", blurb: "Compose shots from the sky.", span: "md:col-span-2" },
+  { icon: <Joystick />, name: "Drone Pilot Training", kind: "drone", blurb: "Hands-on flight training.", span: "md:col-span-2", fill: true },
 ]
+
+// One bento cell. Clicking it toggles the icon's thematic animation on/off.
+function SkillTile({ a }: { a: Area }) {
+  const [active, setActive] = useState(false)
+  return (
+    <MagneticTile className="h-full">
+      <button
+        type="button"
+        onClick={() => setActive((v) => !v)}
+        aria-pressed={active}
+        className={`group relative flex h-full min-h-[150px] w-full flex-col justify-between gap-4 overflow-hidden rounded-2xl p-5 text-left transition-shadow duration-300 ${
+          a.fill
+            ? "bg-[linear-gradient(135deg,#cb2957_0%,#7a1230_100%)] text-cream shadow-[0_24px_60px_-28px_rgba(203,41,87,0.7)] hover:shadow-[0_32px_80px_-24px_rgba(203,41,87,0.95)]"
+            : "bg-white/[0.04] text-cream ring-1 ring-white/10 hover:ring-maroon/40 hover:shadow-[0_28px_70px_-30px_rgba(203,41,87,0.6)]"
+        }`}
+      >
+        {/* Sheen that sweeps across on hover. */}
+        <span className="pointer-events-none absolute -inset-x-2 -top-1/2 h-[200%] -translate-x-[120%] rotate-12 bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[120%]" />
+        <div
+          className={`flex h-11 w-11 items-center justify-center rounded-xl transition-transform duration-300 ease-out group-hover:-translate-y-0.5 group-hover:scale-110 [&>svg]:h-5 [&>svg]:w-5 ${
+            a.fill ? "bg-cream/15 text-cream" : "bg-maroon text-cream"
+          }`}
+        >
+          <AnimatedSkillIcon kind={a.kind} active={active}>
+            {a.icon}
+          </AnimatedSkillIcon>
+        </div>
+        <div>
+          <span className="font-display text-base font-semibold tracking-tight">
+            {a.name}
+          </span>
+          {a.blurb && (
+            <p
+              className={`mt-1 text-sm leading-snug ${
+                a.fill ? "text-cream/80" : "text-cream/55"
+              }`}
+            >
+              {a.blurb}
+            </p>
+          )}
+        </div>
+      </button>
+    </MagneticTile>
+  )
+}
 
 const Services: React.FC = () => {
   return (
-    <section id="services" className="flex min-h-screen flex-col justify-center bg-[linear-gradient(180deg,#f6e8ec_0%,#eeeeee_45%,#e4e4e7_100%)] text-maroon-dark py-24 px-6">
-      <div className="mx-auto max-w-5xl text-center">
-        <p className="mb-3 text-xs uppercase tracking-[0.3em] text-maroon">
-          What You'll Master
-        </p>
-        <h2 className="text-3xl md:text-5xl font-semibold tracking-tight">
-          Skills for Every Media Career
-        </h2>
-        <p className="mx-auto mt-6 max-w-2xl text-maroon-dark">
-          From the lens to the final cut, our hands-on training covers the full
-          production pipeline.
-        </p>
-      </div>
+    <section
+      id="services"
+      className="gc-dark-section gc-sep relative flex min-h-dvh flex-col justify-center overflow-hidden px-6 py-24 text-cream"
+    >
+      <Grain />
+      <div className="relative z-10 mx-auto w-full max-w-5xl">
+        <Reveal repeat className="max-w-2xl">
+          <h2 className="font-display text-4xl font-bold tracking-tighter text-cream md:text-6xl">
+            Skills for every <span className="text-maroon">media career</span>
+          </h2>
+          <p className="mt-5 max-w-[55ch] text-base leading-relaxed text-cream/65 md:text-lg">
+            From the lens to the final cut, our hands-on training covers the full
+            production pipeline.
+          </p>
+        </Reveal>
 
-      <div className="mx-auto mt-16 grid max-w-5xl grid-cols-2 gap-5 sm:grid-cols-4">
-        {areas.map((a) => (
-          <GlowCard
-            key={a.name}
-            glowColor="maroon"
-            customSize
-            className="h-full min-h-[160px]"
-          >
-            <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-maroon text-cream">
-                {a.icon}
-              </div>
-              <span className="text-sm font-medium">{a.name}</span>
-            </div>
-          </GlowCard>
-        ))}
+        <RevealStagger className="mt-14 grid grid-cols-2 gap-4 md:grid-cols-6">
+          {areas.map((a) => (
+            <RevealItem key={a.name} className={`h-full ${a.span}`}>
+              <SkillTile a={a} />
+            </RevealItem>
+          ))}
+        </RevealStagger>
       </div>
     </section>
   )

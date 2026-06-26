@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react"
-import { motion } from "framer-motion"
+import { motion, useReducedMotion } from "framer-motion"
 import {
   CalendarDays,
   MapPin,
@@ -47,6 +47,11 @@ import {
 import { fetchWorkshops, type Workshop, type WorkshopSession } from "@/lib/cms-api"
 import { PixelTrail } from "@/components/ui/pixel-trail"
 import TextCursorProximity from "@/components/ui/text-cursor-proximity"
+import { Reveal } from "@/components/ui/reveal"
+
+// Strong ease-out curve — matches the shared Reveal component (Emil Kowalski:
+// the built-in easings are too weak to feel intentional).
+const EASE_OUT = [0.23, 1, 0.32, 1] as const
 
 // Letters grow + turn crimson as the cursor approaches them.
 const PROXIMITY_STYLES = {
@@ -128,13 +133,14 @@ function WorkshopCard({ w, index }: { w: Workshop; index: number }) {
   const sessions = sessionsOf(w)
   const learn = w.learn ?? []
   const included = w.included ?? []
+  const reduce = useReducedMotion()
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 24 }}
+      initial={{ opacity: 0, y: reduce ? 0 : 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-10%" }}
-      transition={{ duration: 0.5, delay: (index % 2) * 0.1 }}
+      transition={{ duration: 0.5, delay: (index % 2) * 0.1, ease: EASE_OUT }}
       className="flex flex-col overflow-hidden rounded-3xl bg-white/5 ring-1 ring-white/10"
     >
       {/* Banner (when one was uploaded) */}
@@ -271,15 +277,16 @@ function ThumbCard({
   const first = sessionsOf(w)[0]
   const date = w.date || first?.dates
   const location = w.location || first?.city
+  const reduce = useReducedMotion()
 
   return (
     <motion.button
       type="button"
       onClick={onOpen}
-      initial={{ opacity: 0, y: 24 }}
+      initial={{ opacity: 0, y: reduce ? 0 : 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-10%" }}
-      transition={{ duration: 0.5, delay: (index % 3) * 0.08 }}
+      transition={{ duration: 0.5, delay: (index % 3) * 0.08, ease: EASE_OUT }}
       className="group flex flex-col overflow-hidden rounded-2xl bg-white/5 text-left ring-1 ring-white/10 transition hover:ring-maroon/60"
     >
       {/* Thumbnail */}
@@ -359,9 +366,11 @@ const Workshops: React.FC = () => {
           <PixelTrail pixelSize={60} fadeDuration={500} pixelClassName="bg-maroon-dark/10" />
         </div>
         <div ref={heroRef} className="relative z-10 mx-auto max-w-7xl text-center">
-          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-maroon">
-            Genesis Creations
-          </p>
+          <Reveal>
+            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-maroon">
+              Genesis Creations
+            </p>
+          </Reveal>
           {/* Interactive headline — letters react to cursor proximity. */}
           <h1 className="mb-8 flex flex-col items-center font-bold uppercase leading-[0.95] tracking-tight">
             <TextCursorProximity
@@ -381,11 +390,13 @@ const Workshops: React.FC = () => {
               containerRef={heroRef}
             />
           </h1>
-          <p className="mx-auto max-w-3xl text-lg leading-relaxed text-maroon-dark/80 md:text-xl">
-            Hands-on sessions led by working professionals — gimbal, drone,
-            cinematography, photography and more. Find an upcoming session and
-            register.
-          </p>
+          <Reveal delay={0.1}>
+            <p className="mx-auto max-w-3xl text-lg leading-relaxed text-maroon-dark/80 md:text-xl">
+              Hands-on sessions led by working professionals — gimbal, drone,
+              cinematography, photography and more. Find an upcoming session and
+              register.
+            </p>
+          </Reveal>
         </div>
       </section>
 

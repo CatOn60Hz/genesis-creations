@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap');
 @import "tailwindcss";
 
 /* Genesis Creations brand palette — crimson / black / greys.
@@ -11,6 +12,12 @@
   --color-maroon-dark: #000000;
   --color-tan: #dddddd;
   --color-cream: #eeeeee;
+
+  /* Type — Outfit for body/UI, Space Grotesk for display headlines. */
+  --font-sans: "Outfit", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
+  --font-display: "Space Grotesk", "Outfit", ui-sans-serif, system-ui,
+    sans-serif;
 }
 
 /* shadcn design tokens, mapped to the GC brand palette (light theme) */
@@ -91,6 +98,135 @@ body,
   animation: gc-marquee 90s linear infinite;
 }
 
+/* Scroll-reel testimonials — per-character rise + whole-block exit. */
+@keyframes scroll-reel-char-rise {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes scroll-reel-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+.scroll-reel-char {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.6em);
+  animation: scroll-reel-char-rise 0.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+.scroll-reel-exit {
+  animation: scroll-reel-exit 0.24s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reel-char {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .scroll-reel-exit {
+    animation: none;
+  }
+}
+
+/* Course icons — thematic hover animations (play while the row is hovered). */
+.gc-cicon {
+  display: inline-flex;
+  transform-origin: center;
+}
+/* Gimbal: continuous stabilising spin. */
+.group:hover .gc-cicon-gimbal {
+  animation: gc-spin 1.1s linear infinite;
+}
+/* Drone: lift off and hover. */
+.group:hover .gc-cicon-drone {
+  animation: gc-takeoff 1.2s ease-in-out infinite;
+}
+/* Aerial: bank and fly. */
+.group:hover .gc-cicon-aerial {
+  animation: gc-fly 1.7s ease-in-out infinite;
+}
+/* Clapperboard: snap. */
+.group:hover .gc-cicon-clapper {
+  animation: gc-clap 0.9s ease-in-out infinite;
+}
+/* Camera: shutter pulse. */
+.group:hover .gc-cicon-camera {
+  animation: gc-shutter 0.85s ease-in-out infinite;
+}
+@keyframes gc-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes gc-takeoff {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(2px, -4px) rotate(-10deg);
+  }
+}
+@keyframes gc-fly {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(2px, -2px) rotate(-7deg);
+  }
+  50% {
+    transform: translate(4px, 0) rotate(0deg);
+  }
+  75% {
+    transform: translate(2px, 2px) rotate(7deg);
+  }
+}
+@keyframes gc-clap {
+  0%,
+  35%,
+  100% {
+    transform: rotate(0deg);
+  }
+  12% {
+    transform: rotate(-22deg);
+  }
+  24% {
+    transform: rotate(-4deg);
+  }
+}
+@keyframes gc-shutter {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  20% {
+    transform: scale(0.8);
+  }
+  45% {
+    transform: scale(1.08);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .group:hover .gc-cicon-gimbal,
+  .group:hover .gc-cicon-drone,
+  .group:hover .gc-cicon-aerial,
+  .group:hover .gc-cicon-clapper,
+  .group:hover .gc-cicon-camera {
+    animation: none;
+  }
+}
+
 /* Hide the scrollbar while keeping scroll behaviour intact */
 html {
   scrollbar-width: none; /* Firefox */
@@ -110,7 +246,30 @@ body {
   margin: 0;
   background-color: var(--color-maroon-dark);
   color: var(--color-cream);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    Helvetica, Arial, sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Reusable dark section base. A translucent near-black scrim so the fixed
+   crimson beams behind the page glow through while keeping text readable. */
+.gc-dark-section {
+  position: relative;
+  background-color: rgba(4, 4, 6, 0.58);
+}
+
+/* Clean crimson seam across the top edge of a full-screen slide, so the
+   boundary between pages reads clearly during the snap scroll. */
+.gc-sep::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(203, 41, 87, 0.6) 50%,
+    transparent 100%
+  );
+  z-index: 20;
+  pointer-events: none;
 }

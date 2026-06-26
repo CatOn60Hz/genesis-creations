@@ -1,5 +1,8 @@
 import { MapPin, Phone, Mail } from "lucide-react"
 
+import { Grain } from "@/components/ui/grain"
+import { Reveal } from "@/components/ui/reveal"
+
 const FacebookIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5" aria-hidden="true">
     <path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z" />
@@ -22,43 +25,47 @@ const WhatsAppIcon = () => (
 
 const SiteFooter: React.FC = () => {
   return (
-    <footer id="contact" className="bg-[linear-gradient(180deg,#f6e8ec_0%,#eeeeee_45%,#e4e4e7_100%)] text-maroon-dark pt-20 pb-28 px-6">
-      <div className="mx-auto grid max-w-6xl gap-12 md:grid-cols-2">
+    <footer
+      id="contact"
+      className="gc-dark-section gc-sep relative overflow-hidden px-6 py-16 text-cream"
+    >
+      <Grain />
+      <div className="relative z-10 mx-auto grid max-w-6xl gap-12 md:grid-cols-2">
         {/* CTA / brand */}
-        <div>
-          <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
-            Start Your Media Career Today
+        <Reveal repeat>
+          <h2 className="font-display text-4xl font-bold tracking-tighter text-cream md:text-5xl text-balance">
+            Start your media career today
           </h2>
-          <p className="mt-4 max-w-md text-maroon-dark">
+          <p className="mt-4 max-w-md leading-relaxed text-cream/65">
             Join Genesis Creations Media Academy and learn from working
             professionals in a fully equipped studio environment.
           </p>
           <a
             href="tel:+917824850999"
-            className="mt-8 inline-block rounded-full bg-maroon px-8 py-3 text-sm font-medium text-maroon-dark transition-transform hover:scale-105"
+            className="mt-8 inline-block rounded-full bg-maroon px-8 py-3 text-sm font-semibold text-cream transition-transform hover:scale-105 active:scale-[0.98]"
           >
-            Call to Enroll
+            Call to enroll
           </a>
-        </div>
+        </Reveal>
 
         {/* Contact details */}
         <div className="space-y-5">
           <div className="flex items-start gap-3">
             <MapPin className="mt-1 h-5 w-5 shrink-0 text-maroon" />
-            <p className="text-maroon-dark">
+            <p className="text-cream/80">
               #340B/1A3B1, Vinayaka Avenue, Okkiyam Thoraipakkam, Chennai 600097
             </p>
           </div>
           <a
             href="tel:+917824850999"
-            className="flex items-center gap-3 text-maroon-dark transition-colors hover:text-maroon"
+            className="flex items-center gap-3 text-cream/80 transition-colors hover:text-maroon"
           >
             <Phone className="h-5 w-5 shrink-0 text-maroon" />
             +91 78248 50999
           </a>
           <a
             href="mailto:info@genesiscreations.in"
-            className="flex items-center gap-3 text-maroon-dark transition-colors hover:text-maroon"
+            className="flex items-center gap-3 text-cream/80 transition-colors hover:text-maroon"
           >
             <Mail className="h-5 w-5 shrink-0 text-maroon" />
             info@genesiscreations.in
@@ -68,21 +75,23 @@ const SiteFooter: React.FC = () => {
             <a
               href="#"
               aria-label="Facebook"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-maroon-dark/10 transition-colors hover:bg-maroon"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-maroon"
             >
               <FacebookIcon />
             </a>
             <a
               href="#"
               aria-label="Instagram"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-maroon-dark/10 transition-colors hover:bg-maroon"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-maroon"
             >
               <InstagramIcon />
             </a>
             <a
-              href="#"
+              href="https://wa.me/917824850999"
+              target="_blank"
+              rel="noreferrer"
               aria-label="WhatsApp"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-maroon-dark/10 transition-colors hover:bg-maroon"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-maroon"
             >
               <WhatsAppIcon />
             </a>
@@ -90,7 +99,7 @@ const SiteFooter: React.FC = () => {
         </div>
       </div>
 
-      <p className="mx-auto mt-16 max-w-6xl border-t border-maroon-dark/15 pt-6 text-center text-xs text-maroon-dark">
+      <p className="relative z-10 mx-auto mt-10 max-w-6xl border-t border-white/10 pt-6 text-center text-xs text-cream/50">
         © {new Date().getFullYear()} Genesis Creations · genesiscreations.com
       </p>
     </footer>

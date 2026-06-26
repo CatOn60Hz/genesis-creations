@@ -1,53 +1,53 @@
-import { TestimonialSlider } from "@/components/ui/testimonial-slider-1"
+import {
+  ScrollReelTestimonials,
+  type ScrollReelTestimonial,
+} from "@/components/ui/scroll-reel-testimonials"
+import { Grain } from "@/components/ui/grain"
+import { Reveal } from "@/components/ui/reveal"
 
 import johnImg from "@/assets/testimonials/student_john.png"
 import jeremiahImg from "@/assets/testimonials/student_jeremiah.png"
 import derrickImg from "@/assets/testimonials/student_derrick.png"
 
 // Real Genesis Creations Media Academy student reviews.
-const reviews = [
+const reviews: ScrollReelTestimonial[] = [
   {
-    id: 1,
-    name: "John Bosco",
-    affiliation: "Media Academy · Genesis Creations",
     quote:
       "It gave me the confidence and skills that I needed to get into the Media industry.",
-    imageSrc: johnImg,
-    thumbnailSrc: johnImg,
+    author: "John Bosco",
+    image: johnImg,
+    alt: "John Bosco",
   },
   {
-    id: 2,
-    name: "Jeremiah Philemon",
-    affiliation: "Media Academy · Genesis Creations",
     quote:
       "Best place to learn media course — all the basic subjects required to excel in media are covered.",
-    imageSrc: jeremiahImg,
-    thumbnailSrc: jeremiahImg,
+    author: "Jeremiah Philemon",
+    image: jeremiahImg,
+    alt: "Jeremiah Philemon",
   },
   {
-    id: 3,
-    name: "Derrick Gannon",
-    affiliation: "Media Academy · Genesis Creations",
     quote: "They teach from scratch so no prior knowledge is required.",
-    imageSrc: derrickImg,
-    thumbnailSrc: derrickImg,
+    author: "Derrick Gannon",
+    image: derrickImg,
+    alt: "Derrick Gannon",
   },
 ]
 
 const Testimonials: React.FC = () => {
   return (
-    <section id="testimonials" className="flex min-h-screen flex-col justify-center bg-maroon-dark text-cream py-16 px-6">
-      <div className="mx-auto mb-8 max-w-6xl text-center">
-        <p className="mb-3 text-xs uppercase tracking-[0.3em] text-maroon">
-          What Our Students Say
-        </p>
-        <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-cream">
-          Hear From Our Students
+    <section
+      id="testimonials"
+      className="gc-dark-section gc-sep relative flex min-h-dvh flex-col justify-center overflow-hidden px-6 py-16 text-cream"
+    >
+      <Grain />
+      <Reveal repeat className="relative z-10 mx-auto mb-10 max-w-6xl text-center">
+        <h2 className="font-display text-4xl font-bold tracking-tighter text-cream md:text-6xl">
+          Hear from our <span className="text-maroon">students</span>
         </h2>
-      </div>
+      </Reveal>
 
-      <div className="mx-auto max-w-6xl">
-        <TestimonialSlider reviews={reviews} />
+      <div className="relative z-10 flex w-full justify-center">
+        <ScrollReelTestimonials testimonials={reviews} />
       </div>
     </section>
   )
