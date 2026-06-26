@@ -37,6 +37,7 @@ import {
   uploadGalleryPhotos,
   deleteGalleryPhoto,
 } from "@/lib/gallery-api"
+import { MultiDatePicker } from "@/components/ui/multi-date-picker"
 
 const PW_KEY = "gc-admin-pw"
 
@@ -445,15 +446,11 @@ function WorkshopsManager({
                     onChange={(e) => updateSession(i, "city", e.target.value)}
                   />
                 </label>
-                <label className="flex items-center gap-2 rounded-lg border border-tan/20 bg-maroon-dark/60 px-3">
-                  <CalendarDays className="h-4 w-4 shrink-0 text-maroon" />
-                  <input
-                    className="w-full bg-transparent py-3 text-cream outline-none"
-                    placeholder="Dates (e.g. July 16, 17, 18)"
-                    value={s.dates}
-                    onChange={(e) => updateSession(i, "dates", e.target.value)}
-                  />
-                </label>
+                <MultiDatePicker
+                  value={s.dates}
+                  onChange={(v) => updateSession(i, "dates", v)}
+                  placeholder="Dates (e.g. July 16, 17, 18)"
+                />
                 <label className="flex items-center gap-2 rounded-lg border border-tan/20 bg-maroon-dark/60 px-3">
                   <Clock className="h-4 w-4 shrink-0 text-maroon" />
                   <input
