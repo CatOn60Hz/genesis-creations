@@ -2,7 +2,10 @@ import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ChevronDown } from "lucide-react"
 
+import { ReactLenis } from "lenis/react"
+
 import ThreeDMarquee from "@/components/ui/3d-marquee"
+import { SiteFooter } from "@/components/sections/site-footer"
 import { fetchGalleryPhotos } from "@/lib/gallery-api"
 
 // Bundled photos act as a fallback so the page is never empty — used until the
@@ -73,11 +76,14 @@ const Gallery: React.FC = () => {
   }, [openSrc])
 
   return (
-    <main className="h-screen snap-y snap-proximity overflow-y-auto overflow-x-hidden bg-maroon-dark text-cream [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <ReactLenis
+      className="h-screen overflow-y-auto overflow-x-hidden bg-maroon-dark/40 text-cream [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      options={{ lerp: 0.09, smoothWheel: true, syncTouch: true }}
+    >
       {/* Page 1 — the 3D marquee hero */}
       <section
         id="gallery-marquee"
-        className="relative flex min-h-screen snap-start flex-col items-center justify-center overflow-hidden px-6 py-16"
+        className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 py-16"
       >
         <div className="absolute inset-0 z-0 opacity-90">
           <ThreeDMarquee images={marqueeImages} className="h-full" />
@@ -121,7 +127,7 @@ const Gallery: React.FC = () => {
       {/* Page 2 — the full photo grid */}
       <section
         id="gallery-grid"
-        className="flex min-h-screen snap-start flex-col px-6 py-24"
+        className="flex min-h-screen flex-col px-6 py-24"
       >
         <div className="mx-auto w-full max-w-6xl">
           <div className="mb-12 text-center">
@@ -162,6 +168,10 @@ const Gallery: React.FC = () => {
         </div>
       </section>
 
+      {/* Footer as the final scroll section, inside the gallery's own scroll
+          container so it doesn't fight the snap layout. */}
+      <SiteFooter />
+
       {/* Lightbox */}
       <AnimatePresence>
         {openSrc && (
@@ -194,7 +204,7 @@ const Gallery: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </main>
+    </ReactLenis>
   )
 }
 

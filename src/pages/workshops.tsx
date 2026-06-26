@@ -359,7 +359,7 @@ const Workshops: React.FC = () => {
   }, [selected])
 
   return (
-    <main className="min-h-screen bg-maroon-dark pb-32 text-cream">
+    <main className="min-h-screen bg-maroon-dark/40 pb-32 text-cream">
       {/* Hero */}
       <section className="relative overflow-hidden bg-[linear-gradient(180deg,#f6e8ec_0%,#eeeeee_45%,#e4e4e7_100%)] px-6 py-28 text-maroon-dark md:py-40">
         <div className="absolute inset-0 z-0 opacity-40">
@@ -428,6 +428,7 @@ const Workshops: React.FC = () => {
           onClick={() => setSelected(null)}
           role="dialog"
           aria-modal="true"
+          data-lenis-prevent
         >
           <div
             className="relative my-auto w-full max-w-2xl"

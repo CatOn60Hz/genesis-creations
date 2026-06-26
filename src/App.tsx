@@ -4,6 +4,7 @@ import { ReactLenis } from "lenis/react"
 import { SiteNav } from "@/components/layout/site-nav"
 import { AnnouncementBanner } from "@/components/ui/announcement-banner"
 import { SiteFooter } from "@/components/sections/site-footer"
+import { BeamsBackground } from "@/components/ui/beams-background"
 import { Home } from "@/pages/home"
 import { Academy } from "@/pages/academy"
 import { Gallery } from "@/pages/gallery"
@@ -17,7 +18,7 @@ function SectionStub() {
   const item = dockItems.find((i) => i.to === location.pathname)
 
   return (
-    <section className="min-h-screen flex flex-col items-center justify-center px-6 text-center bg-maroon-dark text-cream">
+    <section className="min-h-screen flex flex-col items-center justify-center px-6 text-center bg-maroon-dark/40 text-cream">
       <p className="mb-3 text-xs uppercase tracking-[0.3em] text-maroon">
         Genesis Creations
       </p>
@@ -42,9 +43,10 @@ function App() {
   const location = useLocation()
   const isAdmin =
     location.pathname === "/admin" || location.pathname === "/gallery-admin"
-  // Home renders its own SiteFooter inside the Lenis snap container, so the
-  // global footer is for every other public page.
+  // Home and Gallery render their own SiteFooter inside their self-contained
+  // scroll containers, so the global footer is for every other public page.
   const isHome = location.pathname === "/"
+  const isGallery = location.pathname === "/gallery"
 
   const routes = (
     <Routes>
@@ -78,14 +80,26 @@ function App() {
           dashboard. Every other page gets the same smooth scroll, root-bound. */}
       {isHome || isAdmin ? (
         routes
-      ) : (
-        <ReactLenis
-          root
-          options={{ lerp: 0.09, smoothWheel: true, syncTouch: true }}
-        >
+      ) : isGallery ? (
+        <>
+          {/* Gallery owns its scroll container and drives its own scoped Lenis
+              (like home), so it sits outside the root Lenis. */}
+          <BeamsBackground className="fixed inset-0 -z-10" intensity="medium" />
           {routes}
-          <SiteFooter />
-        </ReactLenis>
+        </>
+      ) : (
+        <>
+          {/* Same fixed crimson beams as the home page, glowing behind the
+              translucent page backgrounds. */}
+          <BeamsBackground className="fixed inset-0 -z-10" intensity="medium" />
+          <ReactLenis
+            root
+            options={{ lerp: 0.09, smoothWheel: true, syncTouch: true }}
+          >
+            {routes}
+            <SiteFooter />
+          </ReactLenis>
+        </>
       )}
     </>
   )

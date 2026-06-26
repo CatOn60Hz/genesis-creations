@@ -1,4 +1,4 @@
-import { useEffect, useState, type ComponentType } from "react"
+import { useEffect, useRef, useState, type ComponentType } from "react"
 import { Link } from "react-router-dom"
 import { motion, useReducedMotion } from "framer-motion"
 import {
@@ -22,12 +22,21 @@ import {
 import { Reveal, RevealStagger, RevealItem } from "@/components/ui/reveal"
 import { PixelTrail } from "@/components/ui/pixel-trail"
 import { Grain } from "@/components/ui/grain"
+import { LampContainer } from "@/components/ui/lamp"
+import TextCursorProximity from "@/components/ui/text-cursor-proximity"
 import {
   AnimatedCourseIcon,
   type CourseKind,
 } from "@/components/ui/animated-course-icon"
 
 const EASE_OUT = [0.16, 1, 0.3, 1] as const
+
+// Letters grow + turn crimson as the cursor approaches them, matching the
+// Workshops hero headline.
+const PROXIMITY_STYLES = {
+  transform: { from: "scale(1)", to: "scale(1.3)" },
+  color: { from: "#000000", to: "#cb2957" },
+} as const
 
 type Icon = ComponentType<LucideProps>
 
@@ -376,6 +385,7 @@ function CourseDetail({ course, onClose }: { course: Course; onClose: () => void
       role="dialog"
       aria-modal="true"
       aria-label={course.title}
+      data-lenis-prevent
     >
       <div
         className="relative my-auto w-full max-w-2xl"
@@ -474,6 +484,7 @@ function CourseDetail({ course, onClose }: { course: Course; onClose: () => void
 
 const Academy: React.FC = () => {
   const [selected, setSelected] = useState<Course | null>(null)
+  const heroRef = useRef<HTMLDivElement>(null)
 
   // Lock body scroll + close on Escape while the detail modal is open.
   useEffect(() => {
@@ -488,53 +499,76 @@ const Academy: React.FC = () => {
   }, [selected])
 
   return (
-    <main className="min-h-screen bg-maroon-dark text-cream">
+    <main className="min-h-screen bg-maroon-dark/40 text-cream">
       {/* Hero */}
       <section className="relative overflow-hidden bg-[linear-gradient(180deg,#f6e8ec_0%,#eeeeee_45%,#e4e4e7_100%)] px-6 py-28 text-maroon-dark md:py-36">
         <div className="absolute inset-0 z-0 opacity-40">
           <PixelTrail pixelSize={60} fadeDuration={500} pixelClassName="bg-maroon-dark/10" />
         </div>
-        <div className="relative z-10 mx-auto max-w-5xl text-center">
-          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-maroon">
-            Media Academy
-          </p>
-          <h1 className="mb-8 font-display text-5xl font-bold tracking-tight md:text-7xl">
-            Where creators learn the{" "}
-            <span className="text-maroon">craft, not just the theory</span>
+        <div ref={heroRef} className="relative z-10 mx-auto max-w-7xl text-center">
+          <Reveal>
+            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-maroon">
+              Genesis Creations
+            </p>
+          </Reveal>
+          {/* Interactive headline — letters react to cursor proximity. */}
+          <h1 className="mb-8 flex flex-col items-center font-bold uppercase leading-[0.95] tracking-tight">
+            <TextCursorProximity
+              label="MEDIA"
+              className="text-7xl will-change-transform md:text-9xl lg:text-[11rem]"
+              styles={PROXIMITY_STYLES}
+              falloff="gaussian"
+              radius={200}
+              containerRef={heroRef}
+            />
+            <TextCursorProximity
+              label="ACADEMY"
+              className="text-6xl will-change-transform md:text-8xl lg:text-9xl"
+              styles={PROXIMITY_STYLES}
+              falloff="gaussian"
+              radius={200}
+              containerRef={heroRef}
+            />
           </h1>
-          <p className="mx-auto max-w-2xl text-lg leading-relaxed text-maroon-dark/80">
-            Industry-recognized certification courses across photography, film,
-            design, and audio, taught hands-on by working professionals.
-          </p>
+          <Reveal delay={0.1}>
+            <p className="mx-auto max-w-2xl text-lg leading-relaxed text-maroon-dark/80">
+              Industry-recognized certification courses across photography,
+              film, design, and audio, taught hands-on by working
+              professionals.
+            </p>
+          </Reveal>
         </div>
       </section>
 
-      {/* Courses */}
-      <section className="gc-dark-section relative overflow-hidden px-6 py-24">
+      {/* Courses — opens on a studio tube light glowing down from the top,
+          the same effect as the home About section. */}
+      <section className="gc-sep relative overflow-hidden text-cream">
         <Grain />
-        <div className="relative z-10 mx-auto max-w-6xl">
-          <Reveal className="max-w-3xl">
-            <h2 className="font-display text-4xl font-bold tracking-tighter text-cream md:text-6xl text-balance">
-              Certification courses
-            </h2>
-            <p className="mt-6 max-w-2xl text-base leading-relaxed text-cream/80 md:text-lg">
-              Seven focused programs, each built around real shoots, real
-              sessions, and a portfolio you walk away with. Tap any course to
-              see what you will learn, how it runs, and who it is for.
-            </p>
-          </Reveal>
+        <LampContainer className="bg-transparent">
+          <div className="w-full px-6 pb-24">
+            <Reveal className="mx-auto max-w-3xl text-center">
+              <h2 className="font-display text-4xl font-bold tracking-tighter text-cream md:text-6xl text-balance">
+                Certification courses
+              </h2>
+              <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-cream/80 md:text-lg">
+                Seven focused programs, each built around real shoots, real
+                sessions, and a portfolio you walk away with. Tap any course to
+                see what you will learn, how it runs, and who it is for.
+              </p>
+            </Reveal>
 
-          <div className="mt-14 grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {courses.map((course, i) => (
-              <CourseCard
-                key={course.kind}
-                course={course}
-                index={i}
-                onOpen={() => setSelected(course)}
-              />
-            ))}
+            <div className="mx-auto mt-14 grid max-w-6xl items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {courses.map((course, i) => (
+                <CourseCard
+                  key={course.kind}
+                  course={course}
+                  index={i}
+                  onOpen={() => setSelected(course)}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        </LampContainer>
       </section>
 
       {/* Why Genesis Creations Media Academy */}
