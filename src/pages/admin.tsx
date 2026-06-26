@@ -12,6 +12,10 @@ import {
   Save,
   Pencil,
   Star,
+  MapPin,
+  Clock,
+  CircleCheck,
+  X,
 } from "lucide-react"
 
 import {
@@ -154,6 +158,10 @@ function AnnouncementEditor({
 
 /* ------------------------------- Workshops ------------------------------ */
 
+type SessionRow = { city: string; dates: string; timing: string; venue: string }
+
+const EMPTY_SESSION: SessionRow = { city: "", dates: "", timing: "", venue: "" }
+
 const EMPTY_FORM = {
   id: "",
   title: "",
@@ -165,10 +173,10 @@ const EMPTY_FORM = {
   icon: "",
   registerUrl: "",
   note: "",
-  // Multi-line text inputs (one item / one session per line).
-  learn: "",
-  included: "",
-  sessions: "",
+  // Structured, field-by-field inputs that mirror the workshop card.
+  learn: [] as string[],
+  included: [] as string[],
+  sessions: [] as SessionRow[],
 }
 
 // Icon keys offered in the admin (must match the map in workshops.tsx).
@@ -181,26 +189,29 @@ const ICON_OPTIONS = [
   { value: "audio", label: "Audio" },
 ]
 
-// One item per non-empty line.
-const parseList = (text: string): string[] =>
-  text.split("\n").map((s) => s.trim()).filter(Boolean)
+// Drop blank rows before saving.
+const cleanList = (items: string[]): string[] =>
+  items.map((s) => s.trim()).filter(Boolean)
 
-// One session per line: "City | Dates | Timing | Venue" (city required).
-const parseSessions = (text: string): WorkshopSession[] =>
-  text
-    .split("\n")
-    .map((line) => {
-      const [city = "", dates = "", timing = "", venue = ""] = line
-        .split("|")
-        .map((s) => s.trim())
-      return { city, dates, timing, venue }
-    })
+// Keep only sessions that name a city; trim the rest.
+const cleanSessions = (rows: SessionRow[]): WorkshopSession[] =>
+  rows
+    .map((s) => ({
+      city: s.city.trim(),
+      dates: s.dates.trim(),
+      timing: s.timing.trim(),
+      venue: s.venue.trim(),
+    }))
     .filter((s) => s.city)
 
-const serializeSessions = (sessions?: WorkshopSession[]): string =>
-  (sessions ?? [])
-    .map((s) => [s.city, s.dates ?? "", s.timing ?? "", s.venue ?? ""].join(" | "))
-    .join("\n")
+// Rehydrate stored sessions into editable rows (every field present).
+const sessionsToRows = (sessions?: WorkshopSession[]): SessionRow[] =>
+  (sessions ?? []).map((s) => ({
+    city: s.city ?? "",
+    dates: s.dates ?? "",
+    timing: s.timing ?? "",
+    venue: s.venue ?? "",
+  }))
 
 function WorkshopsManager({
   password,
@@ -257,9 +268,9 @@ function WorkshopsManager({
           icon: form.icon,
           registerUrl: form.registerUrl,
           note: form.note,
-          sessions: parseSessions(form.sessions),
-          learn: parseList(form.learn),
-          included: parseList(form.included),
+          sessions: cleanSessions(form.sessions),
+          learn: cleanList(form.learn),
+          included: cleanList(form.included),
           banner,
         },
         password
@@ -287,9 +298,9 @@ function WorkshopsManager({
       icon: w.icon ?? "",
       registerUrl: w.registerUrl ?? "",
       note: w.note ?? "",
-      learn: (w.learn ?? []).join("\n"),
-      included: (w.included ?? []).join("\n"),
-      sessions: serializeSessions(w.sessions),
+      learn: [...(w.learn ?? [])],
+      included: [...(w.included ?? [])],
+      sessions: sessionsToRows(w.sessions),
     })
     setCustomIcon(!!w.icon && !ICON_OPTIONS.some((o) => o.value === w.icon))
     setBanner(undefined)
@@ -310,6 +321,32 @@ function WorkshopsManager({
       setBusy(false)
     }
   }
+
+  /* --- repeatable-row helpers (sessions / learn / included) --- */
+
+  const addSession = () =>
+    setForm((f) => ({ ...f, sessions: [...f.sessions, { ...EMPTY_SESSION }] }))
+
+  const updateSession = (i: number, key: keyof SessionRow, value: string) =>
+    setForm((f) => ({
+      ...f,
+      sessions: f.sessions.map((s, si) => (si === i ? { ...s, [key]: value } : s)),
+    }))
+
+  const removeSession = (i: number) =>
+    setForm((f) => ({ ...f, sessions: f.sessions.filter((_, si) => si !== i) }))
+
+  const addListItem = (key: "learn" | "included") =>
+    setForm((f) => ({ ...f, [key]: [...f[key], ""] }))
+
+  const updateListItem = (key: "learn" | "included", i: number, value: string) =>
+    setForm((f) => ({
+      ...f,
+      [key]: f[key].map((s, si) => (si === i ? value : s)),
+    }))
+
+  const removeListItem = (key: "learn" | "included", i: number) =>
+    setForm((f) => ({ ...f, [key]: f[key].filter((_, si) => si !== i) }))
 
   return (
     <div className="space-y-10">
@@ -377,44 +414,137 @@ function WorkshopsManager({
           onChange={(e) => setForm({ ...form, description: e.target.value })}
         />
 
-        <div>
-          <label className="mb-1 block text-sm text-cream/70">
-            Sessions — one per line:{" "}
-            <span className="text-cream/50">City | Dates | Timing | Venue</span>
-          </label>
-          <textarea
-            className={inputCls}
-            rows={3}
-            placeholder={"Chennai | July 16–18 | 10:00 AM – 4:00 PM | 340B/1A3B1, Vinayaka Avenue, Chennai 600097\nCoimbatore | July 27–29 | 10:00 AM – 4:00 PM | 34, Siruvani Main Rd, Coimbatore 641101"}
-            value={form.sessions}
-            onChange={(e) => setForm({ ...form, sessions: e.target.value })}
-          />
+        {/* Sessions — one block per city, mirroring the card rows */}
+        <div className="space-y-3">
+          <label className="block text-sm text-cream/70">Sessions</label>
+          {form.sessions.map((s, i) => (
+            <div
+              key={i}
+              className="space-y-3 rounded-2xl bg-black/20 p-4 ring-1 ring-white/10"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold uppercase tracking-wider text-maroon">
+                  Session {i + 1}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => removeSession(i)}
+                  aria-label="Remove session"
+                  className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs text-cream/60 hover:bg-white/10 hover:text-red-300"
+                >
+                  <X className="h-3.5 w-3.5" /> Remove
+                </button>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="flex items-center gap-2 rounded-lg border border-tan/20 bg-maroon-dark/60 px-3">
+                  <MapPin className="h-4 w-4 shrink-0 text-maroon" />
+                  <input
+                    className="w-full bg-transparent py-3 text-cream outline-none"
+                    placeholder="City (e.g. Chennai)"
+                    value={s.city}
+                    onChange={(e) => updateSession(i, "city", e.target.value)}
+                  />
+                </label>
+                <label className="flex items-center gap-2 rounded-lg border border-tan/20 bg-maroon-dark/60 px-3">
+                  <CalendarDays className="h-4 w-4 shrink-0 text-maroon" />
+                  <input
+                    className="w-full bg-transparent py-3 text-cream outline-none"
+                    placeholder="Dates (e.g. July 16, 17, 18)"
+                    value={s.dates}
+                    onChange={(e) => updateSession(i, "dates", e.target.value)}
+                  />
+                </label>
+                <label className="flex items-center gap-2 rounded-lg border border-tan/20 bg-maroon-dark/60 px-3">
+                  <Clock className="h-4 w-4 shrink-0 text-maroon" />
+                  <input
+                    className="w-full bg-transparent py-3 text-cream outline-none"
+                    placeholder="Timing (e.g. 10:00 AM – 4:00 PM)"
+                    value={s.timing}
+                    onChange={(e) => updateSession(i, "timing", e.target.value)}
+                  />
+                </label>
+                <label className="flex items-center gap-2 rounded-lg border border-tan/20 bg-maroon-dark/60 px-3">
+                  <MapPin className="h-4 w-4 shrink-0 text-maroon" />
+                  <input
+                    className="w-full bg-transparent py-3 text-cream outline-none"
+                    placeholder="Venue / address"
+                    value={s.venue}
+                    onChange={(e) => updateSession(i, "venue", e.target.value)}
+                  />
+                </label>
+              </div>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={addSession}
+            className="inline-flex items-center gap-2 rounded-full border border-dashed border-tan/30 px-4 py-2 text-sm text-cream/80 hover:border-maroon hover:text-cream"
+          >
+            <Plus className="h-4 w-4" /> Add session
+          </button>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="mb-1 block text-sm text-cream/70">
-              What you'll learn — one per line
-            </label>
-            <textarea
-              className={inputCls}
-              rows={5}
-              placeholder={"Drone theory & safety\nDGCA rules & regulations\nAerial cinematography"}
-              value={form.learn}
-              onChange={(e) => setForm({ ...form, learn: e.target.value })}
-            />
+        <div className="grid gap-6 sm:grid-cols-2">
+          {/* What you'll learn — one bullet per row */}
+          <div className="space-y-2">
+            <label className="block text-sm text-cream/70">What you'll learn</label>
+            {form.learn.map((item, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <CircleCheck className="h-4 w-4 shrink-0 text-maroon" />
+                <input
+                  className={inputCls}
+                  placeholder="e.g. Aerial cinematography"
+                  value={item}
+                  onChange={(e) => updateListItem("learn", i, e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => removeListItem("learn", i)}
+                  aria-label="Remove item"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-cream/60 hover:bg-white/10 hover:text-red-300"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => addListItem("learn")}
+              className="inline-flex items-center gap-2 rounded-full border border-dashed border-tan/30 px-4 py-2 text-sm text-cream/80 hover:border-maroon hover:text-cream"
+            >
+              <Plus className="h-4 w-4" /> Add item
+            </button>
           </div>
-          <div>
-            <label className="mb-1 block text-sm text-cream/70">
-              What's included — one per line
-            </label>
-            <textarea
-              className={inputCls}
-              rows={5}
-              placeholder={"3 days of intensive training\nDaily lunch & refreshments\nCompletion certificate"}
-              value={form.included}
-              onChange={(e) => setForm({ ...form, included: e.target.value })}
-            />
+
+          {/* What's included — one tag per row */}
+          <div className="space-y-2">
+            <label className="block text-sm text-cream/70">What's included</label>
+            {form.included.map((item, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-maroon" />
+                <input
+                  className={inputCls}
+                  placeholder="e.g. Course completion certificate"
+                  value={item}
+                  onChange={(e) => updateListItem("included", i, e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => removeListItem("included", i)}
+                  aria-label="Remove item"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-cream/60 hover:bg-white/10 hover:text-red-300"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => addListItem("included")}
+              className="inline-flex items-center gap-2 rounded-full border border-dashed border-tan/30 px-4 py-2 text-sm text-cream/80 hover:border-maroon hover:text-cream"
+            >
+              <Plus className="h-4 w-4" /> Add item
+            </button>
           </div>
         </div>
 
