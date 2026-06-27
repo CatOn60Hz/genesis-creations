@@ -1,5 +1,6 @@
+import { useEffect, useRef } from "react"
 import { Routes, Route, Link, useLocation } from "react-router-dom"
-import { ReactLenis } from "lenis/react"
+import { ReactLenis, type LenisRef } from "lenis/react"
 
 import { SiteNav } from "@/components/layout/site-nav"
 import { AnnouncementBanner } from "@/components/ui/announcement-banner"
@@ -49,6 +50,21 @@ function App() {
   const isHome = location.pathname === "/"
   const isGallery = location.pathname === "/gallery"
 
+  // The root Lenis instance persists across the smooth-scroll pages (academy,
+  // services, workshops, stubs), so navigating between them would otherwise keep
+  // the previous page's scroll position. Reset it to the top on every route
+  // change. Home and Gallery mount their own scoped Lenis fresh, so they already
+  // start at the top; window.scrollTo covers the admin (no-Lenis) pages.
+  const rootLenisRef = useRef<LenisRef>(null)
+  useEffect(() => {
+    const lenis = rootLenisRef.current?.lenis
+    if (lenis) {
+      lenis.scrollTo(0, { immediate: true })
+    } else {
+      window.scrollTo(0, 0)
+    }
+  }, [location.pathname])
+
   const routes = (
     <Routes>
       <Route path="/" element={<Home />} />
@@ -97,6 +113,7 @@ function App() {
           <BeamsBackground className="fixed inset-0 -z-10" intensity="medium" />
           <ReactLenis
             root
+            ref={rootLenisRef}
             options={{ lerp: 0.09, smoothWheel: true, syncTouch: true }}
           >
             {routes}
