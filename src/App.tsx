@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, lazy, Suspense } from "react"
 import { Routes, Route, Link, useLocation } from "react-router-dom"
 import { ReactLenis, type LenisRef } from "lenis/react"
 
@@ -7,14 +7,21 @@ import { AnnouncementBanner } from "@/components/ui/announcement-banner"
 import { SiteFooter } from "@/components/sections/site-footer"
 import { BeamsBackground } from "@/components/ui/beams-background"
 import { Home } from "@/pages/home"
-import { Academy } from "@/pages/academy"
-import { Services } from "@/pages/services"
-import { DigitalMarketing } from "@/pages/digital-marketing"
-import { Gallery } from "@/pages/gallery"
-import { Workshops } from "@/pages/workshops"
-import { About } from "@/pages/about"
-import { AdminDashboard } from "@/pages/admin"
 import { dockItems } from "@/components/ui/dock-tabs"
+
+// Code-split the secondary pages so the initial download is just the home page
+// + shared vendor. Each route's chunk loads on navigation.
+const Academy = lazy(() => import("@/pages/academy").then((m) => ({ default: m.Academy })))
+const Services = lazy(() => import("@/pages/services").then((m) => ({ default: m.Services })))
+const DigitalMarketing = lazy(() =>
+  import("@/pages/digital-marketing").then((m) => ({ default: m.DigitalMarketing }))
+)
+const Gallery = lazy(() => import("@/pages/gallery").then((m) => ({ default: m.Gallery })))
+const Workshops = lazy(() => import("@/pages/workshops").then((m) => ({ default: m.Workshops })))
+const About = lazy(() => import("@/pages/about").then((m) => ({ default: m.About })))
+const AdminDashboard = lazy(() =>
+  import("@/pages/admin").then((m) => ({ default: m.AdminDashboard }))
+)
 
 // Placeholder page for sections not yet built.
 function SectionStub() {
@@ -77,6 +84,7 @@ function App() {
   }, [location.pathname, location.hash])
 
   const routes = (
+    <Suspense fallback={<div className="min-h-screen bg-black" />}>
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/academy" element={<Academy />} />
@@ -104,6 +112,7 @@ function App() {
         ))}
       <Route path="*" element={<SectionStub />} />
     </Routes>
+    </Suspense>
   )
 
   return (
