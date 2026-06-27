@@ -48,7 +48,7 @@ interface Service {
   perfectFor?: string
 }
 
-// Digital Marketing catalogue, lifted from the Genesis Creations handbook. Same
+// Digital Marketing catalogue, lifted from the Genesis Kreations handbook. Same
 // shape as the Services page so the card + detail modal stay dumb.
 const services: Service[] = [
   {
@@ -366,8 +366,8 @@ const DigitalMarketing: React.FC = () => {
   return (
     <main className="min-h-screen bg-maroon-dark/40 text-cream">
       <SEO 
-        title="Digital Marketing - Genesis Creations" 
-        description="Build your brand online with Genesis Creations' Digital Marketing services including self-branding, social media management, Google & Meta Ads, and content planning." 
+        title="Digital Marketing - Genesis Kreations" 
+        description="Build your brand online with Genesis Kreations' Digital Marketing services including self-branding, social media management, Google & Meta Ads, and content planning." 
       />
       {/* Hero: gaming-lounge photo background under a dark scrim, full height */}
       <section className="relative flex min-h-[100dvh] items-center overflow-hidden px-6 py-24 text-cream">
@@ -383,7 +383,7 @@ const DigitalMarketing: React.FC = () => {
         <div ref={heroRef} className="relative z-10 mx-auto w-full max-w-7xl text-center">
           <Reveal>
             <p className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-maroon">
-              Genesis Creations
+              Genesis Kreations
             </p>
           </Reveal>
           {/* Interactive headline: letters react to cursor proximity. */}

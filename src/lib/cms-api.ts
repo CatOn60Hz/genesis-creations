@@ -1,8 +1,8 @@
-// Client for the Genesis Creations CMS backend (public/api/*.php): announcement,
+// Client for the Genesis Kreations CMS backend (public/api/*.php): announcement,
 // workshops and projector images.
 //
 // Same origin in production; override in dev via VITE_API_BASE in a .env file,
-// e.g. VITE_API_BASE=https://genesiscreations.in/api
+// e.g. VITE_API_BASE=https://genesiskreationsmedia.com/api
 
 const API_BASE = (
   (import.meta.env.VITE_API_BASE as string | undefined) || "/api"

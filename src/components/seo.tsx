@@ -8,7 +8,7 @@ interface SEOProps {
   url?: string;
 }
 
-export function SEO({ title, description, type = 'website', image = 'https://genesiscreations.in/og-image.jpg', url = 'https://genesiscreations.in/' }: SEOProps) {
+export function SEO({ title, description, type = 'website', image = 'https://genesiskreationsmedia.com/og-image.jpg', url = 'https://genesiskreationsmedia.com/' }: SEOProps) {
   return (
     <Helmet>
       <title>{title}</title>

@@ -40,7 +40,7 @@ const PROXIMITY_STYLES = {
 } as const
 
 const aboutParagraphs = [
-  "At Genesis Creations, we believe every great story deserves to be told with creativity, purpose, and excellence. We are a full-service media production company and media academy dedicated to delivering high-quality visual content while nurturing the next generation of creative professionals.",
+  "At Genesis Kreations, we believe every great story deserves to be told with creativity, purpose, and excellence. We are a full-service media production company and media academy dedicated to delivering high-quality visual content while nurturing the next generation of creative professionals.",
   "Our expertise spans video production, photography, live broadcasting, digital marketing, studio production, and professional media training. By combining industry experience with innovative technology, we create impactful visual experiences that help businesses, brands, organizations, and individuals communicate their message effectively.",
   "Beyond media production, we're committed to empowering aspiring creators through practical, industry-oriented education — hands-on training, real-world project exposure, and mentorship from experienced professionals, so students graduate with the confidence and skills to succeed in the creative industry.",
 ]
@@ -109,8 +109,8 @@ const milestones = [
   { year: "2016", text: "Built an award-winning drone-based engineering project" },
   { year: "2016", text: "Established the department's first student-led OB Van setup" },
   { year: "2016–2017", text: "Media Professional at JC Media" },
-  { year: "11 Dec 2017", text: "Founded Genesis Creations" },
-  { year: "2020", text: "Launched Genesis Creations Media Academy" },
+  { year: "11 Dec 2017", text: "Founded Genesis Kreations" },
+  { year: "2020", text: "Launched Genesis Kreations Media Academy" },
   { year: "2025", text: "Partnered with TAHDCO to train 30 students" },
   { year: "2026", text: "Expanded workshops to Chennai and Coimbatore" },
 ]
@@ -118,14 +118,14 @@ const milestones = [
 const founderBio = [
   "For Jerophin Deril S, media has never been just a profession — it has always been a passion. From a young age he was fascinated by photography and filmmaking, spending countless hours capturing moments on his phone and experimenting with editing long before it became a career.",
   "He pursued a Bachelor's in Electronics & Media Technology at Karunya Institute of Technology and Sciences (2012–2016), a program that uniquely combined engineering with professional media production. He spent much of his time in the television studio and Production Control Room, became Student Coordinator of the campus channel, built his own drone for an award-winning final-year project, and set up the department's first student-led OB Van.",
-  "After gaining industry experience at JC Media, he founded Genesis Creations on 11 December 2017 — specializing in media production, live broadcasting, streaming, and television programs. During the COVID-19 pandemic he transformed it into a media academy, redesigning his four-year engineering curriculum into an intensive three-month practical training program.",
+  "After gaining industry experience at JC Media, he founded Genesis Kreations on 11 December 2017 — specializing in media production, live broadcasting, streaming, and television programs. During the COVID-19 pandemic he transformed it into a media academy, redesigning his four-year engineering curriculum into an intensive three-month practical training program.",
   "A licensed drone pilot, he introduced specialized training in drone cinematography, gimbal filmmaking, and advanced production. Today his expertise spans photography, videography, editing, live broadcasting, drone cinematography, audio production, gimbal and Steadicam operation, and creative direction.",
 ]
 
 const faqs: FaqProItem[] = [
   {
     id: "services",
-    question: "What services does Genesis Creations offer?",
+    question: "What services does Genesis Kreations offer?",
     answer: "We provide media production, photography, videography, live streaming, digital marketing, studio rental, corporate training, and a professional media academy offering industry-focused courses.",
   },
   {
@@ -170,7 +170,7 @@ const faqs: FaqProItem[] = [
   },
   {
     id: "contact",
-    question: "How can I contact Genesis Creations?",
+    question: "How can I contact Genesis Kreations?",
     answer: "You can reach us through the Contact Us page, by phone, email, or by visiting our office. Our team will be happy to assist you.",
   },
 ]
@@ -182,8 +182,8 @@ const About: React.FC = () => {
   return (
     <main className="min-h-screen bg-maroon-dark/40 text-cream">
       <SEO 
-        title="About Us - Genesis Creations" 
-        description="Learn more about Genesis Creations, our vision, mission, and the founder behind our media production company and academy." 
+        title="About Us - Genesis Kreations" 
+        description="Learn more about Genesis Kreations, our vision, mission, and the founder behind our media production company and academy." 
       />
       {/* Hero: team photo background under a dark scrim, full viewport height */}
       <section className="relative flex min-h-[100dvh] items-center overflow-hidden px-6 py-24 text-cream">
@@ -199,7 +199,7 @@ const About: React.FC = () => {
         <div ref={heroRef} className="relative z-10 mx-auto w-full max-w-7xl text-center">
           <Reveal>
             <p className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-maroon">
-              Genesis Creations
+              Genesis Kreations
             </p>
           </Reveal>
           <h1 className="mb-8 flex flex-col items-center font-bold uppercase leading-[0.95] tracking-tight [text-shadow:0_4px_28px_rgba(0,0,0,0.6)]">
@@ -309,7 +309,7 @@ const About: React.FC = () => {
           <div className="w-full px-6 pb-24">
             <Reveal className="mx-auto max-w-3xl text-center">
               <p className="mb-4 text-xs font-medium uppercase tracking-[0.35em] text-maroon">
-                Why Genesis Creations
+                Why Genesis Kreations
               </p>
               <h2 className="font-display text-3xl font-bold tracking-tighter text-cream md:text-6xl text-balance">
                 Built on craft, taught with heart
@@ -403,7 +403,7 @@ const About: React.FC = () => {
                   <div className="absolute inset-0 overflow-hidden rounded-3xl ring-1 ring-white/10 [backface-visibility:hidden]">
                     <img
                       src={founderImg}
-                      alt="Jerophin Deril S, Founder & Managing Director of Genesis Creations"
+                      alt="Jerophin Deril S, Founder & Managing Director of Genesis Kreations"
                       loading="lazy"
                       className="h-full w-full object-cover"
                       style={{ objectPosition: "62% 22%" }}

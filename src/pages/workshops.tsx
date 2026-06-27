@@ -365,7 +365,7 @@ const Workshops: React.FC = () => {
   return (
     <main className="min-h-screen bg-maroon-dark/40 pb-32 text-cream">
       <SEO 
-        title="Workshops & Masterclasses - Genesis Creations" 
+        title="Workshops & Masterclasses - Genesis Kreations" 
         description="Join hands-on sessions led by working professionals in gimbal operation, drone flying, cinematography, photography, and more." 
       />
       {/* Hero: workshop photo background under a dark scrim, full viewport height */}
@@ -382,7 +382,7 @@ const Workshops: React.FC = () => {
         <div ref={heroRef} className="relative z-10 mx-auto w-full max-w-7xl text-center">
           <Reveal>
             <p className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-maroon">
-              Genesis Creations
+              Genesis Kreations
             </p>
           </Reveal>
           {/* Interactive headline — letters react to cursor proximity. */}

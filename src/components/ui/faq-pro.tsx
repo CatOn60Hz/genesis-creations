@@ -7,7 +7,7 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-// Adapted for Genesis Creations: themed to the brand (dark glass rows, cream
+// Adapted for Genesis Kreations: themed to the brand (dark glass rows, cream
 // text, maroon accents) instead of the original light/dark token theme, and the
 // search bar removed. The spring-driven expand/collapse animation is kept.
 

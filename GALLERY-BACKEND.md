@@ -1,4 +1,4 @@
-# Genesis Creations admin / backend (Hostinger)
+# Genesis Kreations admin / backend (Hostinger)
 
 Site content that changes often — the announcement banner, workshops, gallery
 photos, and the home-page projector images — is managed from a browser at

@@ -40,8 +40,8 @@ const Home: React.FC = () => {
   return (
     <>
       <SEO 
-        title="Genesis Creations — Chennai Media House" 
-        description="Genesis Creations — Chennai media house: Media Academy, Digital Marketing, Production, Studio Rental and Broadcasting." 
+        title="Genesis Kreations — Chennai Media House" 
+        description="Genesis Kreations — Chennai media house: Media Academy, Digital Marketing, Production, Studio Rental and Broadcasting." 
       />
       {/* Fixed crimson beams behind the whole page. The opaque Hero hides them
           on page 1; the translucent dark sections let them glow through from

@@ -6,7 +6,7 @@ import * as React from "react";
  * ScrollReelTestimonials
  *
  * Counter-rotating scroll reel + per-character text rise. Themed for
- * Genesis Creations (crimson / cream on dark) instead of the original
+ * Genesis Kreations (crimson / cream on dark) instead of the original
  * shadcn light-card defaults.
  * ---------------------------------------------------------------- */
 

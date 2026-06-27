@@ -26,7 +26,7 @@ export interface DockItem {
   color: string
 }
 
-// Genesis Creations site navigation (spec §5), brand-tinted.
+// Genesis Kreations site navigation (spec §5), brand-tinted.
 export const dockItems: DockItem[] = [
   { id: "home", name: "Home", to: "/", icon: <Home />, color: "bg-maroon-dark" },
   { id: "academy", name: "Media Academy", to: "/academy", icon: <GraduationCap />, color: "bg-maroon-dark" },

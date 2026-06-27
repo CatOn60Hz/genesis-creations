@@ -1,5 +1,5 @@
 <?php
-// Genesis Creations — shared backend configuration (single source of truth).
+// Genesis Kreations — shared backend configuration (single source of truth).
 //
 // SECURITY: change GC_ADMIN_PASSWORD to your own secret before going live.
 // This one password gates the whole /admin dashboard (announcements, workshops,

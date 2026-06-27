@@ -88,8 +88,8 @@ const Gallery: React.FC = () => {
       options={{ lerp: 0.09, smoothWheel: true }}
     >
       <SEO 
-        title="Gallery - Genesis Creations" 
-        description="Explore the Genesis Creations gallery featuring moments from our shoots, studio sessions, and professional events." 
+        title="Gallery - Genesis Kreations" 
+        description="Explore the Genesis Kreations gallery featuring moments from our shoots, studio sessions, and professional events." 
       />
       {/* Page 1 — the 3D marquee hero */}
       <section
@@ -105,7 +105,7 @@ const Gallery: React.FC = () => {
 
         <div className="relative z-20 text-center">
           <p className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-maroon md:text-sm">
-            Genesis Creations
+            Genesis Kreations
           </p>
           <h1 className="text-6xl font-bold tracking-tight drop-shadow-[0_4px_24px_rgba(0,0,0,0.6)] md:text-8xl">
             Gallery
@@ -163,7 +163,7 @@ const Gallery: React.FC = () => {
                 >
                   <img
                     src={src}
-                    alt={`Genesis Creations gallery photo ${i + 1}`}
+                    alt={`Genesis Kreations gallery photo ${i + 1}`}
                     loading="lazy"
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
@@ -196,7 +196,7 @@ const Gallery: React.FC = () => {
           >
             <motion.img
               src={openSrc}
-              alt="Genesis Creations full-size gallery photo"
+              alt="Genesis Kreations full-size gallery photo"
               className="max-h-[90vh] max-w-[90vw] rounded-2xl object-contain shadow-2xl"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}

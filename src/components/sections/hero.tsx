@@ -50,7 +50,7 @@ const Hero: React.FC = () => {
           {/* Left: gooey morphing brand words + tagline */}
           <div className="flex w-full min-w-0 flex-col items-center text-center lg:w-[30rem] lg:flex-none lg:-translate-x-20">
             <p className="text-3xl md:text-5xl uppercase tracking-[0.2em] text-maroon-dark">
-              Genesis Creations
+              Genesis Kreations
             </p>
 
             <GooeyText
@@ -58,7 +58,7 @@ const Hero: React.FC = () => {
               morphTime={1.2}
               cooldownTime={2.5}
               logo={logo}
-              logoAlt="Genesis Creations"
+              logoAlt="Genesis Kreations"
               logoClassName="h-[90%] drop-shadow-sm"
               className="mt-6 mb-6 h-[clamp(120px,18vh,180px)] w-full"
               // `!` forces this size over GooeyText's own md:text-[60pt] default.
@@ -78,7 +78,7 @@ const Hero: React.FC = () => {
             </p>
           </div>
 
-          {/* Right: projector throwing Genesis Creations moments onto a screen.
+          {/* Right: projector throwing Genesis Kreations moments onto a screen.
               Width is driven by viewport HEIGHT (so the hero always fits and stays
               centered) but never more than 57vw, so the pair fits side-by-side. */}
           <div className="flex w-full flex-col items-center lg:w-[min(57vw,calc((100vh_-_24rem)_*_16_/_9))] lg:flex-none">
@@ -89,7 +89,7 @@ const Hero: React.FC = () => {
               <ProjectorScreen className="pointer-events-auto" />
             </div>
             <p className="mt-4 text-center text-xs uppercase tracking-[0.3em] text-black/60 md:text-sm">
-              Moments from Genesis Creations
+              Moments from Genesis Kreations
             </p>
           </div>
         </div>

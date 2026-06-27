@@ -3,7 +3,7 @@
 import React, { useState } from "react"
 import { ChevronDown } from "lucide-react"
 
-// Adapted for Genesis Creations: the circular stack is themed to the brand
+// Adapted for Genesis Kreations: the circular stack is themed to the brand
 // (maroon FAB, maroon-dark items, cream icons) instead of the original grays,
 // since the site is dark-themed and doesn't toggle a `.dark` class. The
 // expand/clip-path animation is kept exactly as the source component.

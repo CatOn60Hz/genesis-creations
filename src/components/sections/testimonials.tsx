@@ -9,7 +9,7 @@ import johnImg from "@/assets/testimonials/student_john.png"
 import jeremiahImg from "@/assets/testimonials/student_jeremiah.png"
 import derrickImg from "@/assets/testimonials/student_derrick.png"
 
-// Real Genesis Creations Media Academy student reviews.
+// Real Genesis Kreations Media Academy student reviews.
 const reviews: ScrollReelTestimonial[] = [
   {
     quote:

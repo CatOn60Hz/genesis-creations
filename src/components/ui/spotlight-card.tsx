@@ -16,7 +16,7 @@ const glowColorMap = {
   green: { base: 120, spread: 200 },
   red: { base: 0, spread: 200 },
   orange: { base: 30, spread: 200 },
-  // On-brand Genesis Creations crimson/maroon — narrow spread keeps the glow
+  // On-brand Genesis Kreations crimson/maroon — narrow spread keeps the glow
   // within the warm magenta-red range so it never drifts off-palette.
   maroon: { base: 335, spread: 40 }
 };

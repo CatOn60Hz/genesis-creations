@@ -29,7 +29,7 @@ const About: React.FC = () => {
           <Reveal repeat className="mx-auto max-w-5xl text-center">
             {/* Eyebrow — tan reads clearly on the deep maroon background */}
             <p className="mb-4 text-xs font-medium uppercase tracking-[0.35em] text-maroon">
-              Welcome to Genesis Creations
+              Welcome to Genesis Kreations
             </p>
             {/* Heading — cream for strong contrast and easy reading */}
             <h2 className="font-display text-4xl md:text-6xl font-bold tracking-tighter text-cream text-balance">
@@ -37,7 +37,7 @@ const About: React.FC = () => {
               <span className="text-maroon">career in media</span>
             </h2>
             <p className="mx-auto mt-6 max-w-3xl text-base md:text-lg leading-relaxed text-cream/85">
-              We at Genesis Creation's Academy provide you with all the necessary skills
+              We at Genesis Kreation's Academy provide you with all the necessary skills
               tailored for a solid grounding to help you jumpstart your career as a media
               professional. Gaining the right balance of knowledge and skill is much
               required in any career — our courses combine theoretical and practical

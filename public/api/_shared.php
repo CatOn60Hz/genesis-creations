@@ -1,5 +1,5 @@
 <?php
-// Shared helpers for the Genesis Creations CMS API. Not a routable endpoint.
+// Shared helpers for the Genesis Kreations CMS API. Not a routable endpoint.
 
 require_once __DIR__ . '/config.php';
 

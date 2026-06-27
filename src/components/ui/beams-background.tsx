@@ -23,7 +23,7 @@ interface Beam {
     pulseSpeed: number;
 }
 
-// Genesis Creations crimson range (≈ #cb2957) instead of the original cyan/blue.
+// Genesis Kreations crimson range (≈ #cb2957) instead of the original cyan/blue.
 const HUE_BASE = 330;
 const HUE_SPREAD = 24;
 

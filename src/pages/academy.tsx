@@ -61,7 +61,7 @@ interface Course {
   who: string
 }
 
-// Catalogue content lifted from the Genesis Creations course handbook. Each
+// Catalogue content lifted from the Genesis Kreations course handbook. Each
 // course keeps the same shape so the card and its detail modal stay dumb: an
 // intro paragraph up top, then the practical points underneath.
 const courses: Course[] = [
@@ -74,7 +74,7 @@ const courses: Course[] = [
     duration: "1 Year",
     schedule: "Mon to Fri",
     format: "Practical, studio-based learning",
-    certification: "Genesis Creations Diploma in Visual Communication",
+    certification: "Genesis Kreations Diploma in Visual Communication",
     modules: [
       {
         title: "Foundations of Visual Communication",
@@ -204,7 +204,7 @@ const courses: Course[] = [
       "Real production environment with studio and live shoot exposure",
       "Learn directly from working videographers and cinematographers",
       "Build a demo reel by course end",
-      "Direct pathway into the Genesis Creations production division",
+      "Direct pathway into the Genesis Kreations production division",
     ],
     who: "Aspiring cinematographers, content creators, event videographers, and anyone wanting to shoot professionally.",
   },
@@ -254,7 +254,7 @@ const courses: Course[] = [
       "Export settings and platform-specific optimization",
     ],
     choose: [
-      "Edit using real footage from actual Genesis Creations productions",
+      "Edit using real footage from actual Genesis Kreations productions",
       "Access to industry-grade editing systems and software",
       "Learn from editors actively working on commercial projects",
       "Build a strong edited showreel by the end of the course",
@@ -345,7 +345,7 @@ const courses: Course[] = [
   },
 ]
 
-// The "Why Genesis Creations Media Academy" advantages, kept as a de-boxed
+// The "Why Genesis Kreations Media Academy" advantages, kept as a de-boxed
 // editorial list to match the About section on the home page.
 const advantages: { icon: Icon; title: string; text: string }[] = [
   {
@@ -667,8 +667,8 @@ const Academy: React.FC = () => {
   return (
     <main className="min-h-screen bg-maroon-dark/40 text-cream">
       <SEO 
-        title="Media Academy - Genesis Creations" 
-        description="Join Genesis Creations Media Academy for professional courses in photography, videography, graphic design, and video editing." 
+        title="Media Academy - Genesis Kreations" 
+        description="Join Genesis Kreations Media Academy for professional courses in photography, videography, graphic design, and video editing." 
       />
       {/* Hero: team photo background under a dark scrim, full viewport height */}
       <section className="relative flex min-h-[100dvh] items-center overflow-hidden px-6 py-24 text-cream">
@@ -684,7 +684,7 @@ const Academy: React.FC = () => {
         <div ref={heroRef} className="relative z-10 mx-auto w-full max-w-7xl text-center">
           <Reveal>
             <p className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-maroon">
-              Genesis Creations
+              Genesis Kreations
             </p>
           </Reveal>
           {/* Interactive headline — letters react to cursor proximity. */}
@@ -747,12 +747,12 @@ const Academy: React.FC = () => {
         </LampContainer>
       </section>
 
-      {/* Why Genesis Creations Media Academy */}
+      {/* Why Genesis Kreations Media Academy */}
       <section className="relative px-6 py-24">
         <div className="mx-auto max-w-5xl">
           <Reveal className="max-w-3xl">
             <p className="mb-4 text-xs font-medium uppercase tracking-[0.35em] text-maroon">
-              Why Genesis Creations
+              Why Genesis Kreations
             </p>
             <h2 className="font-display text-3xl font-bold tracking-tighter text-cream md:text-5xl text-balance">
               An academy built to put you to work

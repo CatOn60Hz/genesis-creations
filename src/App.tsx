@@ -31,7 +31,7 @@ function SectionStub() {
   return (
     <section className="min-h-screen flex flex-col items-center justify-center px-6 text-center bg-maroon-dark/40 text-cream">
       <p className="mb-3 text-xs uppercase tracking-[0.3em] text-maroon">
-        Genesis Creations
+        Genesis Kreations
       </p>
       <h1 className="text-4xl md:text-6xl font-semibold tracking-tight text-maroon">
         {item?.name ?? "Page"}

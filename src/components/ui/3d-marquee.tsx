@@ -4,7 +4,7 @@
  * @license: MIT
  * @website: https://emerald-ui.com
  *
- * Adapted for Genesis Creations: wider field so it fills the side edges, and a
+ * Adapted for Genesis Kreations: wider field so it fills the side edges, and a
  * continuous seamless loop (columns scroll endlessly, alternating direction)
  * instead of the original bounce. Uses the shared `cn` helper from @/lib/utils.
  */

@@ -38,7 +38,7 @@ const SiteFooter: React.FC = () => {
             Start your media career today
           </h2>
           <p className="mt-4 max-w-md leading-relaxed text-cream/65">
-            Join Genesis Creations Media Academy and learn from working
+            Join Genesis Kreations Media Academy and learn from working
             professionals in a fully equipped studio environment.
           </p>
           <a
@@ -65,11 +65,11 @@ const SiteFooter: React.FC = () => {
             +91 78248 50999
           </a>
           <a
-            href="mailto:info@genesiscreations.in"
+            href="mailto:info@genesiskreationsmedia.com"
             className="flex items-center gap-3 text-cream/80 transition-colors hover:text-maroon"
           >
             <Mail className="h-5 w-5 shrink-0 text-maroon" />
-            info@genesiscreations.in
+            info@genesiskreationsmedia.com
           </a>
 
           <div className="flex items-center gap-4 pt-2">
@@ -116,7 +116,7 @@ const SiteFooter: React.FC = () => {
           </Link>
         </nav>
         <p className="text-center text-xs text-cream/50">
-          © {new Date().getFullYear()} Genesis Creations · genesiscreations.in
+          © {new Date().getFullYear()} Genesis Kreations · genesiskreationsmedia.com
         </p>
       </div>
     </footer>

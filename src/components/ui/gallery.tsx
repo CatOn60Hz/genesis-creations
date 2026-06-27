@@ -27,7 +27,7 @@ type GalleryPhoto = {
   src: string
 }
 
-// The Genesis Creations shots, fanned out left-to-right. Eight photos packed
+// The Genesis Kreations shots, fanned out left-to-right. Eight photos packed
 // into the same overall width the original five used (more overlap).
 const PHOTOS: GalleryPhoto[] = [
   { id: 1, order: 0, x: -200, y: 10, zIndex: 80, direction: "left", src: photo28 },
@@ -179,7 +179,7 @@ export const PhotoGallery = ({
                     width={photoSize}
                     height={photoSize}
                     src={photo.src}
-                    alt="Genesis Creations"
+                    alt="Genesis Kreations"
                     direction={photo.direction}
                     onOpen={() => setOpenSrc(photo.src)}
                   />
@@ -202,7 +202,7 @@ export const PhotoGallery = ({
           >
             <motion.img
               src={openSrc}
-              alt="Genesis Creations"
+              alt="Genesis Kreations"
               className="max-h-[90vh] max-w-[90vw] rounded-2xl object-contain shadow-2xl"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}

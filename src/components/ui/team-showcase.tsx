@@ -3,7 +3,7 @@ import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { LinkedInIcon, InstagramIcon, XIcon } from "@/components/ui/social-icons"
 
-// Adapted for Genesis Creations: lucide-react icons instead of react-icons, the
+// Adapted for Genesis Kreations: lucide-react icons instead of react-icons, the
 // "@/" path alias, and cream theming so it reads on the brand's dark sections.
 // An optional `objectPosition` lets a portrait be framed on the face.
 

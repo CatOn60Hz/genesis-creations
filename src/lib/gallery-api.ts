@@ -3,7 +3,7 @@
 // In production the site and the API share an origin, so the default
 // "/api/gallery" works. For local dev, point at the live API by setting
 // VITE_GALLERY_API in a .env file, e.g.
-//   VITE_GALLERY_API=https://genesiscreations.in/api/gallery
+//   VITE_GALLERY_API=https://genesiskreationsmedia.com/api/gallery
 
 export type GalleryPhoto = { name: string; url: string }
 

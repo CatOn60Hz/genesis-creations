@@ -880,13 +880,13 @@ const AdminDashboard: React.FC = () => {
   if (!authed) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-maroon-dark px-6 text-cream">
-        <SEO title="Admin Login - Genesis Creations" />
+        <SEO title="Admin Login - Genesis Kreations" />
         <form
           onSubmit={login}
           className="w-full max-w-sm rounded-2xl border border-tan/15 bg-white/5 p-8 backdrop-blur"
         >
           <p className="mb-2 text-xs font-semibold uppercase tracking-[0.4em] text-maroon">
-            Genesis Creations
+            Genesis Kreations
           </p>
           <h1 className="mb-6 text-2xl font-semibold">Admin Dashboard</h1>
           <input
@@ -908,12 +908,12 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <main className="min-h-screen bg-maroon-dark px-6 py-14 text-cream">
-      <SEO title="Admin Dashboard - Genesis Creations" />
+      <SEO title="Admin Dashboard - Genesis Kreations" />
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.4em] text-maroon">
-              Genesis Creations
+              Genesis Kreations
             </p>
             <h1 className="text-3xl font-semibold md:text-4xl">Admin Dashboard</h1>
           </div>

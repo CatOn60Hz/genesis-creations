@@ -49,7 +49,7 @@ interface Service {
   perfectFor: string
 }
 
-// Service catalogue lifted from the Genesis Creations services handbook. Each
+// Service catalogue lifted from the Genesis Kreations services handbook. Each
 // service keeps the same shape so the card and its detail modal stay dumb.
 const services: Service[] = [
   {
@@ -360,8 +360,8 @@ const Services: React.FC = () => {
   return (
     <main className="min-h-screen bg-maroon-dark/40 text-cream">
       <SEO 
-        title="Services - Genesis Creations" 
-        description="Discover Genesis Creations' services: Media Production, Studio Rental, Studio Production, and Live Broadcasting." 
+        title="Services - Genesis Kreations" 
+        description="Discover Genesis Kreations' services: Media Production, Studio Rental, Studio Production, and Live Broadcasting." 
       />
       {/* Hero: studio photo background under a dark scrim, full viewport height */}
       <section className="relative flex min-h-[100dvh] items-center overflow-hidden px-6 py-24 text-cream">
@@ -377,7 +377,7 @@ const Services: React.FC = () => {
         <div ref={heroRef} className="relative z-10 mx-auto w-full max-w-7xl text-center">
           <Reveal>
             <p className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-maroon">
-              Genesis Creations
+              Genesis Kreations
             </p>
           </Reveal>
           {/* Interactive headline: letters react to cursor proximity. */}
@@ -493,7 +493,7 @@ const Services: React.FC = () => {
               </h2>
               <p className="mx-auto mt-4 max-w-xl text-cream/75">
                 The same studios and professionals behind our productions also
-                teach at the Genesis Creations Media Academy.
+                teach at the Genesis Kreations Media Academy.
               </p>
               <Link
                 to="/academy"
