@@ -18,8 +18,11 @@ if ($rel === '' && isset($_GET['f'])) {
 $rel = ltrim($rel, '/');
 
 // Shape must be "<section>/<filename>" with safe characters and no traversal.
+// The filename class allows spaces and parentheses too, so files placed on the
+// server directly (e.g. "36(1).jpg", not run through the upload sanitizer) still
+// serve. Traversal is blocked by the '..' guard plus the realpath check below.
 if (strpos($rel, '..') !== false ||
-    !preg_match('#^[a-z0-9_-]+/[A-Za-z0-9._-]+$#', $rel)) {
+    !preg_match('#^[a-z0-9_-]+/[A-Za-z0-9 ._()-]+$#', $rel)) {
     http_response_code(404);
     exit;
 }
