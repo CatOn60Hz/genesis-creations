@@ -28,6 +28,7 @@ import {
   AnimatedCourseIcon,
   type CourseKind,
 } from "@/components/ui/animated-course-icon"
+import { SEO } from "@/components/seo"
 import academyHero from "@/assets/academy-hero.jpg"
 
 const EASE_OUT = [0.16, 1, 0.3, 1] as const
@@ -665,6 +666,10 @@ const Academy: React.FC = () => {
 
   return (
     <main className="min-h-screen bg-maroon-dark/40 text-cream">
+      <SEO 
+        title="Media Academy - Genesis Creations" 
+        description="Join Genesis Creations Media Academy for professional courses in photography, videography, graphic design, and video editing." 
+      />
       {/* Hero: team photo background under a dark scrim, full viewport height */}
       <section className="relative flex min-h-[100dvh] items-center overflow-hidden px-6 py-24 text-cream">
         <img

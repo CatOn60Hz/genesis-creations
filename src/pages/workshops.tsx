@@ -49,6 +49,7 @@ import { PixelTrail } from "@/components/ui/pixel-trail"
 import TextCursorProximity from "@/components/ui/text-cursor-proximity"
 import { Reveal } from "@/components/ui/reveal"
 import { LampContainer } from "@/components/ui/lamp"
+import { SEO } from "@/components/seo"
 import workshopsHero from "@/assets/workshops-hero.jpg"
 
 // Strong ease-out curve — matches the shared Reveal component (Emil Kowalski:
@@ -149,7 +150,7 @@ function WorkshopCard({ w, index }: { w: Workshop; index: number }) {
       {/* Banner (when one was uploaded) */}
       {w.banner && (
         <div className="aspect-[16/9] w-full overflow-hidden">
-          <img src={w.banner.url} alt={w.title} className="h-full w-full object-cover" />
+          <img src={w.banner.url} alt={w.title} loading="lazy" className="h-full w-full object-cover" />
         </div>
       )}
 
@@ -363,6 +364,10 @@ const Workshops: React.FC = () => {
 
   return (
     <main className="min-h-screen bg-maroon-dark/40 pb-32 text-cream">
+      <SEO 
+        title="Workshops & Masterclasses - Genesis Creations" 
+        description="Join hands-on sessions led by working professionals in gimbal operation, drone flying, cinematography, photography, and more." 
+      />
       {/* Hero: workshop photo background under a dark scrim, full viewport height */}
       <section className="relative flex min-h-[100dvh] items-center overflow-hidden px-6 py-24 text-cream">
         <img

@@ -23,6 +23,7 @@ import { PixelTrail } from "@/components/ui/pixel-trail"
 import { Grain } from "@/components/ui/grain"
 import { LampContainer } from "@/components/ui/lamp"
 import TextCursorProximity from "@/components/ui/text-cursor-proximity"
+import { SEO } from "@/components/seo"
 import dmHero from "@/assets/digital-marketing-hero.jpg"
 
 const EASE_OUT = [0.16, 1, 0.3, 1] as const
@@ -364,6 +365,10 @@ const DigitalMarketing: React.FC = () => {
 
   return (
     <main className="min-h-screen bg-maroon-dark/40 text-cream">
+      <SEO 
+        title="Digital Marketing - Genesis Creations" 
+        description="Build your brand online with Genesis Creations' Digital Marketing services including self-branding, social media management, Google & Meta Ads, and content planning." 
+      />
       {/* Hero: gaming-lounge photo background under a dark scrim, full height */}
       <section className="relative flex min-h-[100dvh] items-center overflow-hidden px-6 py-24 text-cream">
         <img

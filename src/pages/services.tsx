@@ -23,6 +23,7 @@ import {
   AnimatedServiceIcon,
   type ServiceKind,
 } from "@/components/ui/animated-service-icon"
+import { SEO } from "@/components/seo"
 import studioPhoto from "@/assets/studio.jpg"
 
 const EASE_OUT = [0.16, 1, 0.3, 1] as const
@@ -358,6 +359,10 @@ const Services: React.FC = () => {
 
   return (
     <main className="min-h-screen bg-maroon-dark/40 text-cream">
+      <SEO 
+        title="Services - Genesis Creations" 
+        description="Discover Genesis Creations' services: Media Production, Studio Rental, Studio Production, and Live Broadcasting." 
+      />
       {/* Hero: studio photo background under a dark scrim, full viewport height */}
       <section className="relative flex min-h-[100dvh] items-center overflow-hidden px-6 py-24 text-cream">
         <img

@@ -18,6 +18,8 @@ import {
   X,
 } from "lucide-react"
 
+import { SEO } from "@/components/seo"
+
 import {
   fetchAnnouncement,
   saveAnnouncement,
@@ -610,6 +612,7 @@ function WorkshopsManager({
                 <img
                   src={w.banner.url}
                   alt={w.title}
+                  loading="lazy"
                   className="aspect-[16/9] w-full object-cover"
                 />
               )}
@@ -877,6 +880,7 @@ const AdminDashboard: React.FC = () => {
   if (!authed) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-maroon-dark px-6 text-cream">
+        <SEO title="Admin Login - Genesis Creations" />
         <form
           onSubmit={login}
           className="w-full max-w-sm rounded-2xl border border-tan/15 bg-white/5 p-8 backdrop-blur"
@@ -904,6 +908,7 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <main className="min-h-screen bg-maroon-dark px-6 py-14 text-cream">
+      <SEO title="Admin Dashboard - Genesis Creations" />
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div>

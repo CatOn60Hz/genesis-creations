@@ -8,6 +8,7 @@ import ThreeDMarquee from "@/components/ui/3d-marquee"
 import { SiteFooter } from "@/components/sections/site-footer"
 import { fetchGalleryPhotos } from "@/lib/gallery-api"
 import { useIsTouch } from "@/components/hooks/use-is-touch"
+import { SEO } from "@/components/seo"
 
 // Bundled photos act as a fallback so the page is never empty — used until the
 // Hostinger backend responds, and in local dev where PHP isn't running. Drop
@@ -86,6 +87,10 @@ const Gallery: React.FC = () => {
       className="h-screen overflow-y-auto overflow-x-hidden bg-maroon-dark/40 text-cream [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       options={{ lerp: 0.09, smoothWheel: true }}
     >
+      <SEO 
+        title="Gallery - Genesis Creations" 
+        description="Explore the Genesis Creations gallery featuring moments from our shoots, studio sessions, and professional events." 
+      />
       {/* Page 1 — the 3D marquee hero */}
       <section
         id="gallery-marquee"
@@ -158,7 +163,7 @@ const Gallery: React.FC = () => {
                 >
                   <img
                     src={src}
-                    alt={`Genesis Creations ${i + 1}`}
+                    alt={`Genesis Creations gallery photo ${i + 1}`}
                     loading="lazy"
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
@@ -191,7 +196,7 @@ const Gallery: React.FC = () => {
           >
             <motion.img
               src={openSrc}
-              alt="Genesis Creations"
+              alt="Genesis Creations full-size gallery photo"
               className="max-h-[90vh] max-w-[90vw] rounded-2xl object-contain shadow-2xl"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}

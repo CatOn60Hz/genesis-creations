@@ -25,6 +25,7 @@ import { LampContainer } from "@/components/ui/lamp"
 import TextCursorProximity from "@/components/ui/text-cursor-proximity"
 import { FaqPro, type FaqProItem } from "@/components/ui/faq-pro"
 import { LinkedInIcon, InstagramIcon } from "@/components/ui/social-icons"
+import { SEO } from "@/components/seo"
 import aboutHero from "@/assets/about-hero.jpg"
 import visionImg from "@/assets/vision.jpg"
 import founderImg from "@/assets/founder.jpg"
@@ -180,6 +181,10 @@ const About: React.FC = () => {
 
   return (
     <main className="min-h-screen bg-maroon-dark/40 text-cream">
+      <SEO 
+        title="About Us - Genesis Creations" 
+        description="Learn more about Genesis Creations, our vision, mission, and the founder behind our media production company and academy." 
+      />
       {/* Hero: team photo background under a dark scrim, full viewport height */}
       <section className="relative flex min-h-[100dvh] items-center overflow-hidden px-6 py-24 text-cream">
         <img
@@ -262,6 +267,7 @@ const About: React.FC = () => {
                 src={visionImg}
                 alt=""
                 aria-hidden
+                loading="lazy"
                 className="absolute inset-0 h-full w-full object-cover object-center"
               />
               <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.45)_0%,rgba(0,0,0,0.72)_100%)]" />
@@ -398,6 +404,7 @@ const About: React.FC = () => {
                     <img
                       src={founderImg}
                       alt="Jerophin Deril S, Founder & Managing Director of Genesis Creations"
+                      loading="lazy"
                       className="h-full w-full object-cover"
                       style={{ objectPosition: "62% 22%" }}
                     />
