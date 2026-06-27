@@ -82,12 +82,12 @@ const Gallery: React.FC = () => {
     }
   }, [openSrc])
 
-  return (
-    <ReactLenis
-      className="h-screen overflow-y-auto overflow-x-hidden bg-maroon-dark/40 text-cream [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      options={{ lerp: 0.09, smoothWheel: true }}
-    >
-      <SEO 
+  // Same className for both paths; only the scroll engine differs.
+  const containerClass =
+    "h-screen overflow-y-auto overflow-x-hidden bg-maroon-dark/40 text-cream [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+  const content = (
+    <>
+      <SEO
         title="Gallery - Genesis Kreations" 
         description="Explore the Genesis Kreations gallery featuring moments from our shoots, studio sessions, and professional events." 
       />
@@ -215,6 +215,16 @@ const Gallery: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+    </>
+  )
+
+  // Lenis's per-frame layout reads were the dominant scroll-jank cost on phones.
+  // Touch scrolls smoothly natively, so use a plain container there.
+  return isTouch ? (
+    <div className={containerClass}>{content}</div>
+  ) : (
+    <ReactLenis className={containerClass} options={{ lerp: 0.09, smoothWheel: true }}>
+      {content}
     </ReactLenis>
   )
 }

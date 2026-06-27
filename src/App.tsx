@@ -6,6 +6,7 @@ import { SiteNav } from "@/components/layout/site-nav"
 import { AnnouncementBanner } from "@/components/ui/announcement-banner"
 import { SiteFooter } from "@/components/sections/site-footer"
 import { BeamsBackground } from "@/components/ui/beams-background"
+import { useIsTouch } from "@/components/hooks/use-is-touch"
 import { Home } from "@/pages/home"
 import { dockItems } from "@/components/ui/dock-tabs"
 
@@ -58,6 +59,13 @@ function App() {
   // scroll containers, so the global footer is for every other public page.
   const isHome = location.pathname === "/"
   const isGallery = location.pathname === "/gallery"
+
+  // Lenis smooth scroll forces a layout read every animation frame (its
+  // `setScroll` was measured as the dominant main-thread cost on mobile — ~1.4s
+  // of forced reflow over a single scroll). Phones already scroll smoothly
+  // natively and Lenis doesn't smooth touch anyway, so it's pure cost there.
+  // Skip Lenis on touch devices and let the browser scroll natively.
+  const isTouch = useIsTouch()
 
   // The root Lenis instance persists across the smooth-scroll pages (academy,
   // services, workshops, stubs), so navigating between them would otherwise keep
@@ -158,14 +166,23 @@ function App() {
           {/* Same fixed crimson beams as the home page, glowing behind the
               translucent page backgrounds. */}
           <BeamsBackground className="fixed inset-0 -z-10" intensity="medium" />
-          <ReactLenis
-            root
-            ref={rootLenisRef}
-            options={{ lerp: 0.09, smoothWheel: true }}
-          >
-            {routes}
-            <SiteFooter />
-          </ReactLenis>
+          {isTouch ? (
+            // Native scroll on touch — the route-change/hash effects above
+            // already fall back to window.scrollTo when there's no Lenis.
+            <>
+              {routes}
+              <SiteFooter />
+            </>
+          ) : (
+            <ReactLenis
+              root
+              ref={rootLenisRef}
+              options={{ lerp: 0.09, smoothWheel: true }}
+            >
+              {routes}
+              <SiteFooter />
+            </ReactLenis>
+          )}
         </>
       )}
     </>

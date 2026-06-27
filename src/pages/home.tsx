@@ -10,17 +10,24 @@ import { Testimonials } from "@/components/sections/testimonials"
 import { SiteFooter } from "@/components/sections/site-footer"
 import { Reveal } from "@/components/ui/reveal"
 import { BeamsBackground } from "@/components/ui/beams-background"
+import { useIsTouch } from "@/components/hooks/use-is-touch"
 
 import { SEO } from "@/components/seo"
 
 const Home: React.FC = () => {
   const lenisRef = useRef<LenisRef>(null)
+  // Lenis's per-frame layout reads were the dominant scroll-jank cost on phones
+  // (~1.4s of forced reflow, measured). Touch already scrolls smoothly natively,
+  // so render a plain scroll container there and skip Lenis + the JS snap.
+  const isTouch = useIsTouch()
 
   // Lenis drives the smooth wheel/trackpad scrolling; its Snap addon locks each
   // section to the top of the viewport. `lock` advances one section at a time
   // (slideshow style) so the scroll always stops on a full page and can't skip
   // past several at once. `duration` + `easing` make that a smooth eased glide.
+  // Desktop only — on touch Lenis is disabled so there's no instance to snap.
   useEffect(() => {
+    if (isTouch) return
     const lenis = lenisRef.current?.lenis
     if (!lenis) return
 
@@ -35,23 +42,10 @@ const Home: React.FC = () => {
     )
 
     return () => snap.destroy()
-  }, [])
+  }, [isTouch])
 
-  return (
+  const sections = (
     <>
-      <SEO 
-        title="Genesis Kreations — Chennai Media House" 
-        description="Genesis Kreations — Chennai media house: Media Academy, Digital Marketing, Production, Studio Rental and Broadcasting." 
-      />
-      {/* Fixed crimson beams behind the whole page. The opaque Hero hides them
-          on page 1; the translucent dark sections let them glow through from
-          the second page onward. */}
-      <BeamsBackground className="fixed inset-0 -z-10" intensity="medium" />
-      <ReactLenis
-        ref={lenisRef}
-        className="h-screen overflow-y-auto overflow-x-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        options={{ lerp: 0.09, smoothWheel: true }}
-      >
       <Hero />
       <Reveal className="snap-section">
         <About />
@@ -68,7 +62,32 @@ const Home: React.FC = () => {
       <Reveal className="snap-section">
         <SiteFooter />
       </Reveal>
-      </ReactLenis>
+    </>
+  )
+
+  return (
+    <>
+      <SEO 
+        title="Genesis Kreations — Chennai Media House" 
+        description="Genesis Kreations — Chennai media house: Media Academy, Digital Marketing, Production, Studio Rental and Broadcasting." 
+      />
+      {/* Fixed crimson beams behind the whole page. The opaque Hero hides them
+          on page 1; the translucent dark sections let them glow through from
+          the second page onward. */}
+      <BeamsBackground className="fixed inset-0 -z-10" intensity="medium" />
+      {isTouch ? (
+        <div className="h-screen overflow-y-auto overflow-x-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {sections}
+        </div>
+      ) : (
+        <ReactLenis
+          ref={lenisRef}
+          className="h-screen overflow-y-auto overflow-x-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          options={{ lerp: 0.09, smoothWheel: true }}
+        >
+          {sections}
+        </ReactLenis>
+      )}
     </>
   )
 }
