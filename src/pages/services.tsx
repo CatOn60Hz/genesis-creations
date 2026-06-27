@@ -387,7 +387,7 @@ const Services: React.FC = () => {
             />
             <TextCursorProximity
               label="SERVICES"
-              className="text-6xl will-change-transform md:text-8xl lg:text-9xl"
+              className="text-5xl will-change-transform sm:text-6xl md:text-8xl lg:text-9xl"
               styles={PROXIMITY_STYLES}
               falloff="gaussian"
               radius={200}

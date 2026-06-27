@@ -384,7 +384,7 @@ const Workshops: React.FC = () => {
           <h1 className="mb-8 flex flex-col items-center font-bold uppercase leading-[0.95] tracking-tight [text-shadow:0_4px_28px_rgba(0,0,0,0.6)]">
             <TextCursorProximity
               label="WORKSHOPS"
-              className="text-7xl will-change-transform md:text-9xl lg:text-[11rem]"
+              className="text-[2.5rem] will-change-transform sm:text-7xl md:text-9xl lg:text-[11rem]"
               styles={PROXIMITY_STYLES}
               falloff="gaussian"
               radius={200}
@@ -392,7 +392,7 @@ const Workshops: React.FC = () => {
             />
             <TextCursorProximity
               label="& MASTERCLASSES"
-              className="text-5xl will-change-transform md:text-8xl lg:text-9xl"
+              className="text-3xl will-change-transform sm:text-5xl md:text-8xl lg:text-9xl"
               styles={PROXIMITY_STYLES}
               falloff="gaussian"
               radius={200}

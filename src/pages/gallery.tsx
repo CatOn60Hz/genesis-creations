@@ -7,6 +7,7 @@ import { ReactLenis } from "lenis/react"
 import ThreeDMarquee from "@/components/ui/3d-marquee"
 import { SiteFooter } from "@/components/sections/site-footer"
 import { fetchGalleryPhotos } from "@/lib/gallery-api"
+import { useIsTouch } from "@/components/hooks/use-is-touch"
 
 // Bundled photos act as a fallback so the page is never empty — used until the
 // Hostinger backend responds, and in local dev where PHP isn't running. Drop
@@ -20,12 +21,13 @@ const FALLBACK_PHOTOS = Object.keys(FALLBACK_MODULES)
   .map((key) => FALLBACK_MODULES[key])
 
 // Repeat the available photos up to a generous tile count so the wide tilted
-// field stays full (every column packed) no matter how many photos exist.
-function buildMarqueeImages(photos: string[]): string[] {
+// field stays full (every column packed) no matter how many photos exist. The
+// count is much lower on touch devices — decoding ~100 large images into a 3D
+// transform is a major source of mobile jank, and the field still reads as full.
+function buildMarqueeImages(photos: string[], target: number): string[] {
   if (photos.length === 0) return []
-  const TARGET = 98
   const out: string[] = []
-  while (out.length < TARGET) out.push(...photos)
+  while (out.length < target) out.push(...photos)
   return out
 }
 
@@ -35,6 +37,7 @@ const Gallery: React.FC = () => {
   // empty gallery reads as empty instead of a wall of bundled demo images.
   const [photos, setPhotos] = useState<string[]>([])
   const [loaded, setLoaded] = useState(false)
+  const isTouch = useIsTouch()
 
   useEffect(() => {
     let active = true
@@ -55,7 +58,10 @@ const Gallery: React.FC = () => {
 
   // The hero marquee is purely decorative — never let it go blank, so fall back
   // to the bundled images until real photos exist.
-  const marqueeImages = buildMarqueeImages(photos.length ? photos : FALLBACK_PHOTOS)
+  const marqueeImages = buildMarqueeImages(
+    photos.length ? photos : FALLBACK_PHOTOS,
+    isTouch ? 30 : 98
+  )
 
   // Close the lightbox on Escape and lock body scroll while it's open.
   useEffect(() => {
@@ -78,7 +84,7 @@ const Gallery: React.FC = () => {
   return (
     <ReactLenis
       className="h-screen overflow-y-auto overflow-x-hidden bg-maroon-dark/40 text-cream [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      options={{ lerp: 0.09, smoothWheel: true, syncTouch: true }}
+      options={{ lerp: 0.09, smoothWheel: true }}
     >
       {/* Page 1 — the 3D marquee hero */}
       <section

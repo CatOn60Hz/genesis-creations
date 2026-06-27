@@ -114,7 +114,7 @@ function App() {
           <ReactLenis
             root
             ref={rootLenisRef}
-            options={{ lerp: 0.09, smoothWheel: true, syncTouch: true }}
+            options={{ lerp: 0.09, smoothWheel: true }}
           >
             {routes}
             <SiteFooter />

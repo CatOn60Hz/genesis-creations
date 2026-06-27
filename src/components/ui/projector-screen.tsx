@@ -3,6 +3,7 @@ import { motion, AnimatePresence, useSpring } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 import { fetchProjectorImages } from "@/lib/cms-api"
+import { useIsTouch } from "@/components/hooks/use-is-touch"
 
 // Bundled fallback so the projector is never blank (used in dev where PHP isn't
 // running, or before the backend responds). Managed set lives in the backend.
@@ -47,8 +48,11 @@ export function ProjectorScreen({ className }: { className?: string }) {
   const screenRef = useRef<HTMLDivElement>(null)
   const rotateX = useSpring(0, { stiffness: 120, damping: 18 })
   const rotateY = useSpring(0, { stiffness: 120, damping: 18 })
+  const isTouch = useIsTouch()
 
+  // Desktop: follow the mouse cursor.
   useEffect(() => {
+    if (isTouch) return
     const MAX = 16 // degrees
     const onMove = (e: MouseEvent) => {
       const el = screenRef.current
@@ -63,7 +67,54 @@ export function ProjectorScreen({ className }: { className?: string }) {
     }
     window.addEventListener("mousemove", onMove)
     return () => window.removeEventListener("mousemove", onMove)
-  }, [rotateX, rotateY])
+  }, [isTouch, rotateX, rotateY])
+
+  // Touch devices: tilt with the phone's gyroscope. The first reading becomes
+  // the neutral "holding" position, so ~±28° of physical tilt maps to the full
+  // ±16° on-screen rotation regardless of how the phone is held.
+  useEffect(() => {
+    if (!isTouch) return
+    const MAX = 16
+    const SENS = 28 // degrees of phone tilt for a full swing
+    const clamp = (v: number) => Math.max(-1, Math.min(1, v))
+    let base: { beta: number; gamma: number } | null = null
+
+    const onOrient = (e: DeviceOrientationEvent) => {
+      if (e.beta == null || e.gamma == null) return
+      if (!base) base = { beta: e.beta, gamma: e.gamma }
+      rotateY.set(clamp((e.gamma - base.gamma) / SENS) * MAX)
+      rotateX.set(clamp(-(e.beta - base.beta) / SENS) * MAX)
+    }
+
+    // iOS 13+ gates motion sensors behind a permission prompt that must be
+    // requested from a user gesture; Android/others just start firing.
+    const DOE = DeviceOrientationEvent as unknown as {
+      requestPermission?: () => Promise<"granted" | "denied">
+    }
+    const start = () => window.addEventListener("deviceorientation", onOrient)
+
+    let removeGesture: (() => void) | undefined
+    if (typeof DOE.requestPermission === "function") {
+      const onFirstTouch = () => {
+        DOE.requestPermission?.()
+          .then((res) => {
+            if (res === "granted") start()
+          })
+          .catch(() => {})
+        removeGesture?.()
+      }
+      window.addEventListener("touchend", onFirstTouch, { once: true })
+      removeGesture = () =>
+        window.removeEventListener("touchend", onFirstTouch)
+    } else {
+      start()
+    }
+
+    return () => {
+      window.removeEventListener("deviceorientation", onOrient)
+      removeGesture?.()
+    }
+  }, [isTouch, rotateX, rotateY])
 
   return (
     <div

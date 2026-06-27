@@ -1,14 +1,12 @@
-import { useState } from "react"
-import { Link, useLocation } from "react-router-dom"
-import { Menu, X } from "lucide-react"
+import { Link, useLocation, useNavigate } from "react-router-dom"
+import { Menu as MenuIcon, X } from "lucide-react"
 
-import { cn } from "@/lib/utils"
 import { DockTabs, dockItems } from "@/components/ui/dock-tabs"
-import logo from "@/assets/logo.png"
+import { MenuContainer, MenuItem } from "@/components/ui/fluid-menu"
 
 const SiteNav: React.FC = () => {
-  const [open, setOpen] = useState(false)
   const location = useLocation()
+  const navigate = useNavigate()
 
   return (
     <>
@@ -20,51 +18,52 @@ const SiteNav: React.FC = () => {
         <DockTabs />
       </nav>
 
-      {/* Mobile: hamburger button + slide-down menu (below md) */}
-      <div data-site-nav className="md:hidden">
-        <button
-          type="button"
-          aria-label={open ? "Close menu" : "Open menu"}
-          aria-expanded={open}
-          onClick={() => setOpen((v) => !v)}
-          // top sits below the announcement banner when one is showing
-          // (--announcement-h is published by AnnouncementBanner; 0 otherwise).
-          style={{ top: "calc(var(--announcement-h, 0px) + 1rem)" }}
-          className="fixed right-4 z-50 flex h-11 w-11 items-center justify-center rounded-full bg-maroon text-maroon-dark shadow-lg"
-        >
-          {open ? <X size={20} /> : <Menu size={20} />}
-        </button>
+      {/* Mobile: fluid circular menu (below md). Keyed on the path so it
+          collapses automatically after navigating to a new page. The top sits
+          below the announcement banner when one is showing (--announcement-h is
+          published by AnnouncementBanner; 0 otherwise). */}
+      <div
+        data-site-nav
+        className="md:hidden fixed right-4 z-50"
+        style={{ top: "calc(var(--announcement-h, 0px) + 1rem)" }}
+      >
+        <MenuContainer key={location.pathname}>
+          {/* Toggle — the Menu icon morphs into an X while the stack is open. */}
+          <MenuItem
+            aria-label="Toggle menu"
+            icon={
+              <div className="relative flex h-5 w-5 items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center transition-all duration-300 ease-in-out origin-center opacity-100 scale-100 rotate-0 [div[data-expanded=true]_&]:opacity-0 [div[data-expanded=true]_&]:scale-0 [div[data-expanded=true]_&]:rotate-180">
+                  <MenuIcon size={18} strokeWidth={2} />
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center transition-all duration-300 ease-in-out origin-center opacity-0 scale-0 -rotate-180 [div[data-expanded=true]_&]:opacity-100 [div[data-expanded=true]_&]:scale-100 [div[data-expanded=true]_&]:rotate-0">
+                  <X size={18} strokeWidth={2} />
+                </div>
+              </div>
+            }
+          />
 
-        {open && (
-          <div className="fixed inset-0 z-40 bg-cream/95 backdrop-blur-sm pt-20 px-6">
-            <img
-              src={logo}
-              alt="Genesis Creations"
-              className="mb-8 h-12 w-auto"
+          {dockItems.map((item) => (
+            <MenuItem
+              key={item.id}
+              aria-label={item.name}
+              label={item.name}
+              isActive={location.pathname === item.to}
+              onClick={() => navigate(item.to)}
+              icon={item.icon}
             />
-            <ul className="flex flex-col gap-1">
-              {dockItems.map((item) => {
-                const isActive = location.pathname === item.to
-                return (
-                  <li key={item.id}>
-                    <Link
-                      to={item.to}
-                      onClick={() => setOpen(false)}
-                      className={cn(
-                        "flex items-center gap-3 rounded-xl px-4 py-3 text-lg text-maroon-dark transition-colors",
-                        isActive ? "bg-maroon" : "hover:bg-maroon/40"
-                      )}
-                    >
-                      <span className="text-maroon-dark">{item.icon}</span>
-                      {item.name}
-                    </Link>
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
-        )}
+          ))}
+        </MenuContainer>
       </div>
+
+      {/* Keep a crawlable text nav for SEO / no-JS, visually hidden. */}
+      <nav className="sr-only" aria-label="Site">
+        {dockItems.map((item) => (
+          <Link key={item.id} to={item.to}>
+            {item.name}
+          </Link>
+        ))}
+      </nav>
     </>
   )
 }

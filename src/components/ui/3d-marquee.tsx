@@ -31,14 +31,22 @@ const ThreeDMarquee = ({ images, className }: ThreeDMarqueeProps) => {
   return (
     <div
       className={cn(
-        "mx-auto block h-140 w-full overflow-hidden rounded-md max-xl:h-120 max-sm:h-100",
+        // Fills its container by default — the gallery uses it as a full-bleed
+        // hero background, so a fixed height would leave dead space (notably the
+        // black band below the fold on phones). Pass a height via `className` for
+        // standalone use.
+        "mx-auto block h-full w-full overflow-hidden rounded-md",
         className
       )}
     >
       <div className="flex size-full items-center justify-center">
         {/* Scaled up large so the tilted square bleeds past all four corners,
             leaving no black triangles. */}
-        <div className="aspect-square size-200 shrink-0 scale-[2.1] max-xl:size-full max-xl:scale-[1.7] max-sm:scale-[1.8]">
+        {/* On phones the viewport is tall and narrow, so the tilted field has
+            to be a big square (not size-full) and scaled up hard, otherwise the
+            diamond can't reach the bottom of the full-height hero and leaves a
+            black band below the fold. */}
+        <div className="aspect-square size-200 shrink-0 scale-[2.1] max-xl:size-full max-xl:scale-[1.7] max-sm:size-[42rem] max-sm:scale-[2.4]">
           <div
             style={{ transform: "rotateX(45deg) rotateY(0deg) rotateZ(45deg)" }}
             className="relative top-0 right-[-50%] grid size-full origin-top-left grid-cols-5 gap-4 transform-3d max-xl:-top-30 max-xl:right-[-45%] max-sm:top-0 max-sm:gap-2"

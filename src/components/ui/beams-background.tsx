@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useIsTouch } from "@/components/hooks/use-is-touch";
 
 interface BeamsBackgroundProps {
     className?: string;
@@ -55,6 +56,10 @@ export function BeamsBackground({
     const beamsRef = useRef<Beam[]>([]);
     const animationFrameRef = useRef<number>(0);
     const MINIMUM_BEAMS = 20;
+    // Per-frame canvas blur is the single biggest mobile perf cost on the site.
+    // On touch devices we drop the animation entirely and paint a cheap static
+    // crimson wash instead.
+    const isTouch = useIsTouch();
 
     const opacityMap = {
         subtle: 0.7,
@@ -63,6 +68,8 @@ export function BeamsBackground({
     };
 
     useEffect(() => {
+        if (isTouch) return;
+
         const canvas = canvasRef.current;
         if (!canvas) return;
 
@@ -172,7 +179,7 @@ export function BeamsBackground({
                 cancelAnimationFrame(animationFrameRef.current);
             }
         };
-    }, [intensity]);
+    }, [intensity, isTouch]);
 
     return (
         <div
@@ -181,26 +188,33 @@ export function BeamsBackground({
                 className
             )}
         >
-            <canvas
-                ref={canvasRef}
-                className="absolute inset-0"
-                style={{ filter: "blur(15px)" }}
-            />
+            {isTouch ? (
+                // Static crimson wash — same look, none of the per-frame cost.
+                <div className="absolute inset-0 bg-[radial-gradient(60%_50%_at_50%_0%,rgba(203,41,87,0.22),transparent_70%),radial-gradient(45%_40%_at_82%_62%,rgba(203,41,87,0.14),transparent_70%)]" />
+            ) : (
+                <>
+                    <canvas
+                        ref={canvasRef}
+                        className="absolute inset-0"
+                        style={{ filter: "blur(15px)" }}
+                    />
 
-            <motion.div
-                className="absolute inset-0 bg-neutral-950/5"
-                animate={{
-                    opacity: [0.05, 0.15, 0.05],
-                }}
-                transition={{
-                    duration: 10,
-                    ease: "easeInOut",
-                    repeat: Number.POSITIVE_INFINITY,
-                }}
-                style={{
-                    backdropFilter: "blur(50px)",
-                }}
-            />
+                    <motion.div
+                        className="absolute inset-0 bg-neutral-950/5"
+                        animate={{
+                            opacity: [0.05, 0.15, 0.05],
+                        }}
+                        transition={{
+                            duration: 10,
+                            ease: "easeInOut",
+                            repeat: Number.POSITIVE_INFINITY,
+                        }}
+                        style={{
+                            backdropFilter: "blur(50px)",
+                        }}
+                    />
+                </>
+            )}
 
             {children && <div className="relative z-10 h-full w-full">{children}</div>}
         </div>

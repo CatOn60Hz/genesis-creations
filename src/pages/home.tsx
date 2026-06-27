@@ -44,7 +44,7 @@ const Home: React.FC = () => {
       <ReactLenis
         ref={lenisRef}
         className="h-screen overflow-y-auto overflow-x-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        options={{ lerp: 0.09, smoothWheel: true, syncTouch: true }}
+        options={{ lerp: 0.09, smoothWheel: true }}
       >
       <Hero />
       <Reveal className="snap-section">

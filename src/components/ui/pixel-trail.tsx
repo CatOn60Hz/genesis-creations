@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid"
 
 import { cn } from "@/lib/utils"
 import { useDimensions } from "@/components/hooks/use-debounced-dimensions"
+import { useIsTouch } from "@/components/hooks/use-is-touch"
 
 interface PixelTrailProps {
   pixelSize: number // px
@@ -23,6 +24,7 @@ const PixelTrail: React.FC<PixelTrailProps> = ({
   const containerRef = useRef<HTMLDivElement>(null)
   const dimensions = useDimensions(containerRef)
   const trailId = useRef(uuidv4())
+  const isTouch = useIsTouch()
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -51,6 +53,10 @@ const PixelTrail: React.FC<PixelTrailProps> = ({
     () => Math.ceil(dimensions.height / pixelSize),
     [dimensions.height, pixelSize]
   )
+
+  // The whole effect is driven by mouse movement, so on touch devices it adds
+  // hundreds of motion-divs for zero visible benefit. Render nothing there.
+  if (isTouch) return null
 
   return (
     <div

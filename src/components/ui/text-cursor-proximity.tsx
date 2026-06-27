@@ -6,7 +6,6 @@ import {
   motion,
   useAnimationFrame,
   useMotionValue,
-  useReducedMotion,
   useTransform,
   type MotionStyle,
 } from "framer-motion"
@@ -49,7 +48,6 @@ const TextCursorProximity = forwardRef<HTMLSpanElement, TextProps>(
   ) => {
     const letterRefs = useRef<(HTMLSpanElement | null)[]>([])
     const mousePositionRef = useMousePositionRef(containerRef)
-    const reduceMotion = useReducedMotion()
 
     // Create a motion value for each letter's proximity.
     // Safe because `label` (and therefore the letter count) is stable.
@@ -134,30 +132,18 @@ const TextCursorProximity = forwardRef<HTMLSpanElement, TextProps>(
               )
 
               return (
-                // Outer span: slow, staggered fade-in dropping down from the
-                // top. Inner span keeps the cursor-proximity scale/color so the
-                // two transforms never collide.
+                // Letters render immediately (no fade-in). Inner span keeps the
+                // cursor-proximity scale/color transforms.
                 <motion.span
                   key={currentLetterIndex}
-                  className="inline-block"
-                  initial={reduceMotion ? false : { opacity: 0, y: "-0.6em" }}
-                  animate={{ opacity: 1, y: "0em" }}
-                  transition={{
-                    duration: 1.3,
-                    delay: currentLetterIndex * 0.1,
-                    ease: [0.16, 1, 0.3, 1],
+                  ref={(el: HTMLSpanElement | null) => {
+                    letterRefs.current[currentLetterIndex] = el
                   }}
+                  className="inline-block"
+                  aria-hidden="true"
+                  style={transformedStyles as MotionStyle}
                 >
-                  <motion.span
-                    ref={(el: HTMLSpanElement | null) => {
-                      letterRefs.current[currentLetterIndex] = el
-                    }}
-                    className="inline-block"
-                    aria-hidden="true"
-                    style={transformedStyles as MotionStyle}
-                  >
-                    {letter}
-                  </motion.span>
+                  {letter}
                 </motion.span>
               )
             })}
