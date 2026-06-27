@@ -50,7 +50,12 @@ interface Course {
   schedule: string
   format: string
   certification: string
-  learn: string[]
+  // Most courses list a flat `learn` array; the diploma instead provides a
+  // module breakdown plus career outcomes and a "Launching Soon" badge.
+  learn?: string[]
+  modules?: { title: string; items: string[] }[]
+  careers?: string[]
+  badge?: string
   choose: string[]
   who: string
 }
@@ -59,6 +64,95 @@ interface Course {
 // course keeps the same shape so the card and its detail modal stay dumb: an
 // intro paragraph up top, then the practical points underneath.
 const courses: Course[] = [
+  {
+    kind: "diploma",
+    badge: "Launching Soon",
+    title: "Diploma in Visual Communication",
+    subtitle: "1-Year Regular Program",
+    why: "If you're passionate about photography, graphic design, filmmaking, video editing, or digital storytelling but aren't sure where to begin, this is for you. Instead of learning just one skill, this comprehensive one-year program builds a strong foundation across the entire visual media industry through hands-on training, real studio experience, and mentorship from industry professionals.",
+    duration: "1 Year",
+    schedule: "Mon to Fri",
+    format: "Practical, studio-based learning",
+    certification: "Genesis Creations Diploma in Visual Communication",
+    modules: [
+      {
+        title: "Foundations of Visual Communication",
+        items: [
+          "Principles of design",
+          "Color theory & composition",
+          "Visual storytelling",
+          "Introduction to the media industry",
+        ],
+      },
+      {
+        title: "Graphic Design & Branding",
+        items: [
+          "Adobe Photoshop",
+          "Adobe Illustrator",
+          "Logo design",
+          "Branding & layout design",
+          "Print & digital design",
+        ],
+      },
+      {
+        title: "Photography",
+        items: [
+          "Camera fundamentals",
+          "Lighting techniques",
+          "Portrait, product & event photography",
+          "Photo editing & post-processing",
+        ],
+      },
+      {
+        title: "Videography & Filmmaking",
+        items: [
+          "Camera operations",
+          "Cinematic composition",
+          "Video lighting",
+          "Storyboarding & shot planning",
+          "Direction & production workflow",
+        ],
+      },
+      {
+        title: "Video Editing & Post-Production",
+        items: [
+          "Adobe Premiere Pro",
+          "DaVinci Resolve",
+          "Story editing & color correction",
+          "Audio synchronization",
+          "Export & delivery techniques",
+        ],
+      },
+      {
+        title: "Career Development",
+        items: [
+          "Portfolio building",
+          "Freelancing essentials",
+          "Client communication",
+          "Career guidance & industry exposure",
+        ],
+      },
+    ],
+    choose: [
+      "Comprehensive learning: graphic design, photography, videography, editing, and visual storytelling in one integrated program",
+      "Industry-oriented curriculum built around the skills creative employers expect",
+      "Hands-on studio training on professional cameras, lighting, and editing suites",
+      "Mentorship from working media professionals",
+      "Graduate with a diverse, multi-discipline professional portfolio",
+    ],
+    careers: [
+      "Graphic Designer",
+      "Photographer",
+      "Videographer",
+      "Video Editor",
+      "Content Creator",
+      "Social Media Creative",
+      "Production Assistant",
+      "Creative Executive",
+      "Freelance Media Professional",
+    ],
+    who: "Students who've completed 12th grade, career switchers entering the creative industry, aspiring photographers, designers, videographers, and content creators, and anyone seeking a complete foundation before choosing a specialization. Eligibility: 10+2 (Higher Secondary) or equivalent — subject to final approval.",
+  },
   {
     kind: "photography",
     title: "Photography",
@@ -339,6 +433,11 @@ function CourseCard({
         </div>
 
         <div>
+          {course.badge && (
+            <span className="mb-2 inline-block rounded-full bg-maroon/20 px-2.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-[0.15em] text-maroon ring-1 ring-maroon/40">
+              {course.badge}
+            </span>
+          )}
           <h3 className="font-display text-2xl font-bold tracking-tight text-cream">
             {course.title}
           </h3>
@@ -407,8 +506,15 @@ function CourseDetail({ course, onClose }: { course: Course; onClose: () => void
             <div className="absolute inset-0 opacity-30">
               <PixelTrail pixelSize={42} fadeDuration={500} pixelClassName="bg-maroon/40" />
             </div>
-            <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl bg-maroon text-cream">
-              <AnimatedCourseIcon kind={course.kind} active className="h-7 w-7" />
+            <div className="relative z-10 flex items-center gap-3">
+              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-maroon text-cream">
+                <AnimatedCourseIcon kind={course.kind} active className="h-7 w-7" />
+              </span>
+              {course.badge && (
+                <span className="rounded-full bg-cream/15 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.15em] text-cream">
+                  {course.badge}
+                </span>
+              )}
             </div>
             <h2 className="relative z-10 mt-5 font-display text-2xl font-bold text-cream">
               {course.title}
@@ -435,23 +541,62 @@ function CourseDetail({ course, onClose }: { course: Course; onClose: () => void
               ))}
             </div>
 
-            {/* What you will learn */}
-            <div>
-              <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.22em] text-cream/50">
-                What you will learn
-              </h3>
-              <ul className="grid gap-2.5 sm:grid-cols-2">
-                {course.learn.map((item) => (
-                  <li
-                    key={item}
-                    className="flex items-start gap-2.5 text-sm leading-relaxed text-cream/80"
-                  >
-                    <CircleCheck className="mt-0.5 h-4 w-4 shrink-0 text-maroon" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {/* Curriculum — module breakdown (diploma) or flat learn list */}
+            {course.modules ? (
+              <div>
+                <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.22em] text-cream/50">
+                  Curriculum
+                </h3>
+                <div className="flex flex-col gap-4">
+                  {course.modules.map((mod, i) => (
+                    <div
+                      key={mod.title}
+                      className="rounded-2xl bg-white/[0.03] p-4 ring-1 ring-white/10"
+                    >
+                      <p className="font-display text-sm font-bold text-cream">
+                        <span className="text-maroon">
+                          Module {i + 1}
+                        </span>{" "}
+                        — {mod.title}
+                      </p>
+                      <ul className="mt-2.5 grid gap-2 sm:grid-cols-2">
+                        {mod.items.map((item) => (
+                          <li
+                            key={item}
+                            className="flex items-start gap-2.5 text-sm leading-relaxed text-cream/80"
+                          >
+                            <CircleCheck className="mt-0.5 h-4 w-4 shrink-0 text-maroon" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-3 text-xs italic text-cream/45">
+                  Curriculum is subject to refinement before the official program launch.
+                </p>
+              </div>
+            ) : (
+              course.learn && (
+                <div>
+                  <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.22em] text-cream/50">
+                    What you will learn
+                  </h3>
+                  <ul className="grid gap-2.5 sm:grid-cols-2">
+                    {course.learn.map((item) => (
+                      <li
+                        key={item}
+                        className="flex items-start gap-2.5 text-sm leading-relaxed text-cream/80"
+                      >
+                        <CircleCheck className="mt-0.5 h-4 w-4 shrink-0 text-maroon" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )
+            )}
 
             {/* Why choose this course */}
             <div>
@@ -470,6 +615,25 @@ function CourseDetail({ course, onClose }: { course: Course; onClose: () => void
                 ))}
               </ul>
             </div>
+
+            {/* Career opportunities (diploma) */}
+            {course.careers && (
+              <div>
+                <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.22em] text-cream/50">
+                  Career opportunities
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {course.careers.map((c) => (
+                    <span
+                      key={c}
+                      className="rounded-full bg-cream/10 px-3 py-1 text-xs text-cream/80"
+                    >
+                      {c}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Who should join */}
             <p className="rounded-2xl bg-maroon/15 p-4 text-sm leading-relaxed text-cream/80 ring-1 ring-maroon/30">

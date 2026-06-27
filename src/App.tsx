@@ -9,8 +9,10 @@ import { BeamsBackground } from "@/components/ui/beams-background"
 import { Home } from "@/pages/home"
 import { Academy } from "@/pages/academy"
 import { Services } from "@/pages/services"
+import { DigitalMarketing } from "@/pages/digital-marketing"
 import { Gallery } from "@/pages/gallery"
 import { Workshops } from "@/pages/workshops"
+import { About } from "@/pages/about"
 import { AdminDashboard } from "@/pages/admin"
 import { dockItems } from "@/components/ui/dock-tabs"
 
@@ -58,20 +60,31 @@ function App() {
   const rootLenisRef = useRef<LenisRef>(null)
   useEffect(() => {
     const lenis = rootLenisRef.current?.lenis
+    // A hash (e.g. /about#faq) scrolls to that section instead of the top.
+    if (location.hash) {
+      const el = document.getElementById(location.hash.slice(1))
+      if (el) {
+        if (lenis) lenis.scrollTo(el, { offset: -24 })
+        else el.scrollIntoView({ behavior: "smooth" })
+        return
+      }
+    }
     if (lenis) {
       lenis.scrollTo(0, { immediate: true })
     } else {
       window.scrollTo(0, 0)
     }
-  }, [location.pathname])
+  }, [location.pathname, location.hash])
 
   const routes = (
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/academy" element={<Academy />} />
       <Route path="/services" element={<Services />} />
+      <Route path="/digital-marketing" element={<DigitalMarketing />} />
       <Route path="/gallery" element={<Gallery />} />
       <Route path="/workshops" element={<Workshops />} />
+      <Route path="/about" element={<About />} />
       {/* Unified admin dashboard (gallery-admin kept as an alias). */}
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/gallery-admin" element={<AdminDashboard />} />
@@ -81,8 +94,10 @@ function App() {
             item.to !== "/" &&
             item.to !== "/academy" &&
             item.to !== "/services" &&
+            item.to !== "/digital-marketing" &&
             item.to !== "/gallery" &&
-            item.to !== "/workshops"
+            item.to !== "/workshops" &&
+            item.to !== "/about"
         )
         .map((item) => (
           <Route key={item.id} path={item.to} element={<SectionStub />} />

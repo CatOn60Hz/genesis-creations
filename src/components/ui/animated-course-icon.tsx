@@ -7,6 +7,7 @@ import {
   PlaneTakeoff,
   Mic,
   Headphones,
+  GraduationCap,
   type LucideProps,
 } from "lucide-react"
 import type { ComponentType } from "react"
@@ -22,6 +23,7 @@ export type CourseKind =
   | "drone"
   | "live-sound"
   | "studio-recording"
+  | "diploma"
 
 const EASE_OUT = [0.23, 1, 0.32, 1] as const
 
@@ -33,6 +35,7 @@ const ICONS: Record<CourseKind, ComponentType<LucideProps>> = {
   drone: PlaneTakeoff,
   "live-sound": Mic,
   "studio-recording": Headphones,
+  diploma: GraduationCap,
 }
 
 // `active` plays the gesture; `rest` is the idle pose.
@@ -47,6 +50,7 @@ const VARIANTS: Record<CourseKind, Variants> = {
   },
   "live-sound": { rest: { scale: 1 }, active: { scale: [1, 1.16, 1] } }, // pulse
   "studio-recording": { rest: { y: 0 }, active: { y: [0, -4, 0] } }, // bob
+  diploma: { rest: { rotate: 0 }, active: { rotate: [0, -10, 8, 0] } }, // cap toss
 }
 
 export function AnimatedCourseIcon({

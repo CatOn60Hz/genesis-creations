@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 import { MapPin, Phone, Mail } from "lucide-react"
 
 import { Grain } from "@/components/ui/grain"
@@ -99,9 +100,25 @@ const SiteFooter: React.FC = () => {
         </div>
       </div>
 
-      <p className="relative z-10 mx-auto mt-10 max-w-6xl border-t border-white/10 pt-6 text-center text-xs text-cream/50">
-        © {new Date().getFullYear()} Genesis Creations · genesiscreations.com
-      </p>
+      <div className="relative z-10 mx-auto mt-10 flex max-w-6xl flex-col items-center gap-4 border-t border-white/10 pt-6 sm:flex-row sm:justify-between">
+        <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs uppercase tracking-[0.15em] text-cream/60">
+          <Link to="/about" className="transition-colors hover:text-maroon">
+            About
+          </Link>
+          <Link to="/about#faq" className="transition-colors hover:text-maroon">
+            FAQ
+          </Link>
+          <Link to="/services" className="transition-colors hover:text-maroon">
+            Services
+          </Link>
+          <Link to="/academy" className="transition-colors hover:text-maroon">
+            Academy
+          </Link>
+        </nav>
+        <p className="text-center text-xs text-cream/50">
+          © {new Date().getFullYear()} Genesis Creations · genesiscreations.in
+        </p>
+      </div>
     </footer>
   )
 }
