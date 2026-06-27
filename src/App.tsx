@@ -83,6 +83,29 @@ function App() {
     }
   }, [location.pathname, location.hash])
 
+  // Lazy-loaded pages mount their content AFTER the root Lenis has already
+  // measured the page, so its scroll limit is stale (computed against the short
+  // Suspense fallback) and the page won't scroll. body/#root are height:100% so
+  // a ResizeObserver won't catch it — instead watch for DOM mutations under
+  // #root (which fire when the lazy chunk mounts) and re-measure Lenis, coalesced
+  // to once per frame.
+  useEffect(() => {
+    const root = document.getElementById("root")
+    if (!root || typeof MutationObserver === "undefined") return
+    let scheduled = false
+    const remeasure = () => {
+      if (scheduled) return
+      scheduled = true
+      requestAnimationFrame(() => {
+        scheduled = false
+        rootLenisRef.current?.lenis?.resize()
+      })
+    }
+    const mo = new MutationObserver(remeasure)
+    mo.observe(root, { childList: true, subtree: true })
+    return () => mo.disconnect()
+  }, [])
+
   const routes = (
     <Suspense fallback={<div className="min-h-screen bg-black" />}>
     <Routes>

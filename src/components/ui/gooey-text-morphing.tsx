@@ -61,6 +61,10 @@ export function GooeyText({
     let time = new Date();
     let morph = 0;
     let cooldown = cooldownTime;
+    // Once a frame has fully settled we stop re-applying styles every tick —
+    // otherwise the SVG threshold filter re-rasterizes on every cooldown frame
+    // for no visible change, which is a needless main-thread cost.
+    let settled = false;
     let active = { from: frames[index], to: frames[(index + 1) % n] };
 
     // Assign content to the slots for the transition frames[index] -> next,
@@ -89,10 +93,14 @@ export function GooeyText({
 
     const doCooldown = () => {
       morph = 0;
-      renderFraction(1); // settle fully on the current "to" frame
+      if (!settled) {
+        renderFraction(1); // settle fully on the current "to" frame, once
+        settled = true;
+      }
     };
 
     const doMorph = () => {
+      settled = false;
       morph -= cooldown;
       cooldown = 0;
       let fraction = morph / morphTime;

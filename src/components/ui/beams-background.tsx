@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useIsTouch } from "@/components/hooks/use-is-touch";
 
@@ -55,7 +54,7 @@ export function BeamsBackground({
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const beamsRef = useRef<Beam[]>([]);
     const animationFrameRef = useRef<number>(0);
-    const MINIMUM_BEAMS = 20;
+    const MINIMUM_BEAMS = 12;
     // Per-frame canvas blur is the single biggest mobile perf cost on the site.
     // On touch devices we drop the animation entirely and paint a cheap static
     // crimson wash instead.
@@ -77,7 +76,9 @@ export function BeamsBackground({
         if (!ctx) return;
 
         const updateCanvasSize = () => {
-            const dpr = window.devicePixelRatio || 1;
+            // The canvas is heavily blurred, so rendering above 1x is wasted
+            // pixels — cap the DPR to keep the per-frame cost low.
+            const dpr = 1;
             canvas.width = window.innerWidth * dpr;
             canvas.height = window.innerHeight * dpr;
             canvas.style.width = `${window.innerWidth}px`;
@@ -153,7 +154,10 @@ export function BeamsBackground({
             if (!canvas || !ctx) return;
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.filter = "blur(35px)";
+            // No per-frame `ctx.filter = blur()` here — a canvas blur filter is
+            // CPU-bound and was the dominant main-thread cost. The beams already
+            // have soft gradient edges, and the canvas ELEMENT carries a cheap
+            // GPU-composited CSS blur instead (see the style below).
 
             const totalBeams = beamsRef.current.length;
             beamsRef.current.forEach((beam, index) => {
@@ -192,28 +196,13 @@ export function BeamsBackground({
                 // Static crimson wash — same look, none of the per-frame cost.
                 <div className="absolute inset-0 bg-[radial-gradient(60%_50%_at_50%_0%,rgba(203,41,87,0.22),transparent_70%),radial-gradient(45%_40%_at_82%_62%,rgba(203,41,87,0.14),transparent_70%)]" />
             ) : (
-                <>
-                    <canvas
-                        ref={canvasRef}
-                        className="absolute inset-0"
-                        style={{ filter: "blur(15px)" }}
-                    />
-
-                    <motion.div
-                        className="absolute inset-0 bg-neutral-950/5"
-                        animate={{
-                            opacity: [0.05, 0.15, 0.05],
-                        }}
-                        transition={{
-                            duration: 10,
-                            ease: "easeInOut",
-                            repeat: Number.POSITIVE_INFINITY,
-                        }}
-                        style={{
-                            backdropFilter: "blur(50px)",
-                        }}
-                    />
-                </>
+                // The CSS `blur` here is GPU-composited (one cheap pass), unlike
+                // the old per-frame canvas filter + animated backdrop-blur.
+                <canvas
+                    ref={canvasRef}
+                    className="absolute inset-0"
+                    style={{ filter: "blur(40px)" }}
+                />
             )}
 
             {children && <div className="relative z-10 h-full w-full">{children}</div>}
