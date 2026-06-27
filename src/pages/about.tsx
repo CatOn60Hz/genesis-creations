@@ -1,7 +1,6 @@
 import { useRef, useState } from "react"
 import { Link } from "react-router-dom"
 import {
-  Eye,
   CircleCheck,
   Award,
   Boxes,
@@ -27,6 +26,7 @@ import TextCursorProximity from "@/components/ui/text-cursor-proximity"
 import { FaqPro, type FaqProItem } from "@/components/ui/faq-pro"
 import { LinkedInIcon, InstagramIcon } from "@/components/ui/social-icons"
 import aboutHero from "@/assets/about-hero.jpg"
+import visionImg from "@/assets/vision.jpg"
 import founderImg from "@/assets/founder.jpg"
 
 type Icon = ComponentType<LucideProps>
@@ -256,15 +256,17 @@ const About: React.FC = () => {
         <div className="mx-auto grid max-w-5xl gap-6 lg:grid-cols-2">
           {/* Vision */}
           <Reveal>
-            <div className="relative h-full overflow-hidden rounded-3xl bg-[linear-gradient(135deg,#6d1f33_0%,#2a0d15_100%)] p-8 ring-1 ring-white/10">
-              <div className="absolute inset-0 opacity-25">
-                <PixelTrail pixelSize={44} fadeDuration={500} pixelClassName="bg-maroon/40" />
-              </div>
+            <div className="relative h-full min-h-[20rem] overflow-hidden rounded-3xl p-8 ring-1 ring-white/10">
+              {/* Team photo background with a dark crimson scrim for readability */}
+              <img
+                src={visionImg}
+                alt=""
+                aria-hidden
+                className="absolute inset-0 h-full w-full object-cover object-center"
+              />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.45)_0%,rgba(0,0,0,0.72)_100%)]" />
               <div className="relative z-10">
-                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-maroon text-cream">
-                  <Eye className="h-6 w-6" />
-                </span>
-                <h2 className="mt-5 font-display text-2xl font-bold text-cream">Our vision</h2>
+                <h2 className="font-display text-2xl font-bold text-cream">Our vision</h2>
                 <p className="mt-4 leading-relaxed text-cream/80">
                   To become a globally recognized creative media company and
                   premier media academy — inspiring innovation, transforming ideas
