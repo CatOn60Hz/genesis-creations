@@ -8,15 +8,24 @@
       name="description"
       content="Genesis Creations — Chennai media house: Media Academy, Digital Marketing, Production, Studio Rental and Broadcasting."
     />
-    <!-- Fonts loaded here (not via CSS @import) so they're discovered early and
-         fetched in parallel with the rest of the page, with display:swap so text
-         paints immediately in a fallback. -->
+    <!-- Fonts: preconnect for an early handshake, then load the stylesheet
+         asynchronously (media=print flips to all onload) so it never blocks the
+         initial render. display:swap means text paints immediately in a fallback
+         and swaps in when the webfont arrives. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap"
+      />
+    </noscript>
     <title>Genesis Creations — Chennai Media House</title>
   </head>
   <body>
