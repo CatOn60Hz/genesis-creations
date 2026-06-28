@@ -301,44 +301,6 @@ const About: React.FC = () => {
         </div>
       </section>
 
-      {/* Why choose us — opens on a studio tube light glowing down from the top,
-          the same effect as the Academy/Services pages. */}
-      <section className="gc-sep relative overflow-hidden text-cream">
-        <Grain />
-        <LampContainer className="bg-transparent">
-          <div className="w-full px-6 pb-24">
-            <Reveal className="mx-auto max-w-3xl text-center">
-              <p className="mb-4 text-xs font-medium uppercase tracking-[0.35em] text-maroon">
-                Why Genesis Kreations
-              </p>
-              <h2 className="font-display text-3xl font-bold tracking-tighter text-cream md:text-6xl text-balance">
-                Built on craft, taught with heart
-              </h2>
-            </Reveal>
-
-            <RevealStagger className="mx-auto mt-14 grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {reasons.map((r) => (
-                <RevealItem key={r.title}>
-                  <div className="group relative h-full overflow-hidden rounded-3xl bg-white/5 p-6 ring-1 ring-white/10 backdrop-blur-md transition-colors duration-300 [box-shadow:inset_0_1px_0_rgba(255,255,255,0.08)] hover:bg-white/[0.08] hover:ring-maroon/50">
-                    {/* LED matrix: crimson pixels light up as the cursor sweeps. */}
-                    <PixelTrail pixelSize={40} fadeDuration={650} pixelClassName="gc-led" />
-                    <div className="pointer-events-none relative z-10">
-                      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-maroon/10 text-maroon transition-colors duration-300 group-hover:bg-maroon group-hover:text-cream">
-                        <r.icon className="h-6 w-6" />
-                      </span>
-                      <h3 className="mt-5 font-display text-lg font-semibold tracking-tight text-cream">
-                        {r.title}
-                      </h3>
-                      <p className="mt-2 text-sm leading-relaxed text-cream/65">{r.text}</p>
-                    </div>
-                  </div>
-                </RevealItem>
-              ))}
-            </RevealStagger>
-          </div>
-        </LampContainer>
-      </section>
-
       {/* Founder */}
       <section className="gc-sep relative overflow-hidden px-6 py-24">
         <Grain />
@@ -472,6 +434,44 @@ const About: React.FC = () => {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Why choose us — opens on a studio tube light glowing down from the top,
+          the same effect as the Academy/Services pages. */}
+      <section className="gc-sep relative overflow-hidden text-cream">
+        <Grain />
+        <LampContainer className="bg-transparent">
+          <div className="w-full px-6 pb-24">
+            <Reveal className="mx-auto max-w-3xl text-center">
+              <p className="mb-4 text-xs font-medium uppercase tracking-[0.35em] text-maroon">
+                Why Genesis Kreations
+              </p>
+              <h2 className="font-display text-3xl font-bold tracking-tighter text-cream md:text-6xl text-balance">
+                Built on craft, taught with heart
+              </h2>
+            </Reveal>
+
+            <RevealStagger className="mx-auto mt-14 grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {reasons.map((r) => (
+                <RevealItem key={r.title}>
+                  <div className="group relative h-full overflow-hidden rounded-3xl bg-white/5 p-6 ring-1 ring-white/10 backdrop-blur-md transition-colors duration-300 [box-shadow:inset_0_1px_0_rgba(255,255,255,0.08)] hover:bg-white/[0.08] hover:ring-maroon/50">
+                    {/* LED matrix: crimson pixels light up as the cursor sweeps. */}
+                    <PixelTrail pixelSize={40} fadeDuration={650} pixelClassName="gc-led" />
+                    <div className="pointer-events-none relative z-10">
+                      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-maroon/10 text-maroon transition-colors duration-300 group-hover:bg-maroon group-hover:text-cream">
+                        <r.icon className="h-6 w-6" />
+                      </span>
+                      <h3 className="mt-5 font-display text-lg font-semibold tracking-tight text-cream">
+                        {r.title}
+                      </h3>
+                      <p className="mt-2 text-sm leading-relaxed text-cream/65">{r.text}</p>
+                    </div>
+                  </div>
+                </RevealItem>
+              ))}
+            </RevealStagger>
+          </div>
+        </LampContainer>
       </section>
 
       {/* FAQ */}
