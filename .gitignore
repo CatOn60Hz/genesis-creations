@@ -27,3 +27,6 @@ dist/uploads/
 *.njsproj
 *.sln
 *.sw?
+
+# Throwaway SSR bundle used by scripts/prerender.mjs
+.ssr-tmp

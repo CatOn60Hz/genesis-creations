@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:https": "vite --mode https --host",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir .ssr-tmp && node scripts/prerender.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },
