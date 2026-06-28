@@ -210,7 +210,7 @@ const About: React.FC = () => {
               falloff="gaussian"
               radius={200}
               containerRef={heroRef}
-            />
+            />{" "}
             <TextCursorProximity
               label="US"
               className="text-6xl will-change-transform sm:text-7xl md:text-9xl lg:text-[11rem]"

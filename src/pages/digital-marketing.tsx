@@ -395,7 +395,7 @@ const DigitalMarketing: React.FC = () => {
               falloff="gaussian"
               radius={200}
               containerRef={heroRef}
-            />
+            />{" "}
             <TextCursorProximity
               label="MARKETING"
               className="text-[2.5rem] will-change-transform sm:text-6xl md:text-8xl lg:text-9xl"

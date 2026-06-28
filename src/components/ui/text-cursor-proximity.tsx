@@ -108,10 +108,16 @@ const TextCursorProximity = forwardRef<HTMLSpanElement, TextProps>(
     let letterIndex = 0
 
     return (
+      // role="text" + aria-label expose the whole word as the accessible name
+      // (the per-letter spans below stay aria-hidden). This also means we don't
+      // render a separate sr-only copy of the label — doing so duplicated the
+      // text in the DOM, so crawlers read e.g. "MEDIAMEDIA" for the headings.
       <span
         ref={ref}
         className={`${className ?? ""} inline`}
         onClick={onClick}
+        role="text"
+        aria-label={label}
         {...props}
       >
         {words.map((word, wordIndex) => (
@@ -152,7 +158,6 @@ const TextCursorProximity = forwardRef<HTMLSpanElement, TextProps>(
             )}
           </span>
         ))}
-        <span className="sr-only">{label}</span>
       </span>
     )
   }

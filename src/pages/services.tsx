@@ -389,7 +389,7 @@ const Services: React.FC = () => {
               falloff="gaussian"
               radius={200}
               containerRef={heroRef}
-            />
+            />{" "}
             <TextCursorProximity
               label="SERVICES"
               className="text-5xl will-change-transform sm:text-6xl md:text-8xl lg:text-9xl"

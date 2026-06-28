@@ -1,3 +1,6 @@
+# Advertise UTF-8 in the Content-Type HTTP header (not just the <meta> tag).
+AddDefaultCharset utf-8
+
 # SPA routing for the React app on Hostinger (Apache).
 # Real files and folders — JS/CSS assets, /api/*.php, /uploads/* — are served
 # as-is; every other path falls back to index.html so react-router can handle it.

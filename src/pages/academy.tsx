@@ -674,8 +674,7 @@ const Academy: React.FC = () => {
       <section className="relative flex min-h-[100dvh] items-center overflow-hidden px-6 py-24 text-cream">
         <img
           src={academyHero}
-          alt=""
-          aria-hidden
+          alt="Students and mentors at the Genesis Kreations Media Academy in Chennai"
           className="absolute inset-0 h-full w-full object-cover object-[center_35%]"
         />
         {/* Medium overall scrim for readability, solid at the bottom edge so it
@@ -696,7 +695,7 @@ const Academy: React.FC = () => {
               falloff="gaussian"
               radius={200}
               containerRef={heroRef}
-            />
+            />{" "}
             <TextCursorProximity
               label="ACADEMY"
               className="text-5xl will-change-transform sm:text-6xl md:text-8xl lg:text-9xl"

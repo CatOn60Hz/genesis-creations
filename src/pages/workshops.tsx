@@ -394,7 +394,7 @@ const Workshops: React.FC = () => {
               falloff="gaussian"
               radius={200}
               containerRef={heroRef}
-            />
+            />{" "}
             <TextCursorProximity
               label="& MASTERCLASSES"
               className="text-3xl will-change-transform sm:text-5xl md:text-8xl lg:text-9xl"
