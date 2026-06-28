@@ -16,6 +16,14 @@ const GC_ALLOWED = [
     'gif'  => 'image/gif',
 ];
 
+// Allowed video types for the home-screen hero video: extension => MIME.
+const GC_ALLOWED_VIDEO = [
+    'mp4'  => 'video/mp4',
+    'webm' => 'video/webm',
+    'mov'  => 'video/quicktime',
+    'ogg'  => 'video/ogg',
+];
+
 // Maximum size per uploaded file, in bytes (50 MB). NOTE: PHP's own
 // upload_max_filesize / post_max_size (set in .user.ini at the web root) must be
 // >= this, or large uploads are rejected before this check ever runs.

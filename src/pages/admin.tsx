@@ -4,6 +4,7 @@ import {
   CalendarDays,
   Images,
   Projector,
+  Film,
   Upload,
   Trash2,
   LogOut,
@@ -33,6 +34,9 @@ import {
   uploadProjectorImages,
   deleteProjectorImage,
   featureProjectorImage,
+  fetchHeroVideo,
+  uploadHeroVideo,
+  deleteHeroVideo,
 } from "@/lib/cms-api"
 import {
   fetchGalleryPhotos,
@@ -44,7 +48,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 
 const PW_KEY = "gc-admin-pw"
 
-type Tab = "announcement" | "workshops" | "gallery" | "projector"
+type Tab = "announcement" | "workshops" | "gallery" | "projector" | "herovideo"
 type Img = { name: string; url: string }
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
@@ -52,6 +56,7 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "workshops", label: "Workshops", icon: <CalendarDays className="h-4 w-4" /> },
   { id: "gallery", label: "Gallery", icon: <Images className="h-4 w-4" /> },
   { id: "projector", label: "Home Screen Photos", icon: <Projector className="h-4 w-4" /> },
+  { id: "herovideo", label: "Home Screen Video", icon: <Film className="h-4 w-4" /> },
 ]
 
 /* ----------------------------- shared styles ---------------------------- */
@@ -979,8 +984,138 @@ const AdminDashboard: React.FC = () => {
             onAuthError={onAuthError}
           />
         )}
+        {tab === "herovideo" && (
+          <VideoManager password={password} onAuthError={onAuthError} />
+        )}
       </div>
     </main>
+  )
+}
+
+/* ------------------------------ Hero video ------------------------------ */
+
+function VideoManager({
+  password,
+  onAuthError,
+}: {
+  password: string
+  onAuthError: () => void
+}) {
+  const [video, setVideo] = useState<{ name: string; url: string } | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState("")
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    fetchHeroVideo()
+      .then((v) => setVideo(v))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  async function onUpload(file: File) {
+    setBusy(true)
+    setError("")
+    try {
+      setVideo(await uploadHeroVideo(file, password))
+    } catch (e) {
+      const m = e instanceof Error ? e.message : "Upload failed"
+      setError(m)
+      if (m === "Wrong password") onAuthError()
+    } finally {
+      setBusy(false)
+      if (fileRef.current) fileRef.current.value = ""
+    }
+  }
+
+  async function onRemove() {
+    setBusy(true)
+    setError("")
+    try {
+      await deleteHeroVideo(password)
+      setVideo(null)
+    } catch (e) {
+      const m = e instanceof Error ? e.message : "Delete failed"
+      setError(m)
+      if (m === "Wrong password") onAuthError()
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <p className="text-sm text-cream/70">
+        Upload one video to add to the home-screen slideshow (it plays after the
+        photos). MP4, WebM, MOV or OGG · up to 50 MB · plays muted and silent.
+      </p>
+
+      {loading ? (
+        <div className="flex items-center gap-2 text-cream/60">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+        </div>
+      ) : video ? (
+        <div className="space-y-4">
+          <video
+            src={video.url}
+            controls
+            playsInline
+            className="aspect-video w-full max-w-xl rounded-xl border border-tan/15 bg-black"
+          />
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={busy}
+              className={btnCls}
+            >
+              {busy ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Upload className="h-4 w-4" />
+              )}
+              {busy ? "Working…" : "Replace video"}
+            </button>
+            <button
+              type="button"
+              onClick={onRemove}
+              disabled={busy}
+              className="inline-flex items-center gap-2 rounded-full border border-red-400/40 px-5 py-2.5 font-medium text-red-300 transition-colors hover:bg-red-500/10 disabled:opacity-50"
+            >
+              <Trash2 className="h-4 w-4" /> Remove
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          disabled={busy}
+          className={btnCls}
+        >
+          {busy ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Upload className="h-4 w-4" />
+          )}
+          {busy ? "Uploading…" : "Upload video"}
+        </button>
+      )}
+
+      {error && <p className="text-sm text-red-400">{error}</p>}
+
+      <input
+        ref={fileRef}
+        type="file"
+        accept="video/mp4,video/webm,video/quicktime,video/ogg,video/*"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0]
+          if (f) onUpload(f)
+        }}
+      />
+    </div>
   )
 }
 

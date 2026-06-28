@@ -1,6 +1,8 @@
 import * as React from "react"
 import { motion, useReducedMotion, type Variants } from "framer-motion"
 
+import { useIsTouch } from "@/components/hooks/use-is-touch"
+
 // Soft, gentle deceleration (easeOutQuint). Paired with a blur-focus and a
 // small travel, entrances feel calm and premium rather than snappy.
 const EASE_OUT = [0.16, 1, 0.3, 1] as const
@@ -22,6 +24,10 @@ interface RevealProps {
 export function Reveal({ children, delay = 0, className, repeat = false }: RevealProps) {
   // Reduced motion: keep a plain fade, drop the movement and blur.
   const reduce = useReducedMotion()
+  // On touch/mobile, skip the scroll-in animation entirely — render the content
+  // in its final state. Cheaper (no per-frame blur) and snappier on phones.
+  const isTouch = useIsTouch()
+  if (isTouch) return <div className={className}>{children}</div>
   return (
     <motion.div
       className={className}
@@ -54,6 +60,8 @@ const containerVariants: Variants = {
  * than everything appearing at once; keep the per-item delay short (30–80ms).
  */
 export function RevealStagger({ children, className }: RevealProps) {
+  const isTouch = useIsTouch()
+  if (isTouch) return <div className={className}>{children}</div>
   return (
     <motion.div
       className={className}
@@ -70,6 +78,10 @@ export function RevealStagger({ children, className }: RevealProps) {
 /** A single child of <RevealStagger>; inherits the parent's stagger timing. */
 export function RevealItem({ children, className }: RevealProps) {
   const reduce = useReducedMotion()
+  // Match Reveal/RevealStagger: static on touch so the parent's plain-div path
+  // doesn't leave items stuck in their hidden (opacity:0) variant on mobile.
+  const isTouch = useIsTouch()
+  if (isTouch) return <div className={className}>{children}</div>
   const itemVariants: Variants = {
     hidden: {
       opacity: 0,

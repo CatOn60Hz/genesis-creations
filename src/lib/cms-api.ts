@@ -236,3 +236,42 @@ export async function featureProjectorImage(
   )
   return (data.images ?? []).map((i) => ({ ...i, url: abs(i.url) }))
 }
+
+/* ------------------------------ Hero video ------------------------------ */
+
+export type HeroVideo = { name: string; url: string }
+
+export async function fetchHeroVideo(): Promise<HeroVideo | null> {
+  const data = await getJSON<{ video: HeroVideo | null }>("/herovideo/get.php")
+  return data.video ? { ...data.video, url: abs(data.video.url) } : null
+}
+
+export async function uploadHeroVideo(
+  file: File,
+  password: string
+): Promise<HeroVideo | null> {
+  const form = new FormData()
+  form.append("video", file)
+  const res = await fetch(`${API_BASE}/herovideo/upload.php`, {
+    method: "POST",
+    headers: { "X-Gallery-Password": password },
+    body: form,
+  })
+  if (res.status === 401) throw new Error("Wrong password")
+  if (!res.ok) {
+    let msg = `Upload failed: ${res.status}`
+    try {
+      const d = await res.json()
+      if (d?.error) msg = d.error
+    } catch {
+      /* ignore */
+    }
+    throw new Error(msg)
+  }
+  const data = await res.json()
+  return data.video ? { ...data.video, url: abs(data.video.url) } : null
+}
+
+export async function deleteHeroVideo(password: string): Promise<void> {
+  await postForm("/herovideo/delete.php", {}, password)
+}

@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { motion, AnimatePresence, useSpring } from "framer-motion"
 
 import { cn } from "@/lib/utils"
-import { fetchProjectorImages } from "@/lib/cms-api"
+import { fetchProjectorImages, fetchHeroVideo } from "@/lib/cms-api"
 import { useIsTouch } from "@/components/hooks/use-is-touch"
 
 // Bundled fallback so the projector is never blank (used in dev where PHP isn't
@@ -15,8 +15,11 @@ const FALLBACK_IMAGES = Object.keys(FALLBACK_MODULES)
   .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
   .map((k) => FALLBACK_MODULES[k])
 
+type Slide = { type: "image" | "video"; url: string }
+
 export function ProjectorScreen({ className }: { className?: string }) {
   const [images, setImages] = useState<string[]>(FALLBACK_IMAGES)
+  const [videoUrl, setVideoUrl] = useState<string | null>(null)
   const [index, setIndex] = useState(0)
 
   useEffect(() => {
@@ -28,21 +31,38 @@ export function ProjectorScreen({ className }: { className?: string }) {
       .catch(() => {
         /* keep fallback */
       })
+    // Optional admin-managed video, appended to the slideshow rotation.
+    fetchHeroVideo()
+      .then((v) => {
+        if (active && v) setVideoUrl(v.url)
+      })
+      .catch(() => {
+        /* no video set */
+      })
     return () => {
       active = false
     }
   }, [])
 
+  // Photos followed by the video (if one is set), as a single rotation.
+  const slides = useMemo<Slide[]>(() => {
+    const imgs = images.map((url) => ({ type: "image" as const, url }))
+    return videoUrl ? [...imgs, { type: "video" as const, url: videoUrl }] : imgs
+  }, [images, videoUrl])
+
+  const current = slides[index % Math.max(slides.length, 1)]
+
+  // Advance: photos auto-advance on a timer; the video advances when it ends
+  // (so it always plays in full). A lone video just loops.
   useEffect(() => {
-    if (images.length <= 1) return
-    const t = setInterval(
-      () => setIndex((p) => (p + 1) % images.length),
+    if (slides.length <= 1) return
+    if (current?.type === "video") return
+    const t = setTimeout(
+      () => setIndex((p) => (p + 1) % slides.length),
       3800
     )
-    return () => clearInterval(t)
-  }, [images.length])
-
-  const current = images[index % Math.max(images.length, 1)]
+    return () => clearTimeout(t)
+  }, [index, slides, current])
 
   // Tilt the screen toward the mouse cursor, smoothed with springs.
   const screenRef = useRef<HTMLDivElement>(null)
@@ -133,10 +153,25 @@ export function ProjectorScreen({ className }: { className?: string }) {
         style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
       >
         <AnimatePresence>
-          {current && (
+          {current?.type === "video" ? (
+            <motion.video
+              key={current.url + index}
+              src={current.url}
+              autoPlay
+              muted
+              playsInline
+              loop={slides.length === 1}
+              onEnded={() => setIndex((p) => (p + 1) % slides.length)}
+              className="absolute inset-0 h-full w-full object-cover"
+              initial={{ opacity: 0, scale: 1.06 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.9, ease: "easeInOut" }}
+            />
+          ) : current ? (
             <motion.img
-              key={current + index}
-              src={current}
+              key={current.url + index}
+              src={current.url}
               alt=""
               draggable={false}
               className="absolute inset-0 h-full w-full object-cover"
@@ -145,7 +180,7 @@ export function ProjectorScreen({ className }: { className?: string }) {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.9, ease: "easeInOut" }}
             />
-          )}
+          ) : null}
         </AnimatePresence>
 
         {/* Projector light wash + flicker */}
