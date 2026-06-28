@@ -49,9 +49,9 @@ const Hero: React.FC = () => {
         <div className="mx-auto flex w-full max-w-[110rem] flex-col items-center justify-center gap-10 lg:flex-row lg:gap-14">
           {/* Left: gooey morphing brand words + tagline */}
           <div className="flex w-full min-w-0 flex-col items-center text-center lg:w-[30rem] lg:flex-none lg:-translate-x-20">
-            <p className="text-3xl md:text-5xl uppercase tracking-[0.2em] text-maroon-dark">
+            <h1 className="text-3xl md:text-5xl uppercase tracking-[0.2em] text-maroon-dark">
               Genesis Kreations
-            </p>
+            </h1>
 
             <GooeyText
               texts={MORPH_WORDS}
