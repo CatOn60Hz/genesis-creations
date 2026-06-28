@@ -25,6 +25,7 @@ import { LampContainer } from "@/components/ui/lamp"
 import TextCursorProximity from "@/components/ui/text-cursor-proximity"
 import { SEO } from "@/components/seo"
 import dmHero from "@/assets/digital-marketing-hero.jpg"
+import { usePageBackground } from "@/lib/use-page-background"
 
 const EASE_OUT = [0.16, 1, 0.3, 1] as const
 
@@ -350,6 +351,7 @@ function ServiceDetail({ service, onClose }: { service: Service; onClose: () => 
 const DigitalMarketing: React.FC = () => {
   const [selected, setSelected] = useState<Service | null>(null)
   const heroRef = useRef<HTMLDivElement>(null)
+  const heroBg = usePageBackground("digital-marketing", dmHero)
 
   // Lock body scroll + close on Escape while the detail modal is open.
   useEffect(() => {
@@ -372,7 +374,7 @@ const DigitalMarketing: React.FC = () => {
       {/* Hero: gaming-lounge photo background under a dark scrim, full height */}
       <section className="relative flex min-h-[100dvh] items-center overflow-hidden px-6 py-24 text-cream">
         <img
-          src={dmHero}
+          src={heroBg}
           alt=""
           aria-hidden
           className="absolute inset-0 h-full w-full object-cover object-center"

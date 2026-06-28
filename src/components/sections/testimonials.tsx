@@ -1,16 +1,21 @@
+import { useEffect, useState } from "react"
+
 import {
   ScrollReelTestimonials,
   type ScrollReelTestimonial,
 } from "@/components/ui/scroll-reel-testimonials"
 import { Grain } from "@/components/ui/grain"
 import { Reveal } from "@/components/ui/reveal"
+import { fetchTestimonials } from "@/lib/cms-api"
 
 import johnImg from "@/assets/testimonials/student_john.png"
 import jeremiahImg from "@/assets/testimonials/student_jeremiah.png"
 import derrickImg from "@/assets/testimonials/student_derrick.png"
 
-// Real Genesis Kreations Media Academy student reviews.
-const reviews: ScrollReelTestimonial[] = [
+// Built-in defaults — shown until the CMS responds, and as a fallback if the
+// API is empty or unreachable. The backend seeds these same reviews on first
+// run, so /admin starts with them ready to edit.
+const fallbackReviews: ScrollReelTestimonial[] = [
   {
     quote:
       "It gave me the confidence and skills that I needed to get into the Media industry.",
@@ -34,6 +39,32 @@ const reviews: ScrollReelTestimonial[] = [
 ]
 
 const Testimonials: React.FC = () => {
+  const [reviews, setReviews] = useState<ScrollReelTestimonial[]>(fallbackReviews)
+
+  useEffect(() => {
+    let active = true
+    fetchTestimonials()
+      .then((items) => {
+        if (!active) return
+        // A testimonial needs both a quote and a portrait to render in the reel.
+        const mapped = items
+          .filter((t) => t.quote && t.image?.url)
+          .map<ScrollReelTestimonial>((t) => ({
+            quote: t.quote,
+            author: t.author,
+            image: t.image!.url,
+            alt: t.author,
+          }))
+        if (mapped.length) setReviews(mapped)
+      })
+      .catch(() => {
+        /* keep fallback reviews */
+      })
+    return () => {
+      active = false
+    }
+  }, [])
+
   return (
     <section
       id="testimonials"

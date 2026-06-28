@@ -27,6 +27,7 @@ import { FaqPro, type FaqProItem } from "@/components/ui/faq-pro"
 import { LinkedInIcon, InstagramIcon } from "@/components/ui/social-icons"
 import { SEO } from "@/components/seo"
 import aboutHero from "@/assets/about-hero.jpg"
+import { usePageBackground } from "@/lib/use-page-background"
 import visionImg from "@/assets/vision.jpg"
 import founderImg from "@/assets/founder.jpg"
 
@@ -178,6 +179,7 @@ const faqs: FaqProItem[] = [
 const About: React.FC = () => {
   const heroRef = useRef<HTMLDivElement>(null)
   const [flipped, setFlipped] = useState(false)
+  const heroBg = usePageBackground("about", aboutHero)
 
   return (
     <main className="min-h-screen bg-maroon-dark/40 text-cream">
@@ -188,7 +190,7 @@ const About: React.FC = () => {
       {/* Hero: team photo background under a dark scrim, full viewport height */}
       <section className="relative flex min-h-[100dvh] items-center overflow-hidden px-6 py-24 text-cream">
         <img
-          src={aboutHero}
+          src={heroBg}
           alt=""
           aria-hidden
           className="absolute inset-0 h-full w-full object-cover object-[center_30%]"

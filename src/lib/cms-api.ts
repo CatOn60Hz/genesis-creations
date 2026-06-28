@@ -83,6 +83,239 @@ export function saveAnnouncement(
   )
 }
 
+/* ------------------------------ Testimonials ---------------------------- */
+
+export type Testimonial = {
+  id: string
+  quote: string
+  author: string
+  role?: string
+  image: { name: string; url: string } | null
+  order?: number
+  createdAt?: string
+  updatedAt?: string
+}
+
+function normalizeTestimonial(t: Testimonial): Testimonial {
+  return t.image ? { ...t, image: { ...t.image, url: abs(t.image.url) } } : t
+}
+
+export async function fetchTestimonials(): Promise<Testimonial[]> {
+  const data = await getJSON<{ testimonials: Testimonial[] }>(
+    "/testimonials/list.php"
+  )
+  return (data.testimonials ?? []).map(normalizeTestimonial)
+}
+
+export async function saveTestimonial(
+  fields: {
+    id?: string
+    quote: string
+    author: string
+    role?: string
+    image?: File
+  },
+  password: string
+): Promise<Testimonial[]> {
+  const data = await postForm<{ testimonials: Testimonial[] }>(
+    "/testimonials/save.php",
+    {
+      id: fields.id ?? "",
+      quote: fields.quote,
+      author: fields.author,
+      role: fields.role ?? "",
+      image: fields.image,
+    },
+    password
+  )
+  return (data.testimonials ?? []).map(normalizeTestimonial)
+}
+
+export async function deleteTestimonial(
+  id: string,
+  password: string
+): Promise<Testimonial[]> {
+  const data = await postForm<{ testimonials: Testimonial[] }>(
+    "/testimonials/delete.php",
+    { id },
+    password
+  )
+  return (data.testimonials ?? []).map(normalizeTestimonial)
+}
+
+export async function reorderTestimonials(
+  order: string[],
+  password: string
+): Promise<Testimonial[]> {
+  const data = await postForm<{ testimonials: Testimonial[] }>(
+    "/testimonials/reorder.php",
+    { order: JSON.stringify(order) },
+    password
+  )
+  return (data.testimonials ?? []).map(normalizeTestimonial)
+}
+
+/* ----------------------- Certification courses -------------------------- */
+
+// Kinds map to the animated course icons (see animated-course-icon.tsx). Kept
+// as a string union here to avoid coupling the API client to a UI component.
+export type CertCourseKind =
+  | "diploma"
+  | "photography"
+  | "videography"
+  | "graphic-design"
+  | "video-editing"
+  | "drone"
+  | "live-sound"
+  | "studio-recording"
+
+export type CourseModule = { title: string; items: string[] }
+
+export type CertCourse = {
+  id: string
+  kind: CertCourseKind
+  title: string
+  subtitle: string
+  why: string
+  duration: string
+  schedule: string
+  format: string
+  certification: string
+  badge?: string
+  who: string
+  learn?: string[]
+  modules?: CourseModule[]
+  choose: string[]
+  careers?: string[]
+  order?: number
+  createdAt?: string
+  updatedAt?: string
+}
+
+export async function fetchCertCourses(): Promise<CertCourse[]> {
+  const data = await getJSON<{ courses: CertCourse[] }>("/courses/list.php")
+  return data.courses ?? []
+}
+
+export async function saveCertCourse(
+  fields: {
+    id?: string
+    kind: CertCourseKind
+    title: string
+    subtitle: string
+    why: string
+    duration: string
+    schedule: string
+    format: string
+    certification: string
+    badge?: string
+    who: string
+    learn?: string[]
+    modules?: CourseModule[]
+    choose: string[]
+    careers?: string[]
+  },
+  password: string
+): Promise<CertCourse[]> {
+  const data = await postForm<{ courses: CertCourse[] }>(
+    "/courses/save.php",
+    {
+      id: fields.id ?? "",
+      kind: fields.kind,
+      title: fields.title,
+      subtitle: fields.subtitle,
+      why: fields.why,
+      duration: fields.duration,
+      schedule: fields.schedule,
+      format: fields.format,
+      certification: fields.certification,
+      badge: fields.badge ?? "",
+      who: fields.who,
+      // Lists/objects travel as JSON strings (FormData is flat).
+      learn: JSON.stringify(fields.learn ?? []),
+      modules: JSON.stringify(fields.modules ?? []),
+      choose: JSON.stringify(fields.choose ?? []),
+      careers: JSON.stringify(fields.careers ?? []),
+    },
+    password
+  )
+  return data.courses ?? []
+}
+
+export async function deleteCertCourse(
+  id: string,
+  password: string
+): Promise<CertCourse[]> {
+  const data = await postForm<{ courses: CertCourse[] }>(
+    "/courses/delete.php",
+    { id },
+    password
+  )
+  return data.courses ?? []
+}
+
+export async function reorderCertCourses(
+  order: string[],
+  password: string
+): Promise<CertCourse[]> {
+  const data = await postForm<{ courses: CertCourse[] }>(
+    "/courses/reorder.php",
+    { order: JSON.stringify(order) },
+    password
+  )
+  return data.courses ?? []
+}
+
+/* ---------------------------- Page backgrounds -------------------------- */
+
+// Admin-editable hero/background images, keyed by a named page slot. Pages fall
+// back to their bundled image when a slot is unset.
+export type BackgroundSlot = "academy" | "services" | "digital-marketing" | "about"
+
+type BgImage = { name: string; url: string }
+
+function backgroundsToUrls(
+  bg: Record<string, BgImage> | undefined
+): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const [slot, img] of Object.entries(bg ?? {})) {
+    if (img?.url) out[slot] = abs(img.url)
+  }
+  return out
+}
+
+export async function fetchBackgrounds(): Promise<Record<string, string>> {
+  const data = await getJSON<{ backgrounds: Record<string, BgImage> }>(
+    "/backgrounds/list.php"
+  )
+  return backgroundsToUrls(data.backgrounds)
+}
+
+export async function setBackground(
+  slot: BackgroundSlot,
+  image: File,
+  password: string
+): Promise<Record<string, string>> {
+  const data = await postForm<{ backgrounds: Record<string, BgImage> }>(
+    "/backgrounds/set.php",
+    { slot, image },
+    password
+  )
+  return backgroundsToUrls(data.backgrounds)
+}
+
+export async function clearBackground(
+  slot: BackgroundSlot,
+  password: string
+): Promise<Record<string, string>> {
+  const data = await postForm<{ backgrounds: Record<string, BgImage> }>(
+    "/backgrounds/delete.php",
+    { slot },
+    password
+  )
+  return backgroundsToUrls(data.backgrounds)
+}
+
 /* ------------------------------- Workshops ------------------------------ */
 
 export type WorkshopSession = {
@@ -175,6 +408,66 @@ export async function deleteWorkshop(
     password
   )
   return (data.workshops ?? []).map(normalizeWorkshop)
+}
+
+/* --------------------- Home "Workshops & Courses" list ------------------ */
+
+export type HomeCourseKind = "gimbal" | "drone" | "aerial" | "clapper" | "camera"
+
+export type HomeCourse = {
+  id: string
+  kind: HomeCourseKind
+  title: string
+  text: string
+  order?: number
+  createdAt?: string
+  updatedAt?: string
+}
+
+export async function fetchHomeCourses(): Promise<HomeCourse[]> {
+  const data = await getJSON<{ courses: HomeCourse[] }>("/home-courses/list.php")
+  return data.courses ?? []
+}
+
+export async function saveHomeCourse(
+  fields: { id?: string; kind: HomeCourseKind; title: string; text: string },
+  password: string
+): Promise<HomeCourse[]> {
+  const data = await postForm<{ courses: HomeCourse[] }>(
+    "/home-courses/save.php",
+    {
+      id: fields.id ?? "",
+      kind: fields.kind,
+      title: fields.title,
+      text: fields.text,
+    },
+    password
+  )
+  return data.courses ?? []
+}
+
+export async function deleteHomeCourse(
+  id: string,
+  password: string
+): Promise<HomeCourse[]> {
+  const data = await postForm<{ courses: HomeCourse[] }>(
+    "/home-courses/delete.php",
+    { id },
+    password
+  )
+  return data.courses ?? []
+}
+
+export async function reorderHomeCourses(
+  order: string[],
+  password: string
+): Promise<HomeCourse[]> {
+  const data = await postForm<{ courses: HomeCourse[] }>(
+    "/home-courses/reorder.php",
+    { order: JSON.stringify(order) },
+    password
+  )
+  return data.courses ?? []
 }
 
 /* ------------------------- Home-screen slideshow ------------------------ */

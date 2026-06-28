@@ -1,36 +1,54 @@
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { ArrowRight, RotateCw, PlaneTakeoff, Plane, Clapperboard, Camera } from "lucide-react"
+import {
+  ArrowRight,
+  RotateCw,
+  PlaneTakeoff,
+  Plane,
+  Clapperboard,
+  Camera,
+} from "lucide-react"
 
 import { Reveal, RevealStagger, RevealItem } from "@/components/ui/reveal"
 import { Grain } from "@/components/ui/grain"
+import { fetchHomeCourses, type HomeCourseKind } from "@/lib/cms-api"
 
-const courses = [
+// Icon per `kind`. The CSS class gc-cicon-<kind> drives the hover animation, so
+// keep these keys in sync with the backend's GC_HOME_COURSE_KINDS.
+const KIND_ICONS: Record<HomeCourseKind, React.ReactNode> = {
+  gimbal: <RotateCw />,
+  drone: <PlaneTakeoff />,
+  aerial: <Plane />,
+  clapper: <Clapperboard />,
+  camera: <Camera />,
+}
+
+type CourseRow = { kind: HomeCourseKind; title: string; text: string }
+
+// Built-in defaults — shown until the CMS responds and as a fallback. The
+// backend seeds these same rows on first run, so /admin starts with them.
+const fallbackCourses: CourseRow[] = [
   {
-    icon: <RotateCw />,
     kind: "gimbal",
     title: "Gimbal Workshop",
     text: "Master smooth, cinematic motion with professional gimbal stabilization.",
   },
   {
-    icon: <PlaneTakeoff />,
     kind: "drone",
     title: "Drone Workshop",
     text: "Hands-on drone operation and flight fundamentals for aerial work.",
   },
   {
-    icon: <Plane />,
     kind: "aerial",
     title: "Aerial Cinematography",
     text: "Capture breathtaking aerial shots and compose them like a pro.",
   },
   {
-    icon: <Clapperboard />,
     kind: "clapper",
     title: "Media Technology",
     text: "The complete toolkit — camera, lighting, audio, editing and production.",
   },
   {
-    icon: <Camera />,
     kind: "camera",
     title: "Digital Photography",
     text: "From exposure to composition, build a strong photography foundation.",
@@ -39,6 +57,25 @@ const courses = [
 
 const Courses: React.FC = () => {
   const navigate = useNavigate()
+  const [courses, setCourses] = useState<CourseRow[]>(fallbackCourses)
+
+  useEffect(() => {
+    let active = true
+    fetchHomeCourses()
+      .then((items) => {
+        if (active && items.length) {
+          setCourses(
+            items.map((c) => ({ kind: c.kind, title: c.title, text: c.text }))
+          )
+        }
+      })
+      .catch(() => {
+        /* keep fallback courses */
+      })
+    return () => {
+      active = false
+    }
+  }, [])
 
   return (
     <section
@@ -68,7 +105,7 @@ const Courses: React.FC = () => {
               >
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-maroon/10 text-maroon transition-colors duration-300 group-hover:bg-maroon group-hover:text-cream">
                   <span className={`gc-cicon gc-cicon-${c.kind} [&>svg]:h-5 [&>svg]:w-5`}>
-                    {c.icon}
+                    {KIND_ICONS[c.kind] ?? KIND_ICONS.clapper}
                   </span>
                 </span>
                 <span className="min-w-0 flex-1">

@@ -30,6 +30,8 @@ import {
 } from "@/components/ui/animated-course-icon"
 import { SEO } from "@/components/seo"
 import academyHero from "@/assets/academy-hero.jpg"
+import { usePageBackground } from "@/lib/use-page-background"
+import { fetchCertCourses } from "@/lib/cms-api"
 
 const EASE_OUT = [0.16, 1, 0.3, 1] as const
 
@@ -43,6 +45,7 @@ const PROXIMITY_STYLES = {
 type Icon = ComponentType<LucideProps>
 
 interface Course {
+  id?: string
   kind: CourseKind
   title: string
   subtitle: string
@@ -63,8 +66,10 @@ interface Course {
 
 // Catalogue content lifted from the Genesis Kreations course handbook. Each
 // course keeps the same shape so the card and its detail modal stay dumb: an
-// intro paragraph up top, then the practical points underneath.
-const courses: Course[] = [
+// intro paragraph up top, then the practical points underneath. These are the
+// built-in defaults shown until the CMS responds (and the fallback when the API
+// is empty/unreachable); the backend seeds the same set on first run.
+const fallbackCourses: Course[] = [
   {
     kind: "diploma",
     badge: "Launching Soon",
@@ -650,7 +655,24 @@ function CourseDetail({ course, onClose }: { course: Course; onClose: () => void
 
 const Academy: React.FC = () => {
   const [selected, setSelected] = useState<Course | null>(null)
+  const [courses, setCourses] = useState<Course[]>(fallbackCourses)
   const heroRef = useRef<HTMLDivElement>(null)
+  const heroBg = usePageBackground("academy", academyHero)
+
+  // Load CMS-managed courses; keep the built-in defaults on empty/error.
+  useEffect(() => {
+    let active = true
+    fetchCertCourses()
+      .then((items) => {
+        if (active && items.length) setCourses(items as Course[])
+      })
+      .catch(() => {
+        /* keep fallback courses */
+      })
+    return () => {
+      active = false
+    }
+  }, [])
 
   // Lock body scroll + close on Escape while the detail modal is open.
   useEffect(() => {
@@ -673,7 +695,7 @@ const Academy: React.FC = () => {
       {/* Hero: team photo background under a dark scrim, full viewport height */}
       <section className="relative flex min-h-[100dvh] items-center overflow-hidden px-6 py-24 text-cream">
         <img
-          src={academyHero}
+          src={heroBg}
           alt="Students and mentors at the Genesis Kreations Media Academy in Chennai"
           className="absolute inset-0 h-full w-full object-cover object-[center_35%]"
         />
@@ -735,7 +757,7 @@ const Academy: React.FC = () => {
             <div className="mx-auto mt-14 grid max-w-6xl items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {courses.map((course, i) => (
                 <CourseCard
-                  key={course.kind}
+                  key={course.id ?? course.kind}
                   course={course}
                   index={i}
                   onOpen={() => setSelected(course)}

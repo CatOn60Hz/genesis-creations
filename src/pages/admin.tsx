@@ -4,6 +4,11 @@ import {
   CalendarDays,
   Images,
   Projector,
+  MessageSquareQuote,
+  ImagePlus,
+  RotateCcw,
+  GraduationCap,
+  BookOpen,
   Film,
   ArrowUp,
   ArrowDown,
@@ -38,6 +43,28 @@ import {
   deleteProjectorItem,
   reorderProjector,
   type ProjectorItem,
+  fetchTestimonials,
+  saveTestimonial,
+  deleteTestimonial,
+  reorderTestimonials,
+  type Testimonial,
+  fetchBackgrounds,
+  setBackground,
+  clearBackground,
+  type BackgroundSlot,
+  fetchHomeCourses,
+  saveHomeCourse,
+  deleteHomeCourse,
+  reorderHomeCourses,
+  type HomeCourse,
+  type HomeCourseKind,
+  fetchCertCourses,
+  saveCertCourse,
+  deleteCertCourse,
+  reorderCertCourses,
+  type CertCourse,
+  type CertCourseKind,
+  type CourseModule,
 } from "@/lib/cms-api"
 import {
   fetchGalleryPhotos,
@@ -49,14 +76,26 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 
 const PW_KEY = "gc-admin-pw"
 
-type Tab = "announcement" | "workshops" | "gallery" | "projector"
+type Tab =
+  | "announcement"
+  | "workshops"
+  | "courses"
+  | "testimonials"
+  | "homeCourses"
+  | "gallery"
+  | "projector"
+  | "backgrounds"
 type Img = { name: string; url: string }
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "announcement", label: "Announcement", icon: <Megaphone className="h-4 w-4" /> },
   { id: "workshops", label: "Workshops", icon: <CalendarDays className="h-4 w-4" /> },
+  { id: "courses", label: "Courses", icon: <BookOpen className="h-4 w-4" /> },
+  { id: "testimonials", label: "Testimonials", icon: <MessageSquareQuote className="h-4 w-4" /> },
+  { id: "homeCourses", label: "Home Courses", icon: <GraduationCap className="h-4 w-4" /> },
   { id: "gallery", label: "Gallery", icon: <Images className="h-4 w-4" /> },
   { id: "projector", label: "Home Screen", icon: <Projector className="h-4 w-4" /> },
+  { id: "backgrounds", label: "Backgrounds", icon: <ImagePlus className="h-4 w-4" /> },
 ]
 
 /* ----------------------------- shared styles ---------------------------- */
@@ -858,6 +897,1211 @@ function ImageManager({
 
 /* ------------------------------ Dashboard ------------------------------- */
 
+/* ------------------------------ Testimonials ---------------------------- */
+
+const EMPTY_TESTIMONIAL = { id: "", quote: "", author: "", role: "" }
+
+function TestimonialsManager({
+  password,
+  onAuthError,
+}: {
+  password: string
+  onAuthError: () => void
+}) {
+  const [items, setItems] = useState<Testimonial[]>([])
+  const [loading, setLoading] = useState(true)
+  const [form, setForm] = useState({ ...EMPTY_TESTIMONIAL })
+  const [image, setImage] = useState<File | undefined>()
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [confirmId, setConfirmId] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  // The record being edited (for its existing portrait preview), if any.
+  const editing = items.find((t) => t.id === form.id) ?? null
+
+  useEffect(() => {
+    fetchTestimonials()
+      .then(setItems)
+      .catch(() => setError("Couldn't load testimonials."))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const handleErr = (e: unknown) => {
+    const m = e instanceof Error ? e.message : "Something went wrong"
+    setError(m)
+    if (m === "Wrong password") onAuthError()
+  }
+
+  const resetForm = () => {
+    setForm({ ...EMPTY_TESTIMONIAL })
+    setImage(undefined)
+    if (fileRef.current) fileRef.current.value = ""
+  }
+
+  const submit = async () => {
+    if (!form.quote.trim() || !form.author.trim()) {
+      setError("Quote and author are required.")
+      return
+    }
+    if (!form.id && !image) {
+      setError("Please add a portrait photo.")
+      return
+    }
+    setBusy(true)
+    setError(null)
+    try {
+      const next = await saveTestimonial(
+        {
+          id: form.id || undefined,
+          quote: form.quote,
+          author: form.author,
+          role: form.role,
+          image,
+        },
+        password
+      )
+      setItems(next)
+      resetForm()
+    } catch (e) {
+      handleErr(e)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const edit = (t: Testimonial) => {
+    setForm({ id: t.id, quote: t.quote, author: t.author, role: t.role ?? "" })
+    setImage(undefined)
+    if (fileRef.current) fileRef.current.value = ""
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
+  const confirmRemove = async () => {
+    if (!confirmId) return
+    const id = confirmId
+    setBusy(true)
+    try {
+      setItems(await deleteTestimonial(id, password))
+      if (form.id === id) resetForm()
+      setConfirmId(null)
+    } catch (e) {
+      handleErr(e)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const move = async (idx: number, dir: -1 | 1) => {
+    const j = idx + dir
+    if (j < 0 || j >= items.length) return
+    const next = items.slice()
+    ;[next[idx], next[j]] = [next[j], next[idx]]
+    setItems(next) // optimistic
+    setBusy(true)
+    setError(null)
+    try {
+      setItems(await reorderTestimonials(next.map((t) => t.id), password))
+    } catch (e) {
+      handleErr(e)
+      try {
+        setItems(await fetchTestimonials())
+      } catch {
+        /* ignore */
+      }
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="space-y-10">
+      {/* Editor */}
+      <div className="max-w-2xl space-y-4 rounded-2xl bg-white/5 p-6 ring-1 ring-white/10">
+        <h3 className="flex items-center gap-2 text-lg font-semibold">
+          {form.id ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+          {form.id ? "Edit testimonial" : "Add a testimonial"}
+        </h3>
+        <textarea
+          className={`${inputCls} min-h-[90px]`}
+          placeholder="Quote * (what the student said)"
+          value={form.quote}
+          onChange={(e) => setForm({ ...form, quote: e.target.value })}
+        />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <input
+            className={inputCls}
+            placeholder="Student name *"
+            value={form.author}
+            onChange={(e) => setForm({ ...form, author: e.target.value })}
+          />
+          <input
+            className={inputCls}
+            placeholder="Course / role (optional)"
+            value={form.role}
+            onChange={(e) => setForm({ ...form, role: e.target.value })}
+          />
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full bg-black/40 ring-1 ring-white/10">
+            {image ? (
+              <img
+                src={URL.createObjectURL(image)}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+            ) : editing?.image?.url ? (
+              <img
+                src={editing.image.url}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+            ) : null}
+          </div>
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            className="inline-flex items-center gap-2 rounded-full border border-tan/20 px-4 py-2 text-sm text-cream/80 transition-colors hover:bg-white/5"
+          >
+            <Upload className="h-4 w-4" />
+            {form.id ? "Replace photo" : "Portrait photo *"}
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => setImage(e.target.files?.[0])}
+          />
+        </div>
+
+        {error && <p className="text-sm text-red-400">{error}</p>}
+
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={submit} disabled={busy} className={btnCls}>
+            {busy ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
+            {form.id ? "Save changes" : "Add testimonial"}
+          </button>
+          {form.id && (
+            <button
+              type="button"
+              onClick={resetForm}
+              className="inline-flex items-center gap-2 rounded-full border border-tan/20 px-4 py-2 text-sm text-cream/80 transition-colors hover:bg-white/5"
+            >
+              <X className="h-4 w-4" /> Cancel
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* List */}
+      {loading ? (
+        <div className="flex items-center gap-2 text-cream/60">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+        </div>
+      ) : items.length === 0 ? (
+        <p className="text-cream/60">No testimonials yet — add one above.</p>
+      ) : (
+        <ul className="space-y-3">
+          {items.map((t, idx) => (
+            <li
+              key={t.id}
+              className="flex items-center gap-4 rounded-xl border border-tan/15 bg-white/5 p-3"
+            >
+              <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-black/40">
+                {t.image?.url && (
+                  <img
+                    src={t.image.url}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm text-cream/90">“{t.quote}”</p>
+                <p className="mt-1 text-xs text-cream/55">
+                  {t.author}
+                  {t.role ? ` · ${t.role}` : ""}
+                </p>
+              </div>
+              <div className="flex shrink-0 items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => move(idx, -1)}
+                  disabled={busy || idx === 0}
+                  aria-label="Move up"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-tan/20 text-cream transition-colors hover:border-maroon disabled:opacity-30"
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => move(idx, 1)}
+                  disabled={busy || idx === items.length - 1}
+                  aria-label="Move down"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-tan/20 text-cream transition-colors hover:border-maroon disabled:opacity-30"
+                >
+                  <ArrowDown className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => edit(t)}
+                  aria-label="Edit"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-tan/20 text-cream transition-colors hover:border-maroon"
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmId(t.id)}
+                  disabled={busy}
+                  aria-label="Delete"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-400/40 text-red-300 transition-colors hover:bg-red-500/10 disabled:opacity-50"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <ConfirmDialog
+        open={confirmId !== null}
+        title="Delete testimonial?"
+        message="This permanently removes the testimonial and its photo."
+        busy={busy}
+        onConfirm={confirmRemove}
+        onCancel={() => setConfirmId(null)}
+      />
+    </div>
+  )
+}
+
+/* ----------------------- Certification courses -------------------------- */
+
+const CERT_COURSE_KINDS: { value: CertCourseKind; label: string }[] = [
+  { value: "diploma", label: "Diploma" },
+  { value: "photography", label: "Photography" },
+  { value: "videography", label: "Videography" },
+  { value: "graphic-design", label: "Graphic Design" },
+  { value: "video-editing", label: "Video Editing" },
+  { value: "drone", label: "Drone" },
+  { value: "live-sound", label: "Live Sound" },
+  { value: "studio-recording", label: "Studio Recording" },
+]
+
+// Reusable editor for a simple string[] field (add / edit / remove rows).
+function ListField({
+  label,
+  hint,
+  items,
+  onChange,
+  placeholder,
+}: {
+  label: string
+  hint?: string
+  items: string[]
+  onChange: (items: string[]) => void
+  placeholder?: string
+}) {
+  return (
+    <div className="space-y-2">
+      <label className="block text-sm font-medium text-cream/80">{label}</label>
+      {hint && <p className="-mt-1 text-xs text-cream/45">{hint}</p>}
+      {items.map((v, i) => (
+        <div key={i} className="flex gap-2">
+          <input
+            className={inputCls}
+            value={v}
+            placeholder={placeholder}
+            onChange={(e) =>
+              onChange(items.map((x, xi) => (xi === i ? e.target.value : x)))
+            }
+          />
+          <button
+            type="button"
+            onClick={() => onChange(items.filter((_, xi) => xi !== i))}
+            aria-label="Remove"
+            className="flex h-[46px] w-11 shrink-0 items-center justify-center rounded-lg border border-red-400/40 text-red-300 transition-colors hover:bg-red-500/10"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={() => onChange([...items, ""])}
+        className="inline-flex items-center gap-2 rounded-full border border-tan/20 px-4 py-2 text-sm text-cream/80 transition-colors hover:bg-white/5"
+      >
+        <Plus className="h-4 w-4" /> Add
+      </button>
+    </div>
+  )
+}
+
+// Editor for the diploma's module breakdown: a list of { title, items[] }.
+function ModulesField({
+  modules,
+  onChange,
+}: {
+  modules: CourseModule[]
+  onChange: (modules: CourseModule[]) => void
+}) {
+  const update = (i: number, patch: Partial<CourseModule>) =>
+    onChange(modules.map((m, mi) => (mi === i ? { ...m, ...patch } : m)))
+
+  return (
+    <div className="space-y-3">
+      <label className="block text-sm font-medium text-cream/80">
+        Modules (curriculum breakdown)
+      </label>
+      <p className="-mt-1 text-xs text-cream/45">
+        Leave empty for single-skill courses — they use the “What you’ll learn”
+        list instead.
+      </p>
+      {modules.map((m, i) => (
+        <div
+          key={i}
+          className="space-y-2 rounded-xl border border-tan/15 bg-black/20 p-3"
+        >
+          <div className="flex gap-2">
+            <input
+              className={inputCls}
+              value={m.title}
+              placeholder="Module title"
+              onChange={(e) => update(i, { title: e.target.value })}
+            />
+            <button
+              type="button"
+              onClick={() => onChange(modules.filter((_, mi) => mi !== i))}
+              aria-label="Remove module"
+              className="flex h-[46px] w-11 shrink-0 items-center justify-center rounded-lg border border-red-400/40 text-red-300 transition-colors hover:bg-red-500/10"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="pl-3">
+            <ListField
+              label="Topics"
+              items={m.items}
+              onChange={(items) => update(i, { items })}
+              placeholder="Topic covered in this module"
+            />
+          </div>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={() => onChange([...modules, { title: "", items: [] }])}
+        className="inline-flex items-center gap-2 rounded-full border border-tan/20 px-4 py-2 text-sm text-cream/80 transition-colors hover:bg-white/5"
+      >
+        <Plus className="h-4 w-4" /> Add module
+      </button>
+    </div>
+  )
+}
+
+type CourseForm = {
+  id: string
+  kind: CertCourseKind
+  title: string
+  subtitle: string
+  badge: string
+  why: string
+  duration: string
+  schedule: string
+  format: string
+  certification: string
+  who: string
+  learn: string[]
+  choose: string[]
+  careers: string[]
+  modules: CourseModule[]
+}
+
+const EMPTY_COURSE: CourseForm = {
+  id: "",
+  kind: "photography",
+  title: "",
+  subtitle: "",
+  badge: "",
+  why: "",
+  duration: "",
+  schedule: "",
+  format: "",
+  certification: "",
+  who: "",
+  learn: [],
+  choose: [],
+  careers: [],
+  modules: [],
+}
+
+const courseToForm = (c: CertCourse): CourseForm => ({
+  id: c.id,
+  kind: c.kind,
+  title: c.title,
+  subtitle: c.subtitle ?? "",
+  badge: c.badge ?? "",
+  why: c.why ?? "",
+  duration: c.duration ?? "",
+  schedule: c.schedule ?? "",
+  format: c.format ?? "",
+  certification: c.certification ?? "",
+  who: c.who ?? "",
+  learn: [...(c.learn ?? [])],
+  choose: [...(c.choose ?? [])],
+  careers: [...(c.careers ?? [])],
+  modules: (c.modules ?? []).map((m) => ({ title: m.title, items: [...m.items] })),
+})
+
+function CoursesManager({
+  password,
+  onAuthError,
+}: {
+  password: string
+  onAuthError: () => void
+}) {
+  const [items, setItems] = useState<CertCourse[]>([])
+  const [loading, setLoading] = useState(true)
+  const [form, setForm] = useState<CourseForm>({ ...EMPTY_COURSE })
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [confirmId, setConfirmId] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetchCertCourses()
+      .then(setItems)
+      .catch(() => setError("Couldn't load courses."))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const handleErr = (e: unknown) => {
+    const m = e instanceof Error ? e.message : "Something went wrong"
+    setError(m)
+    if (m === "Wrong password") onAuthError()
+  }
+
+  const resetForm = () => setForm({ ...EMPTY_COURSE })
+
+  const submit = async () => {
+    if (!form.title.trim()) {
+      setError("Title is required.")
+      return
+    }
+    setBusy(true)
+    setError(null)
+    try {
+      const next = await saveCertCourse(
+        {
+          id: form.id || undefined,
+          kind: form.kind,
+          title: form.title,
+          subtitle: form.subtitle,
+          why: form.why,
+          duration: form.duration,
+          schedule: form.schedule,
+          format: form.format,
+          certification: form.certification,
+          badge: form.badge,
+          who: form.who,
+          learn: form.learn,
+          modules: form.modules,
+          choose: form.choose,
+          careers: form.careers,
+        },
+        password
+      )
+      setItems(next)
+      resetForm()
+      window.scrollTo({ top: 0, behavior: "smooth" })
+    } catch (e) {
+      handleErr(e)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const edit = (c: CertCourse) => {
+    setForm(courseToForm(c))
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
+  const confirmRemove = async () => {
+    if (!confirmId) return
+    const id = confirmId
+    setBusy(true)
+    try {
+      setItems(await deleteCertCourse(id, password))
+      if (form.id === id) resetForm()
+      setConfirmId(null)
+    } catch (e) {
+      handleErr(e)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const move = async (idx: number, dir: -1 | 1) => {
+    const j = idx + dir
+    if (j < 0 || j >= items.length) return
+    const next = items.slice()
+    ;[next[idx], next[j]] = [next[j], next[idx]]
+    setItems(next) // optimistic
+    setBusy(true)
+    setError(null)
+    try {
+      setItems(await reorderCertCourses(next.map((c) => c.id), password))
+    } catch (e) {
+      handleErr(e)
+      try {
+        setItems(await fetchCertCourses())
+      } catch {
+        /* ignore */
+      }
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const set = (patch: Partial<CourseForm>) => setForm((f) => ({ ...f, ...patch }))
+
+  return (
+    <div className="space-y-10">
+      <p className="text-sm text-cream/70">
+        The certification courses shown on the Academy page. Drag order with the
+        arrows; the first card is the most prominent.
+      </p>
+
+      {/* Editor */}
+      <div className="max-w-2xl space-y-5 rounded-2xl bg-white/5 p-6 ring-1 ring-white/10">
+        <h3 className="flex items-center gap-2 text-lg font-semibold">
+          {form.id ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+          {form.id ? "Edit course" : "Add a course"}
+        </h3>
+
+        <input
+          className={inputCls}
+          placeholder="Title * (e.g. Photography)"
+          value={form.title}
+          onChange={(e) => set({ title: e.target.value })}
+        />
+        <input
+          className={inputCls}
+          placeholder="Subtitle (e.g. Professional Photography Certification Course)"
+          value={form.subtitle}
+          onChange={(e) => set({ subtitle: e.target.value })}
+        />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="mb-1 block text-sm text-cream/70">Icon</label>
+            <select
+              className={inputCls}
+              value={form.kind}
+              onChange={(e) => set({ kind: e.target.value as CertCourseKind })}
+            >
+              {CERT_COURSE_KINDS.map((k) => (
+                <option key={k.value} value={k.value}>
+                  {k.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <input
+            className={inputCls}
+            placeholder='Badge (e.g. "Launching Soon")'
+            value={form.badge}
+            onChange={(e) => set({ badge: e.target.value })}
+          />
+        </div>
+
+        <textarea
+          className={`${inputCls} min-h-[110px]`}
+          placeholder="Intro paragraph (the “why this course” text)"
+          value={form.why}
+          onChange={(e) => set({ why: e.target.value })}
+        />
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <input
+            className={inputCls}
+            placeholder="Duration (e.g. 1 Month)"
+            value={form.duration}
+            onChange={(e) => set({ duration: e.target.value })}
+          />
+          <input
+            className={inputCls}
+            placeholder="Schedule (e.g. Mon to Fri, 3 hours/day)"
+            value={form.schedule}
+            onChange={(e) => set({ schedule: e.target.value })}
+          />
+          <input
+            className={inputCls}
+            placeholder="Format (e.g. Studio + outdoor shoots)"
+            value={form.format}
+            onChange={(e) => set({ format: e.target.value })}
+          />
+          <input
+            className={inputCls}
+            placeholder="Certification (e.g. Certified Photographer)"
+            value={form.certification}
+            onChange={(e) => set({ certification: e.target.value })}
+          />
+        </div>
+
+        <ListField
+          label="What you’ll learn"
+          hint="Used for single-skill courses. Leave empty if you fill Modules below."
+          items={form.learn}
+          onChange={(learn) => set({ learn })}
+          placeholder="A skill or topic covered"
+        />
+
+        <ModulesField
+          modules={form.modules}
+          onChange={(modules) => set({ modules })}
+        />
+
+        <ListField
+          label="Why choose this course"
+          items={form.choose}
+          onChange={(choose) => set({ choose })}
+          placeholder="A reason to choose this course"
+        />
+
+        <ListField
+          label="Career opportunities"
+          hint="Optional — mainly for the diploma."
+          items={form.careers}
+          onChange={(careers) => set({ careers })}
+          placeholder="A job role / career path"
+        />
+
+        <div>
+          <label className="mb-1 block text-sm font-medium text-cream/80">
+            Who it’s for
+          </label>
+          <textarea
+            className={`${inputCls} min-h-[80px]`}
+            placeholder="Who should take this course"
+            value={form.who}
+            onChange={(e) => set({ who: e.target.value })}
+          />
+        </div>
+
+        {error && <p className="text-sm text-red-400">{error}</p>}
+
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={submit} disabled={busy} className={btnCls}>
+            {busy ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
+            {form.id ? "Save changes" : "Add course"}
+          </button>
+          {form.id && (
+            <button
+              type="button"
+              onClick={resetForm}
+              className="inline-flex items-center gap-2 rounded-full border border-tan/20 px-4 py-2 text-sm text-cream/80 transition-colors hover:bg-white/5"
+            >
+              <X className="h-4 w-4" /> Cancel
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* List */}
+      {loading ? (
+        <div className="flex items-center gap-2 text-cream/60">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+        </div>
+      ) : items.length === 0 ? (
+        <p className="text-cream/60">No courses yet — add one above.</p>
+      ) : (
+        <ul className="space-y-3">
+          {items.map((c, idx) => (
+            <li
+              key={c.id}
+              className="flex items-center gap-4 rounded-xl border border-tan/15 bg-white/5 p-3"
+            >
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-medium text-cream/90">
+                  {c.title}
+                  {c.badge ? (
+                    <span className="ml-2 rounded-full bg-maroon/20 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-maroon">
+                      {c.badge}
+                    </span>
+                  ) : null}
+                </p>
+                <p className="mt-0.5 truncate text-xs text-cream/55">
+                  {c.kind} · {c.duration}
+                  {c.subtitle ? ` · ${c.subtitle}` : ""}
+                </p>
+              </div>
+              <div className="flex shrink-0 items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => move(idx, -1)}
+                  disabled={busy || idx === 0}
+                  aria-label="Move up"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-tan/20 text-cream transition-colors hover:border-maroon disabled:opacity-30"
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => move(idx, 1)}
+                  disabled={busy || idx === items.length - 1}
+                  aria-label="Move down"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-tan/20 text-cream transition-colors hover:border-maroon disabled:opacity-30"
+                >
+                  <ArrowDown className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => edit(c)}
+                  aria-label="Edit"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-tan/20 text-cream transition-colors hover:border-maroon"
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmId(c.id)}
+                  disabled={busy}
+                  aria-label="Delete"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-400/40 text-red-300 transition-colors hover:bg-red-500/10 disabled:opacity-50"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <ConfirmDialog
+        open={confirmId !== null}
+        title="Delete course?"
+        message="This permanently removes the course from the Academy page."
+        busy={busy}
+        onConfirm={confirmRemove}
+        onCancel={() => setConfirmId(null)}
+      />
+    </div>
+  )
+}
+
+/* --------------------- Home "Workshops & Courses" list ------------------ */
+
+const HOME_COURSE_KINDS: { value: HomeCourseKind; label: string }[] = [
+  { value: "gimbal", label: "Gimbal (rotating icon)" },
+  { value: "drone", label: "Drone (take-off icon)" },
+  { value: "aerial", label: "Aerial (plane icon)" },
+  { value: "clapper", label: "Media / production (clapperboard icon)" },
+  { value: "camera", label: "Photography (camera icon)" },
+]
+
+const EMPTY_HOME_COURSE = {
+  id: "",
+  kind: "clapper" as HomeCourseKind,
+  title: "",
+  text: "",
+}
+
+function HomeCoursesManager({
+  password,
+  onAuthError,
+}: {
+  password: string
+  onAuthError: () => void
+}) {
+  const [items, setItems] = useState<HomeCourse[]>([])
+  const [loading, setLoading] = useState(true)
+  const [form, setForm] = useState({ ...EMPTY_HOME_COURSE })
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [confirmId, setConfirmId] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetchHomeCourses()
+      .then(setItems)
+      .catch(() => setError("Couldn't load courses."))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const handleErr = (e: unknown) => {
+    const m = e instanceof Error ? e.message : "Something went wrong"
+    setError(m)
+    if (m === "Wrong password") onAuthError()
+  }
+
+  const resetForm = () => setForm({ ...EMPTY_HOME_COURSE })
+
+  const submit = async () => {
+    if (!form.title.trim()) {
+      setError("Title is required.")
+      return
+    }
+    setBusy(true)
+    setError(null)
+    try {
+      const next = await saveHomeCourse(
+        {
+          id: form.id || undefined,
+          kind: form.kind,
+          title: form.title,
+          text: form.text,
+        },
+        password
+      )
+      setItems(next)
+      resetForm()
+    } catch (e) {
+      handleErr(e)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const edit = (c: HomeCourse) => {
+    setForm({ id: c.id, kind: c.kind, title: c.title, text: c.text })
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
+  const confirmRemove = async () => {
+    if (!confirmId) return
+    const id = confirmId
+    setBusy(true)
+    try {
+      setItems(await deleteHomeCourse(id, password))
+      if (form.id === id) resetForm()
+      setConfirmId(null)
+    } catch (e) {
+      handleErr(e)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const move = async (idx: number, dir: -1 | 1) => {
+    const j = idx + dir
+    if (j < 0 || j >= items.length) return
+    const next = items.slice()
+    ;[next[idx], next[j]] = [next[j], next[idx]]
+    setItems(next) // optimistic
+    setBusy(true)
+    setError(null)
+    try {
+      setItems(await reorderHomeCourses(next.map((c) => c.id), password))
+    } catch (e) {
+      handleErr(e)
+      try {
+        setItems(await fetchHomeCourses())
+      } catch {
+        /* ignore */
+      }
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="space-y-10">
+      <p className="text-sm text-cream/70">
+        The “Workshops &amp; Courses” menu on the home page. Each row links to the
+        Workshops page.
+      </p>
+
+      {/* Editor */}
+      <div className="max-w-2xl space-y-4 rounded-2xl bg-white/5 p-6 ring-1 ring-white/10">
+        <h3 className="flex items-center gap-2 text-lg font-semibold">
+          {form.id ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+          {form.id ? "Edit course" : "Add a course"}
+        </h3>
+        <input
+          className={inputCls}
+          placeholder="Title * (e.g. Drone Workshop)"
+          value={form.title}
+          onChange={(e) => setForm({ ...form, title: e.target.value })}
+        />
+        <textarea
+          className={`${inputCls} min-h-[70px]`}
+          placeholder="Short description (one line under the title)"
+          value={form.text}
+          onChange={(e) => setForm({ ...form, text: e.target.value })}
+        />
+        <div>
+          <label className="mb-1 block text-sm text-cream/70">Icon</label>
+          <select
+            className={inputCls}
+            value={form.kind}
+            onChange={(e) =>
+              setForm({ ...form, kind: e.target.value as HomeCourseKind })
+            }
+          >
+            {HOME_COURSE_KINDS.map((k) => (
+              <option key={k.value} value={k.value}>
+                {k.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {error && <p className="text-sm text-red-400">{error}</p>}
+
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={submit} disabled={busy} className={btnCls}>
+            {busy ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
+            {form.id ? "Save changes" : "Add course"}
+          </button>
+          {form.id && (
+            <button
+              type="button"
+              onClick={resetForm}
+              className="inline-flex items-center gap-2 rounded-full border border-tan/20 px-4 py-2 text-sm text-cream/80 transition-colors hover:bg-white/5"
+            >
+              <X className="h-4 w-4" /> Cancel
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* List */}
+      {loading ? (
+        <div className="flex items-center gap-2 text-cream/60">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+        </div>
+      ) : items.length === 0 ? (
+        <p className="text-cream/60">No courses yet — add one above.</p>
+      ) : (
+        <ul className="space-y-3">
+          {items.map((c, idx) => (
+            <li
+              key={c.id}
+              className="flex items-center gap-4 rounded-xl border border-tan/15 bg-white/5 p-3"
+            >
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-medium text-cream/90">{c.title}</p>
+                <p className="mt-0.5 truncate text-xs text-cream/55">
+                  {c.kind} · {c.text}
+                </p>
+              </div>
+              <div className="flex shrink-0 items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => move(idx, -1)}
+                  disabled={busy || idx === 0}
+                  aria-label="Move up"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-tan/20 text-cream transition-colors hover:border-maroon disabled:opacity-30"
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => move(idx, 1)}
+                  disabled={busy || idx === items.length - 1}
+                  aria-label="Move down"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-tan/20 text-cream transition-colors hover:border-maroon disabled:opacity-30"
+                >
+                  <ArrowDown className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => edit(c)}
+                  aria-label="Edit"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-tan/20 text-cream transition-colors hover:border-maroon"
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmId(c.id)}
+                  disabled={busy}
+                  aria-label="Delete"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-400/40 text-red-300 transition-colors hover:bg-red-500/10 disabled:opacity-50"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <ConfirmDialog
+        open={confirmId !== null}
+        title="Delete course?"
+        message="This row will be removed from the home page menu."
+        busy={busy}
+        onConfirm={confirmRemove}
+        onCancel={() => setConfirmId(null)}
+      />
+    </div>
+  )
+}
+
+/* ---------------------------- Page backgrounds -------------------------- */
+
+const BG_SLOTS: { id: BackgroundSlot; label: string; hint: string }[] = [
+  { id: "academy", label: "Media Academy", hint: "Hero background on the Academy page" },
+  { id: "services", label: "Our Services", hint: "Hero background on the Services page" },
+  {
+    id: "digital-marketing",
+    label: "Digital Marketing",
+    hint: "Hero background on the Digital Marketing page",
+  },
+  { id: "about", label: "About Us", hint: "Hero background on the About page" },
+]
+
+function BackgroundsManager({
+  password,
+  onAuthError,
+}: {
+  password: string
+  onAuthError: () => void
+}) {
+  const [map, setMap] = useState<Record<string, string>>({})
+  const [loading, setLoading] = useState(true)
+  const [busy, setBusy] = useState<string | null>(null) // slot id being worked on
+  const [error, setError] = useState<string | null>(null)
+  const fileRefs = useRef<Record<string, HTMLInputElement | null>>({})
+
+  useEffect(() => {
+    fetchBackgrounds()
+      .then(setMap)
+      .catch(() => setError("Couldn't load backgrounds."))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const handleErr = (e: unknown) => {
+    const m = e instanceof Error ? e.message : "Something went wrong"
+    setError(m)
+    if (m === "Wrong password") onAuthError()
+  }
+
+  const onUpload = async (slot: BackgroundSlot, file: File) => {
+    setBusy(slot)
+    setError(null)
+    try {
+      setMap(await setBackground(slot, file, password))
+    } catch (e) {
+      handleErr(e)
+    } finally {
+      setBusy(null)
+      const input = fileRefs.current[slot]
+      if (input) input.value = ""
+    }
+  }
+
+  const onReset = async (slot: BackgroundSlot) => {
+    setBusy(slot)
+    setError(null)
+    try {
+      setMap(await clearBackground(slot, password))
+    } catch (e) {
+      handleErr(e)
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <p className="text-sm text-cream/70">
+        Replace the large hero image at the top of each page. JPG, PNG, WebP or
+        GIF · up to 50 MB · landscape images work best. “Reset to default”
+        restores the image that ships with the site.
+      </p>
+
+      {error && <p className="text-sm text-red-400">{error}</p>}
+
+      {loading ? (
+        <div className="flex items-center gap-2 text-cream/60">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {BG_SLOTS.map((slot) => {
+            const url = map[slot.id]
+            const working = busy === slot.id
+            return (
+              <div
+                key={slot.id}
+                className="space-y-3 rounded-2xl border border-tan/15 bg-white/5 p-4"
+              >
+                <div>
+                  <h3 className="font-semibold">{slot.label}</h3>
+                  <p className="text-xs text-cream/55">{slot.hint}</p>
+                </div>
+                <div className="relative aspect-[16/9] overflow-hidden rounded-xl bg-black/40">
+                  {url ? (
+                    <img src={url} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-xs text-cream/40">
+                      Using default image
+                    </div>
+                  )}
+                  {working && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                      <Loader2 className="h-5 w-5 animate-spin text-cream" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fileRefs.current[slot.id]?.click()}
+                    disabled={working}
+                    className={btnCls}
+                  >
+                    <Upload className="h-4 w-4" />
+                    {url ? "Replace" : "Upload"}
+                  </button>
+                  {url && (
+                    <button
+                      type="button"
+                      onClick={() => onReset(slot.id)}
+                      disabled={working}
+                      className="inline-flex items-center gap-2 rounded-full border border-tan/20 px-4 py-2 text-sm text-cream/80 transition-colors hover:bg-white/5 disabled:opacity-50"
+                    >
+                      <RotateCcw className="h-4 w-4" /> Reset to default
+                    </button>
+                  )}
+                </div>
+                <input
+                  ref={(el) => {
+                    fileRefs.current[slot.id] = el
+                  }}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0]
+                    if (f) onUpload(slot.id, f)
+                  }}
+                />
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
 const AdminDashboard: React.FC = () => {
   const [password, setPassword] = useState(() => sessionStorage.getItem(PW_KEY) ?? "")
   const [authed, setAuthed] = useState(() => !!sessionStorage.getItem(PW_KEY))
@@ -957,6 +2201,15 @@ const AdminDashboard: React.FC = () => {
         {tab === "workshops" && (
           <WorkshopsManager password={password} onAuthError={onAuthError} />
         )}
+        {tab === "courses" && (
+          <CoursesManager password={password} onAuthError={onAuthError} />
+        )}
+        {tab === "testimonials" && (
+          <TestimonialsManager password={password} onAuthError={onAuthError} />
+        )}
+        {tab === "homeCourses" && (
+          <HomeCoursesManager password={password} onAuthError={onAuthError} />
+        )}
         {tab === "gallery" && (
           <ImageManager
             password={password}
@@ -972,6 +2225,9 @@ const AdminDashboard: React.FC = () => {
         )}
         {tab === "projector" && (
           <SlideshowManager password={password} onAuthError={onAuthError} />
+        )}
+        {tab === "backgrounds" && (
+          <BackgroundsManager password={password} onAuthError={onAuthError} />
         )}
       </div>
     </main>
