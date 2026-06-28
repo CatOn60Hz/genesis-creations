@@ -63,6 +63,12 @@ const ROUTES = {
     description:
       'Join hands-on sessions led by working professionals in gimbal operation, drone flying, cinematography, photography, and more.',
   },
+  '/contact': {
+    out: 'contact.html',
+    title: 'Contact Us - Genesis Kreations',
+    description:
+      'Get in touch with Genesis Kreations, a Chennai media house. Reach us about our academy, digital marketing, production, studio rental and broadcasting services.',
+  },
 }
 
 const esc = (s) =>

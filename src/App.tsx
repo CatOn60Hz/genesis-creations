@@ -20,6 +20,7 @@ const DigitalMarketing = lazy(() =>
 const Gallery = lazy(() => import("@/pages/gallery").then((m) => ({ default: m.Gallery })))
 const Workshops = lazy(() => import("@/pages/workshops").then((m) => ({ default: m.Workshops })))
 const About = lazy(() => import("@/pages/about").then((m) => ({ default: m.About })))
+const Contact = lazy(() => import("@/pages/contact").then((m) => ({ default: m.Contact })))
 const AdminDashboard = lazy(() =>
   import("@/pages/admin").then((m) => ({ default: m.AdminDashboard }))
 )
@@ -124,6 +125,7 @@ function App() {
       <Route path="/gallery" element={<Gallery />} />
       <Route path="/workshops" element={<Workshops />} />
       <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
       {/* Unified admin dashboard (gallery-admin kept as an alias). */}
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/gallery-admin" element={<AdminDashboard />} />
@@ -136,7 +138,8 @@ function App() {
             item.to !== "/digital-marketing" &&
             item.to !== "/gallery" &&
             item.to !== "/workshops" &&
-            item.to !== "/about"
+            item.to !== "/about" &&
+            item.to !== "/contact"
         )
         .map((item) => (
           <Route key={item.id} path={item.to} element={<SectionStub />} />
