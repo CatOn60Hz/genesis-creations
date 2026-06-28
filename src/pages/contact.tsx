@@ -3,6 +3,7 @@ import { MapPin, Phone, Mail, Send, Loader2, CheckCircle2, MessageCircle } from 
 
 import { Reveal } from "@/components/ui/reveal"
 import { SEO } from "@/components/seo"
+import contactHero from "@/assets/contact-hero.jpg"
 
 // Web3Forms access key — submissions are emailed to the address registered with
 // this key at web3forms.com. The key is safe to expose client-side (it only
@@ -49,13 +50,22 @@ export function Contact() {
   }
 
   return (
-    <main className="min-h-screen bg-maroon-dark/40 text-cream">
+    <main className="relative min-h-screen text-cream">
       <SEO
         title="Contact Us - Genesis Kreations"
         description="Get in touch with Genesis Kreations, a Chennai media house. Reach us about our academy, digital marketing, production, studio rental and broadcasting services."
       />
 
-      <section className="mx-auto w-full max-w-6xl px-6 pb-24 pt-32 md:pt-40">
+      {/* Full-screen workshop group photo background under a dark scrim so the
+          cream text and form stay readable over the bright image. */}
+      <section className="relative flex min-h-[100dvh] items-center overflow-hidden px-6 py-28 md:py-32">
+        <img
+          src={contactHero}
+          alt="The Genesis Kreations team at a gimbal workshop in Chennai"
+          className="absolute inset-0 h-full w-full object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.82)_0%,rgba(0,0,0,0.68)_42%,rgba(0,0,0,0.93)_100%)]" />
+        <div className="relative z-10 mx-auto w-full max-w-6xl">
         <Reveal>
           <p className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-maroon">
             Genesis Kreations
@@ -119,7 +129,7 @@ export function Contact() {
           {/* Form */}
           <Reveal delay={0.1}>
             {status === "success" ? (
-              <div className="flex flex-col items-center justify-center rounded-2xl border border-tan/15 bg-white/5 p-10 text-center backdrop-blur">
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-tan/15 bg-maroon-dark/55 p-10 text-center backdrop-blur">
                 <CheckCircle2 className="h-14 w-14 text-maroon" />
                 <h2 className="mt-4 text-2xl font-semibold">Message sent!</h2>
                 <p className="mt-2 max-w-sm text-cream/75">
@@ -137,7 +147,7 @@ export function Contact() {
             ) : (
               <form
                 onSubmit={handleSubmit}
-                className="rounded-2xl border border-tan/15 bg-white/5 p-6 backdrop-blur md:p-8"
+                className="rounded-2xl border border-tan/15 bg-maroon-dark/55 p-6 backdrop-blur md:p-8"
               >
                 {/* Honeypot field — hidden from users, catches bots. */}
                 <input
@@ -245,6 +255,7 @@ export function Contact() {
               </form>
             )}
           </Reveal>
+        </div>
         </div>
       </section>
     </main>
