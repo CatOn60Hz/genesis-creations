@@ -8,6 +8,13 @@ import * as React from "react";
  * Counter-rotating scroll reel + per-character text rise. Themed for
  * Genesis Kreations (crimson / cream on dark) instead of the original
  * shadcn light-card defaults.
+ *
+ * The reel loops endlessly: the testimonials are rendered as three
+ * stacked copies, the pointer is kept inside the middle copy, and after
+ * each step that crosses a copy boundary we snap (without a transition)
+ * back to the visually identical tile in the middle copy. This lets
+ * "Next" on the last testimonial keep scrolling forward into the first
+ * one, so the controls never grey out at the ends.
  * ---------------------------------------------------------------- */
 
 export interface ScrollReelTestimonial {
@@ -28,7 +35,7 @@ export interface ScrollReelTestimonialsProps {
   charStaggerMs?: number;
   /** Extra classes for the outer container */
   className?: string;
-  /** Auto-advance through the testimonials (ping-pong). Default true. */
+  /** Auto-advance through the testimonials (looping). Default true. */
   autoPlay?: boolean;
   /** Time each testimonial is shown before advancing, in ms (default 3800). */
   autoPlayMs?: number;
@@ -39,6 +46,11 @@ export interface ScrollReelTestimonialsProps {
 const CELL = 224;
 const GAP = 12;
 const STEP = 3 * (CELL + GAP);
+
+/* Number of stacked copies of the testimonial list in the reel. Three
+ * gives one full copy of buffer above and below the active middle copy,
+ * which is enough to fill the viewport while a step crosses a boundary. */
+const COPIES = 3;
 
 const EXIT_MS = 240; // old text removed / new text mounted
 const SLIDE_MS = 800; // column slide duration + interaction lock
@@ -139,16 +151,25 @@ export function ScrollReelTestimonials({
   autoPlay = true,
   autoPlayMs = 3800,
 }: ScrollReelTestimonialsProps) {
-  /* Navigation state vs display state are kept separate so the
-   * exiting block and the entering block never render together. */
-  const [index, setIndex] = React.useState(0);
+  const count = testimonials.length;
+
+  /* `actualIndex` is the pointer into the 3-copy reel strip; it lives in
+   * the middle copy [count, 2*count) except for the brief moment between a
+   * boundary-crossing step and the invisible snap-back. `displayIndex` is
+   * the logical testimonial (0..count-1) shown in the text, swapped after
+   * the old copy has exited so the two never render together. */
+  const [actualIndex, setActualIndex] = React.useState(count);
   const [displayIndex, setDisplayIndex] = React.useState(0);
   const [exiting, setExiting] = React.useState(false);
   const [mounted, setMounted] = React.useState(false);
+  const [snap, setSnap] = React.useState(false); // disables transition for the loop-reset jump
   const animating = React.useRef(false);
   const timeouts = React.useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  const count = testimonials.length;
+  const mod = React.useCallback(
+    (n: number) => ((n % count) + count) % count,
+    [count]
+  );
 
   React.useEffect(() => {
     /* Enable column transitions only after first paint so the reel
@@ -163,40 +184,53 @@ export function ScrollReelTestimonials({
     };
   }, []);
 
+  /* Re-center on the middle copy whenever the list size changes (e.g. the
+   * CMS data replaces the built-in fallback). */
+  React.useEffect(() => {
+    setActualIndex(count);
+    setDisplayIndex(0);
+    animating.current = false;
+  }, [count]);
+
   const paginate = React.useCallback(
     (dir: 1 | -1) => {
-      if (animating.current) return;
-      const next = index + dir;
-      if (next < 0 || next >= count) return;
+      if (count < 2 || animating.current) return;
       animating.current = true;
 
-      setIndex(next);
+      const next = actualIndex + dir;
+      const nextLogical = mod(next);
+
+      setActualIndex(next);
       setExiting(true);
 
       timeouts.current.push(
         setTimeout(() => {
-          setDisplayIndex(next);
+          setDisplayIndex(nextLogical);
           setExiting(false);
         }, EXIT_MS)
       );
       timeouts.current.push(
         setTimeout(() => {
           animating.current = false;
+          /* If the step left the middle copy, jump back to the identical
+           * tile in the middle copy with transitions off so it's seamless. */
+          if (next < count || next >= 2 * count) {
+            setSnap(true);
+            setActualIndex(nextLogical + count);
+            requestAnimationFrame(() =>
+              requestAnimationFrame(() => setSnap(false))
+            );
+          }
         }, SLIDE_MS)
       );
     },
-    [index, count]
+    [actualIndex, count, mod]
   );
 
-  /* Auto-loop: ping-pong forward then back through the list, pausing while
-   * the user hovers or focuses it. Disabled for reduced-motion. */
+  /* Auto-loop: advance forward forever (the reset above keeps it seamless),
+   * pausing while the user hovers or focuses it. Disabled for reduced-motion. */
   const pausedRef = React.useRef(false);
-  const dirRef = React.useRef<1 | -1>(1);
-  const indexRef = React.useRef(0);
   const paginateRef = React.useRef(paginate);
-  React.useEffect(() => {
-    indexRef.current = index;
-  }, [index]);
   React.useEffect(() => {
     paginateRef.current = paginate;
   }, [paginate]);
@@ -209,12 +243,7 @@ export function ScrollReelTestimonials({
     if (reduced) return;
     const id = setInterval(() => {
       if (pausedRef.current) return;
-      let dir = dirRef.current;
-      const cur = indexRef.current;
-      if (cur + dir > count - 1) dir = -1;
-      else if (cur + dir < 0) dir = 1;
-      dirRef.current = dir;
-      paginateRef.current(dir);
+      paginateRef.current(1);
     }, autoPlayMs);
     return () => clearInterval(id);
   }, [autoPlay, autoPlayMs, count]);
@@ -230,29 +259,29 @@ export function ScrollReelTestimonials({
     }
   };
 
-  /* Middle column: 3 leading cells, then featured + 2 cells between
-   * each testimonial, then 3 trailing cells. */
+  /* Middle column: COPIES stacked copies of the list, each testimonial as a
+   * featured tile followed by two blurred cells (pitch = STEP). */
   const middleItems = React.useMemo(() => {
     const items: Array<{ type: "cell" } | { type: "featured"; i: number }> = [];
-    for (let i = 0; i < 3; i++) items.push({ type: "cell" });
-    testimonials.forEach((_, i) => {
-      items.push({ type: "featured", i });
-      if (i < count - 1) {
-        items.push({ type: "cell" }, { type: "cell" });
-      }
-    });
-    for (let i = 0; i < 3; i++) items.push({ type: "cell" });
+    for (let k = 0; k < COPIES * count; k++) {
+      items.push({ type: "featured", i: k % count });
+      items.push({ type: "cell" }, { type: "cell" });
+    }
     return items;
-  }, [testimonials, count]);
+  }, [count]);
 
-  const sideCellCount = 4 + 2 * count;
-  const centerIdx = (count - 1) / 2;
-  const middleY = (centerIdx - index) * STEP;
+  /* Featured tile k sits at cell index 3k; the column is centred at
+   * translateY = 0, so centring tile `actualIndex` means shifting by the
+   * gap between the column's centre cell and that tile's cell. */
+  const stripCenter = (COPIES * count * 3 - 1) / 6;
+  const middleY = (stripCenter - actualIndex) * STEP;
   const sideY = -middleY;
+  const sideCellCount = 6 * count + 12;
 
   const colStyle = (y: number): React.CSSProperties => ({
     transform: `translateY(${y}px)`,
-    transition: mounted ? `transform ${SLIDE_MS}ms ${EASE_INOUT}` : "none",
+    transition:
+      mounted && !snap ? `transform ${SLIDE_MS}ms ${EASE_INOUT}` : "none",
   });
 
   const current = testimonials[displayIndex];
@@ -383,7 +412,7 @@ export function ScrollReelTestimonials({
           <button
             type="button"
             onClick={() => paginate(-1)}
-            disabled={index === 0}
+            disabled={count < 2}
             aria-label="Previous testimonial"
             className="grid h-9 w-9 cursor-pointer place-items-center rounded-full border border-cream/20 bg-transparent p-0 text-cream transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:enabled:scale-[1.08] active:enabled:scale-[0.94] disabled:cursor-default disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-maroon"
           >
@@ -402,7 +431,7 @@ export function ScrollReelTestimonials({
           <button
             type="button"
             onClick={() => paginate(1)}
-            disabled={index === count - 1}
+            disabled={count < 2}
             aria-label="Next testimonial"
             className="grid h-9 w-9 cursor-pointer place-items-center rounded-full border border-cream/20 bg-transparent p-0 text-cream transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:enabled:scale-[1.08] active:enabled:scale-[0.94] disabled:cursor-default disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-maroon"
           >
