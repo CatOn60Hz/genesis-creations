@@ -155,6 +155,59 @@ export async function reorderTestimonials(
   return (data.testimonials ?? []).map(normalizeTestimonial)
 }
 
+/* ---------------------------------- FAQ --------------------------------- */
+
+export type FaqItem = {
+  id: string
+  question: string
+  answer: string
+  order?: number
+  createdAt?: string
+  updatedAt?: string
+}
+
+export async function fetchFaqs(): Promise<FaqItem[]> {
+  const data = await getJSON<{ faqs: FaqItem[] }>("/faq/list.php")
+  return data.faqs ?? []
+}
+
+export async function saveFaq(
+  fields: { id?: string; question: string; answer: string },
+  password: string
+): Promise<FaqItem[]> {
+  const data = await postForm<{ faqs: FaqItem[] }>(
+    "/faq/save.php",
+    {
+      id: fields.id ?? "",
+      question: fields.question,
+      answer: fields.answer,
+    },
+    password
+  )
+  return data.faqs ?? []
+}
+
+export async function deleteFaq(id: string, password: string): Promise<FaqItem[]> {
+  const data = await postForm<{ faqs: FaqItem[] }>(
+    "/faq/delete.php",
+    { id },
+    password
+  )
+  return data.faqs ?? []
+}
+
+export async function reorderFaqs(
+  order: string[],
+  password: string
+): Promise<FaqItem[]> {
+  const data = await postForm<{ faqs: FaqItem[] }>(
+    "/faq/reorder.php",
+    { order: JSON.stringify(order) },
+    password
+  )
+  return data.faqs ?? []
+}
+
 /* ----------------------- Certification courses -------------------------- */
 
 // Kinds map to the animated course icons (see animated-course-icon.tsx). Kept

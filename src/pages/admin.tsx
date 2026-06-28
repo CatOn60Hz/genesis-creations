@@ -9,6 +9,7 @@ import {
   RotateCcw,
   GraduationCap,
   BookOpen,
+  HelpCircle,
   Film,
   ArrowUp,
   ArrowDown,
@@ -65,6 +66,11 @@ import {
   type CertCourse,
   type CertCourseKind,
   type CourseModule,
+  fetchFaqs,
+  saveFaq,
+  deleteFaq,
+  reorderFaqs,
+  type FaqItem,
 } from "@/lib/cms-api"
 import {
   fetchGalleryPhotos,
@@ -82,6 +88,7 @@ type Tab =
   | "courses"
   | "testimonials"
   | "homeCourses"
+  | "faq"
   | "gallery"
   | "projector"
   | "backgrounds"
@@ -93,6 +100,7 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "courses", label: "Courses", icon: <BookOpen className="h-4 w-4" /> },
   { id: "testimonials", label: "Testimonials", icon: <MessageSquareQuote className="h-4 w-4" /> },
   { id: "homeCourses", label: "Home Courses", icon: <GraduationCap className="h-4 w-4" /> },
+  { id: "faq", label: "FAQ", icon: <HelpCircle className="h-4 w-4" /> },
   { id: "gallery", label: "Gallery", icon: <Images className="h-4 w-4" /> },
   { id: "projector", label: "Home Screen", icon: <Projector className="h-4 w-4" /> },
   { id: "backgrounds", label: "Backgrounds", icon: <ImagePlus className="h-4 w-4" /> },
@@ -1953,6 +1961,222 @@ function HomeCoursesManager({
   )
 }
 
+/* ---------------------------------- FAQ --------------------------------- */
+
+const EMPTY_FAQ = { id: "", question: "", answer: "" }
+
+function FaqManager({
+  password,
+  onAuthError,
+}: {
+  password: string
+  onAuthError: () => void
+}) {
+  const [items, setItems] = useState<FaqItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [form, setForm] = useState({ ...EMPTY_FAQ })
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [confirmId, setConfirmId] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetchFaqs()
+      .then(setItems)
+      .catch(() => setError("Couldn't load FAQ."))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const handleErr = (e: unknown) => {
+    const m = e instanceof Error ? e.message : "Something went wrong"
+    setError(m)
+    if (m === "Wrong password") onAuthError()
+  }
+
+  const resetForm = () => setForm({ ...EMPTY_FAQ })
+
+  const submit = async () => {
+    if (!form.question.trim() || !form.answer.trim()) {
+      setError("Question and answer are required.")
+      return
+    }
+    setBusy(true)
+    setError(null)
+    try {
+      const next = await saveFaq(
+        { id: form.id || undefined, question: form.question, answer: form.answer },
+        password
+      )
+      setItems(next)
+      resetForm()
+    } catch (e) {
+      handleErr(e)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const edit = (f: FaqItem) => {
+    setForm({ id: f.id, question: f.question, answer: f.answer })
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
+  const confirmRemove = async () => {
+    if (!confirmId) return
+    const id = confirmId
+    setBusy(true)
+    try {
+      setItems(await deleteFaq(id, password))
+      if (form.id === id) resetForm()
+      setConfirmId(null)
+    } catch (e) {
+      handleErr(e)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const move = async (idx: number, dir: -1 | 1) => {
+    const j = idx + dir
+    if (j < 0 || j >= items.length) return
+    const next = items.slice()
+    ;[next[idx], next[j]] = [next[j], next[idx]]
+    setItems(next) // optimistic
+    setBusy(true)
+    setError(null)
+    try {
+      setItems(await reorderFaqs(next.map((f) => f.id), password))
+    } catch (e) {
+      handleErr(e)
+      try {
+        setItems(await fetchFaqs())
+      } catch {
+        /* ignore */
+      }
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="space-y-10">
+      <p className="text-sm text-cream/70">
+        The “Frequently asked questions” accordion on the Academy page.
+      </p>
+
+      {/* Editor */}
+      <div className="max-w-2xl space-y-4 rounded-2xl bg-white/5 p-6 ring-1 ring-white/10">
+        <h3 className="flex items-center gap-2 text-lg font-semibold">
+          {form.id ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+          {form.id ? "Edit question" : "Add a question"}
+        </h3>
+        <input
+          className={inputCls}
+          placeholder="Question *"
+          value={form.question}
+          onChange={(e) => setForm({ ...form, question: e.target.value })}
+        />
+        <textarea
+          className={`${inputCls} min-h-[100px]`}
+          placeholder="Answer *"
+          value={form.answer}
+          onChange={(e) => setForm({ ...form, answer: e.target.value })}
+        />
+
+        {error && <p className="text-sm text-red-400">{error}</p>}
+
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={submit} disabled={busy} className={btnCls}>
+            {busy ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
+            {form.id ? "Save changes" : "Add question"}
+          </button>
+          {form.id && (
+            <button
+              type="button"
+              onClick={resetForm}
+              className="inline-flex items-center gap-2 rounded-full border border-tan/20 px-4 py-2 text-sm text-cream/80 transition-colors hover:bg-white/5"
+            >
+              <X className="h-4 w-4" /> Cancel
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* List */}
+      {loading ? (
+        <div className="flex items-center gap-2 text-cream/60">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+        </div>
+      ) : items.length === 0 ? (
+        <p className="text-cream/60">No questions yet — add one above.</p>
+      ) : (
+        <ul className="space-y-3">
+          {items.map((f, idx) => (
+            <li
+              key={f.id}
+              className="flex items-center gap-4 rounded-xl border border-tan/15 bg-white/5 p-3"
+            >
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-medium text-cream/90">{f.question}</p>
+                <p className="mt-0.5 truncate text-xs text-cream/55">{f.answer}</p>
+              </div>
+              <div className="flex shrink-0 items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => move(idx, -1)}
+                  disabled={busy || idx === 0}
+                  aria-label="Move up"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-tan/20 text-cream transition-colors hover:border-maroon disabled:opacity-30"
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => move(idx, 1)}
+                  disabled={busy || idx === items.length - 1}
+                  aria-label="Move down"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-tan/20 text-cream transition-colors hover:border-maroon disabled:opacity-30"
+                >
+                  <ArrowDown className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => edit(f)}
+                  aria-label="Edit"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-tan/20 text-cream transition-colors hover:border-maroon"
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmId(f.id)}
+                  disabled={busy}
+                  aria-label="Delete"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-400/40 text-red-300 transition-colors hover:bg-red-500/10 disabled:opacity-50"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <ConfirmDialog
+        open={confirmId !== null}
+        title="Delete question?"
+        message="This question will be removed from the FAQ."
+        busy={busy}
+        onConfirm={confirmRemove}
+        onCancel={() => setConfirmId(null)}
+      />
+    </div>
+  )
+}
+
 /* ---------------------------- Page backgrounds -------------------------- */
 
 const BG_SLOTS: { id: BackgroundSlot; label: string; hint: string }[] = [
@@ -2210,6 +2434,9 @@ const AdminDashboard: React.FC = () => {
         )}
         {tab === "homeCourses" && (
           <HomeCoursesManager password={password} onAuthError={onAuthError} />
+        )}
+        {tab === "faq" && (
+          <FaqManager password={password} onAuthError={onAuthError} />
         )}
         {tab === "gallery" && (
           <ImageManager
