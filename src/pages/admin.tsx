@@ -2060,7 +2060,7 @@ function FaqManager({
   return (
     <div className="space-y-10">
       <p className="text-sm text-cream/70">
-        The “Frequently asked questions” accordion on the Academy page.
+        The “Frequently asked questions” accordion on the About page.
       </p>
 
       {/* Editor */}

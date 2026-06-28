@@ -13,28 +13,44 @@ function faq_seed(): array
 {
     $defaults = [
         [
-            'question' => 'Do I need any prior experience?',
-            'answer'   => 'No. Our courses are built to take you from scratch — no prior knowledge or equipment is required. We teach the fundamentals first, then build up to professional, hands-on work.',
+            'question' => 'What services does Genesis Kreations offer?',
+            'answer'   => 'We provide media production, photography, videography, live streaming, digital marketing, studio rental, corporate training, and a professional media academy offering industry-focused courses.',
         ],
         [
-            'question' => 'How long are the courses?',
-            'answer'   => 'Most certification courses run for 1 month (Mon to Fri, about 3 hours a day). The Diploma in Visual Communication is a 1-year program, and some workshops run over a few focused days.',
+            'question' => 'Who can enroll in the Media Academy?',
+            'answer'   => 'Our courses are open to students, graduates, working professionals, entrepreneurs, and anyone passionate about building a career in media and content creation.',
         ],
         [
-            'question' => 'Will I get a certificate?',
-            'answer'   => 'Yes. Every course ends with an industry-recognized certificate from Genesis Kreations that carries real weight with studios, agencies, and clients.',
+            'question' => 'Do I need prior experience to join a course?',
+            'answer'   => 'No. We offer beginner-friendly programs as well as advanced training for learners who want to enhance their professional skills.',
         ],
         [
-            'question' => 'Where are the classes held?',
-            'answer'   => 'At the Genesis Kreations Media Academy studio in Chennai, with a mix of hands-on studio sessions and real outdoor/location shoots.',
+            'question' => 'Will I receive a certificate after completing a course?',
+            'answer'   => 'Yes. Participants receive a course completion certificate upon successfully fulfilling the program requirements.',
         ],
         [
-            'question' => 'Do you help with jobs or freelancing?',
-            'answer'   => 'We provide portfolio-building support, mentorship from working industry professionals, and guidance for both job-readiness and freelance work.',
+            'question' => 'Are the classes practical or theory-based?',
+            'answer'   => 'Our training emphasizes hands-on learning through live projects, professional equipment, and real-world assignments, supported by essential theoretical concepts.',
         ],
         [
-            'question' => 'How do I enroll?',
-            'answer'   => 'Reach out through the Contact page or give us a call. We will walk you through the schedule, fees, and the next available batch.',
+            'question' => 'Do you provide corporate media services?',
+            'answer'   => 'Yes. We work with businesses, brands, educational institutions, and organizations to produce commercials, corporate films, promotional videos, event coverage, and digital content.',
+        ],
+        [
+            'question' => 'Can I rent your studio?',
+            'answer'   => 'Yes. Our studio facilities are available for professional shoots, interviews, podcasts, product photography, video production, and other creative projects, subject to availability.',
+        ],
+        [
+            'question' => 'Do you offer customized training programs?',
+            'answer'   => 'Yes. We design customized workshops and corporate training programs based on the learning objectives and requirements of organizations and institutions.',
+        ],
+        [
+            'question' => 'How can I request a quotation for a project?',
+            'answer'   => 'Contact us through our website, email, or phone with your project details, and our team will provide a customized quotation.',
+        ],
+        [
+            'question' => 'How can I contact Genesis Kreations?',
+            'answer'   => 'You can reach us through the Contact Us page, by phone, email, or by visiting our office. Our team will be happy to assist you.',
         ],
     ];
 

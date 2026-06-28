@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Link } from "react-router-dom"
 import {
   CircleCheck,
@@ -28,6 +28,7 @@ import { LinkedInIcon, InstagramIcon } from "@/components/ui/social-icons"
 import { SEO } from "@/components/seo"
 import aboutHero from "@/assets/about-hero.jpg"
 import { usePageBackground } from "@/lib/use-page-background"
+import { fetchFaqs } from "@/lib/cms-api"
 import visionImg from "@/assets/vision.jpg"
 import founderImg from "@/assets/founder.jpg"
 
@@ -123,7 +124,10 @@ const founderBio = [
   "A licensed drone pilot, he introduced specialized training in drone cinematography, gimbal filmmaking, and advanced production. Today his expertise spans photography, videography, editing, live broadcasting, drone cinematography, audio production, gimbal and Steadicam operation, and creative direction.",
 ]
 
-const faqs: FaqProItem[] = [
+// Built-in defaults — shown until the CMS responds and as a fallback. The FAQ
+// backend seeds these same questions on first run, so /admin → FAQ starts with
+// them ready to edit, and edits show up here on the About page.
+const fallbackFaqs: FaqProItem[] = [
   {
     id: "services",
     question: "What services does Genesis Kreations offer?",
@@ -180,6 +184,26 @@ const About: React.FC = () => {
   const heroRef = useRef<HTMLDivElement>(null)
   const [flipped, setFlipped] = useState(false)
   const heroBg = usePageBackground("about", aboutHero)
+  const [faqs, setFaqs] = useState<FaqProItem[]>(fallbackFaqs)
+
+  // Load CMS-managed FAQ; keep the built-in defaults on empty/error.
+  useEffect(() => {
+    let active = true
+    fetchFaqs()
+      .then((items) => {
+        if (active && items.length) {
+          setFaqs(
+            items.map((f) => ({ id: f.id, question: f.question, answer: f.answer }))
+          )
+        }
+      })
+      .catch(() => {
+        /* keep fallback faqs */
+      })
+    return () => {
+      active = false
+    }
+  }, [])
 
   return (
     <main className="min-h-screen bg-maroon-dark/40 text-cream">

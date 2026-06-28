@@ -32,7 +32,6 @@ import { SEO } from "@/components/seo"
 import academyHero from "@/assets/academy-hero.jpg"
 import { usePageBackground } from "@/lib/use-page-background"
 import { fetchCertCourses } from "@/lib/cms-api"
-import { Faq } from "@/components/sections/faq"
 
 const EASE_OUT = [0.16, 1, 0.3, 1] as const
 
@@ -810,8 +809,6 @@ const Academy: React.FC = () => {
           </RevealStagger>
         </div>
       </section>
-
-      <Faq />
 
       {/* Closing CTA */}
       <section className="relative px-6 pb-8">
