@@ -177,82 +177,30 @@ export async function deleteWorkshop(
   return (data.workshops ?? []).map(normalizeWorkshop)
 }
 
-/* ------------------------------- Projector ------------------------------ */
+/* ------------------------- Home-screen slideshow ------------------------ */
 
-export type ProjectorImage = { name: string; url: string }
+// Photos and videos share one ordered slideshow ("projector"). Items carry a
+// type so the home screen knows whether to render an <img> or a <video>.
+export type ProjectorItem = { name: string; type: "photo" | "video"; url: string }
 
-export async function fetchProjectorImages(): Promise<ProjectorImage[]> {
-  const data = await getJSON<{ images: ProjectorImage[] }>(
-    "/projector/list.php"
-  )
-  return (data.images ?? []).map((i) => ({ ...i, url: abs(i.url) }))
+function absItems(items: ProjectorItem[]): ProjectorItem[] {
+  return (items ?? []).map((i) => ({ ...i, url: abs(i.url) }))
 }
 
-export async function uploadProjectorImages(
+export async function fetchProjectorItems(): Promise<ProjectorItem[]> {
+  const data = await getJSON<{ items: ProjectorItem[] }>("/projector/list.php")
+  return absItems(data.items ?? [])
+}
+
+async function uploadProjectorMedia(
+  endpoint: string,
+  field: string,
   files: FileList | File[],
   password: string
-): Promise<{ images: ProjectorImage[]; errors: string[] }> {
+): Promise<{ items: ProjectorItem[]; errors: string[] }> {
   const form = new FormData()
-  Array.from(files).forEach((f) => form.append("photos[]", f))
-  const res = await fetch(`${API_BASE}/projector/upload.php`, {
-    method: "POST",
-    headers: { "X-Gallery-Password": password },
-    body: form,
-  })
-  if (res.status === 401) throw new Error("Wrong password")
-  if (!res.ok) throw new Error(`Upload failed: ${res.status}`)
-  const data = await res.json()
-  return {
-    images: (data.images ?? []).map((i: ProjectorImage) => ({
-      ...i,
-      url: abs(i.url),
-    })),
-    errors: data.errors ?? [],
-  }
-}
-
-export async function deleteProjectorImage(
-  name: string,
-  password: string
-): Promise<ProjectorImage[]> {
-  const data = await postForm<{ images: ProjectorImage[] }>(
-    "/projector/delete.php",
-    { name },
-    password
-  )
-  return (data.images ?? []).map((i) => ({ ...i, url: abs(i.url) }))
-}
-
-// Pin one home-screen photo to appear first in the rotation. Returns the
-// reordered list (the chosen image is at index 0).
-export async function featureProjectorImage(
-  name: string,
-  password: string
-): Promise<ProjectorImage[]> {
-  const data = await postForm<{ images: ProjectorImage[] }>(
-    "/projector/feature.php",
-    { name },
-    password
-  )
-  return (data.images ?? []).map((i) => ({ ...i, url: abs(i.url) }))
-}
-
-/* ------------------------------ Hero video ------------------------------ */
-
-export type HeroVideo = { name: string; url: string }
-
-export async function fetchHeroVideo(): Promise<HeroVideo | null> {
-  const data = await getJSON<{ video: HeroVideo | null }>("/herovideo/get.php")
-  return data.video ? { ...data.video, url: abs(data.video.url) } : null
-}
-
-export async function uploadHeroVideo(
-  file: File,
-  password: string
-): Promise<HeroVideo | null> {
-  const form = new FormData()
-  form.append("video", file)
-  const res = await fetch(`${API_BASE}/herovideo/upload.php`, {
+  Array.from(files).forEach((f) => form.append(field, f))
+  const res = await fetch(`${API_BASE}${endpoint}`, {
     method: "POST",
     headers: { "X-Gallery-Password": password },
     body: form,
@@ -269,9 +217,49 @@ export async function uploadHeroVideo(
     throw new Error(msg)
   }
   const data = await res.json()
-  return data.video ? { ...data.video, url: abs(data.video.url) } : null
+  return { items: absItems(data.items ?? []), errors: data.errors ?? [] }
 }
 
-export async function deleteHeroVideo(password: string): Promise<void> {
-  await postForm("/herovideo/delete.php", {}, password)
+export function uploadProjectorImages(
+  files: FileList | File[],
+  password: string
+): Promise<{ items: ProjectorItem[]; errors: string[] }> {
+  return uploadProjectorMedia("/projector/upload.php", "photos[]", files, password)
+}
+
+export function uploadProjectorVideos(
+  files: FileList | File[],
+  password: string
+): Promise<{ items: ProjectorItem[]; errors: string[] }> {
+  return uploadProjectorMedia(
+    "/projector/upload-video.php",
+    "videos[]",
+    files,
+    password
+  )
+}
+
+export async function deleteProjectorItem(
+  name: string,
+  password: string
+): Promise<ProjectorItem[]> {
+  const data = await postForm<{ items: ProjectorItem[] }>(
+    "/projector/delete.php",
+    { name },
+    password
+  )
+  return absItems(data.items ?? [])
+}
+
+// Save the full display order (array of item filenames, in order).
+export async function reorderProjector(
+  order: string[],
+  password: string
+): Promise<ProjectorItem[]> {
+  const data = await postForm<{ items: ProjectorItem[] }>(
+    "/projector/reorder.php",
+    { order: JSON.stringify(order) },
+    password
+  )
+  return absItems(data.items ?? [])
 }

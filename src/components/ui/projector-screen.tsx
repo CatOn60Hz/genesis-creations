@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { motion, AnimatePresence, useSpring } from "framer-motion"
+import { Volume2, VolumeX } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { fetchProjectorImages, fetchHeroVideo } from "@/lib/cms-api"
+import { fetchProjectorItems, type ProjectorItem } from "@/lib/cms-api"
 import { useIsTouch } from "@/components/hooks/use-is-touch"
 
 // Bundled fallback so the projector is never blank (used in dev where PHP isn't
@@ -11,49 +12,42 @@ const FALLBACK_MODULES = import.meta.glob<string>(
   "@/assets/gallery/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}",
   { eager: true, import: "default" }
 )
-const FALLBACK_IMAGES = Object.keys(FALLBACK_MODULES)
+const FALLBACK_ITEMS: ProjectorItem[] = Object.keys(FALLBACK_MODULES)
   .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
-  .map((k) => FALLBACK_MODULES[k])
-
-type Slide = { type: "image" | "video"; url: string }
+  .map((k) => ({ name: k, type: "photo", url: FALLBACK_MODULES[k] }))
 
 export function ProjectorScreen({ className }: { className?: string }) {
-  const [images, setImages] = useState<string[]>(FALLBACK_IMAGES)
-  const [videoUrl, setVideoUrl] = useState<string | null>(null)
+  const [slides, setSlides] = useState<ProjectorItem[]>(FALLBACK_ITEMS)
   const [index, setIndex] = useState(0)
+  // Videos autoplay muted (browser policy); the viewer can unmute.
+  const [muted, setMuted] = useState(true)
 
   useEffect(() => {
     let active = true
-    fetchProjectorImages()
+    fetchProjectorItems()
       .then((list) => {
-        if (active && list.length) setImages(list.map((i) => i.url))
+        if (active && list.length) setSlides(list)
       })
       .catch(() => {
         /* keep fallback */
-      })
-    // Optional admin-managed video, appended to the slideshow rotation.
-    fetchHeroVideo()
-      .then((v) => {
-        if (active && v) setVideoUrl(v.url)
-      })
-      .catch(() => {
-        /* no video set */
       })
     return () => {
       active = false
     }
   }, [])
 
-  // Photos followed by the video (if one is set), as a single rotation.
-  const slides = useMemo<Slide[]>(() => {
-    const imgs = images.map((url) => ({ type: "image" as const, url }))
-    return videoUrl ? [...imgs, { type: "video" as const, url: videoUrl }] : imgs
-  }, [images, videoUrl])
-
   const current = slides[index % Math.max(slides.length, 1)]
+  const hasVideo = useMemo(() => slides.some((s) => s.type === "video"), [slides])
 
-  // Advance: photos auto-advance on a timer; the video advances when it ends
-  // (so it always plays in full). A lone video just loops.
+  // React doesn't reliably reflect the `muted` prop onto the video DOM property,
+  // so set it imperatively whenever the mute state or active slide changes.
+  const videoRef = useRef<HTMLVideoElement>(null)
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.muted = muted
+  }, [muted, current])
+
+  // Advance: photos auto-advance on a timer; videos advance when they end (so
+  // each plays in full). A lone video just loops.
   useEffect(() => {
     if (slides.length <= 1) return
     if (current?.type === "video") return
@@ -156,8 +150,11 @@ export function ProjectorScreen({ className }: { className?: string }) {
           {current?.type === "video" ? (
             <motion.video
               key={current.url + index}
+              ref={videoRef}
               src={current.url}
               autoPlay
+              // Always mount muted so autoplay is allowed; the effect below
+              // applies the viewer's unmute choice once playback has started.
               muted
               playsInline
               loop={slides.length === 1}
@@ -206,6 +203,23 @@ export function ProjectorScreen({ className }: { className?: string }) {
           className="pointer-events-none absolute inset-0"
           style={{ boxShadow: "inset 0 0 80px rgba(0,0,0,0.6)" }}
         />
+
+        {/* Mute / unmute — shown when the slideshow includes a video. Videos
+            start muted (autoplay policy); tap to hear sound. */}
+        {hasVideo && (
+          <button
+            type="button"
+            onClick={() => setMuted((m) => !m)}
+            aria-label={muted ? "Unmute video" : "Mute video"}
+            className="pointer-events-auto absolute bottom-3 right-3 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-black/55 text-cream backdrop-blur transition-colors hover:bg-maroon"
+          >
+            {muted ? (
+              <VolumeX className="h-5 w-5" />
+            ) : (
+              <Volume2 className="h-5 w-5" />
+            )}
+          </button>
+        )}
       </motion.div>
     </div>
   )

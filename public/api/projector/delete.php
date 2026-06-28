@@ -1,30 +1,26 @@
 <?php
 // POST /api/projector/delete.php (form: name + X-Gallery-Password)
-// -> { images: [...] }
-require_once __DIR__ . '/../_shared.php';
+// -> { items: [...] }
+require_once __DIR__ . '/_common.php';
 
 send_cors();
 require_auth();
 require_post();
 
-$dir = GC_UPLOADS_DIR . '/projector';
-$url = GC_UPLOADS_URL . '/projector';
-
 $name = (string) ($_POST['name'] ?? '');
-if (!delete_named($dir, $name)) {
+if (!delete_named(projector_dir(), $name)) {
     json_out(['error' => 'Invalid name'], 400);
 }
 
-// If the removed image was pinned to show first, forget that choice.
+// Drop the deleted file from the saved order.
 $store = GC_DATA_DIR . '/projector.json';
-$meta = json_load($store, []);
-if (($meta['first'] ?? null) === $name) {
-    unset($meta['first']);
+$meta  = json_load($store, []);
+if (isset($meta['order']) && is_array($meta['order'])) {
+    $meta['order'] = array_values(array_filter(
+        $meta['order'],
+        static fn($n) => $n !== $name
+    ));
     json_save($store, $meta);
 }
-$first = $meta['first'] ?? null;
 
-json_out([
-    'images' => order_first(list_images($dir, $url), $first),
-    'first'  => $first,
-]);
+json_out(['items' => projector_items()]);

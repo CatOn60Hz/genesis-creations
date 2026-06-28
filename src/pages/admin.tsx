@@ -5,6 +5,8 @@ import {
   Images,
   Projector,
   Film,
+  ArrowUp,
+  ArrowDown,
   Upload,
   Trash2,
   LogOut,
@@ -30,13 +32,12 @@ import {
   deleteWorkshop,
   type Workshop,
   type WorkshopSession,
-  fetchProjectorImages,
+  fetchProjectorItems,
   uploadProjectorImages,
-  deleteProjectorImage,
-  featureProjectorImage,
-  fetchHeroVideo,
-  uploadHeroVideo,
-  deleteHeroVideo,
+  uploadProjectorVideos,
+  deleteProjectorItem,
+  reorderProjector,
+  type ProjectorItem,
 } from "@/lib/cms-api"
 import {
   fetchGalleryPhotos,
@@ -48,15 +49,14 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 
 const PW_KEY = "gc-admin-pw"
 
-type Tab = "announcement" | "workshops" | "gallery" | "projector" | "herovideo"
+type Tab = "announcement" | "workshops" | "gallery" | "projector"
 type Img = { name: string; url: string }
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "announcement", label: "Announcement", icon: <Megaphone className="h-4 w-4" /> },
   { id: "workshops", label: "Workshops", icon: <CalendarDays className="h-4 w-4" /> },
   { id: "gallery", label: "Gallery", icon: <Images className="h-4 w-4" /> },
-  { id: "projector", label: "Home Screen Photos", icon: <Projector className="h-4 w-4" /> },
-  { id: "herovideo", label: "Home Screen Video", icon: <Film className="h-4 w-4" /> },
+  { id: "projector", label: "Home Screen", icon: <Projector className="h-4 w-4" /> },
 ]
 
 /* ----------------------------- shared styles ---------------------------- */
@@ -971,74 +971,90 @@ const AdminDashboard: React.FC = () => {
           />
         )}
         {tab === "projector" && (
-          <ImageManager
-            password={password}
-            note="These photos play in the slideshow on the home page · hover a photo and tap ★ to make it appear first"
-            list={fetchProjectorImages}
-            upload={async (files, pw) => {
-              const r = await uploadProjectorImages(files, pw)
-              return { items: r.images, errors: r.errors }
-            }}
-            remove={deleteProjectorImage}
-            onMakeFirst={featureProjectorImage}
-            onAuthError={onAuthError}
-          />
-        )}
-        {tab === "herovideo" && (
-          <VideoManager password={password} onAuthError={onAuthError} />
+          <SlideshowManager password={password} onAuthError={onAuthError} />
         )}
       </div>
     </main>
   )
 }
 
-/* ------------------------------ Hero video ------------------------------ */
+/* --------------------------- Home-screen slideshow --------------------------- */
 
-function VideoManager({
+function SlideshowManager({
   password,
   onAuthError,
 }: {
   password: string
   onAuthError: () => void
 }) {
-  const [video, setVideo] = useState<{ name: string; url: string } | null>(null)
+  const [items, setItems] = useState<ProjectorItem[]>([])
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState("")
-  const fileRef = useRef<HTMLInputElement>(null)
+  const photoRef = useRef<HTMLInputElement>(null)
+  const videoRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    fetchHeroVideo()
-      .then((v) => setVideo(v))
+    fetchProjectorItems()
+      .then(setItems)
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
 
-  async function onUpload(file: File) {
+  function handleErr(e: unknown) {
+    const m = e instanceof Error ? e.message : "Something went wrong"
+    setError(m)
+    if (m === "Wrong password") onAuthError()
+  }
+
+  async function onUpload(files: FileList, kind: "photo" | "video") {
     setBusy(true)
     setError("")
     try {
-      setVideo(await uploadHeroVideo(file, password))
+      const r =
+        kind === "photo"
+          ? await uploadProjectorImages(files, password)
+          : await uploadProjectorVideos(files, password)
+      setItems(r.items)
+      if (r.errors.length) setError(r.errors.join(" · "))
     } catch (e) {
-      const m = e instanceof Error ? e.message : "Upload failed"
-      setError(m)
-      if (m === "Wrong password") onAuthError()
+      handleErr(e)
     } finally {
       setBusy(false)
-      if (fileRef.current) fileRef.current.value = ""
+      if (photoRef.current) photoRef.current.value = ""
+      if (videoRef.current) videoRef.current.value = ""
     }
   }
 
-  async function onRemove() {
+  async function onDelete(name: string) {
     setBusy(true)
     setError("")
     try {
-      await deleteHeroVideo(password)
-      setVideo(null)
+      setItems(await deleteProjectorItem(name, password))
     } catch (e) {
-      const m = e instanceof Error ? e.message : "Delete failed"
-      setError(m)
-      if (m === "Wrong password") onAuthError()
+      handleErr(e)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function move(idx: number, dir: -1 | 1) {
+    const j = idx + dir
+    if (j < 0 || j >= items.length) return
+    const next = items.slice()
+    ;[next[idx], next[j]] = [next[j], next[idx]]
+    setItems(next) // optimistic
+    setBusy(true)
+    setError("")
+    try {
+      setItems(await reorderProjector(next.map((i) => i.name), password))
+    } catch (e) {
+      handleErr(e)
+      try {
+        setItems(await fetchProjectorItems())
+      } catch {
+        /* ignore */
+      }
     } finally {
       setBusy(false)
     }
@@ -1047,72 +1063,128 @@ function VideoManager({
   return (
     <div className="space-y-6">
       <p className="text-sm text-cream/70">
-        Upload one video to add to the home-screen slideshow (it plays after the
-        photos). MP4, WebM, MOV or OGG · up to 50 MB · plays muted and silent.
+        Photos and videos play in the home-screen slideshow, in the order shown
+        below — use the arrows to reorder. Videos: MP4, WebM, MOV or OGG · up to
+        50 MB · they autoplay muted with an unmute button on the site.
       </p>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={() => photoRef.current?.click()}
+          disabled={busy}
+          className={btnCls}
+        >
+          <Upload className="h-4 w-4" /> Add photos
+        </button>
+        <button
+          type="button"
+          onClick={() => videoRef.current?.click()}
+          disabled={busy}
+          className={btnCls}
+        >
+          <Film className="h-4 w-4" /> Add videos
+        </button>
+        {busy && (
+          <span className="flex items-center gap-2 text-sm text-cream/60">
+            <Loader2 className="h-4 w-4 animate-spin" /> Working…
+          </span>
+        )}
+      </div>
+
+      {error && <p className="text-sm text-red-400">{error}</p>}
 
       {loading ? (
         <div className="flex items-center gap-2 text-cream/60">
           <Loader2 className="h-4 w-4 animate-spin" /> Loading…
         </div>
-      ) : video ? (
-        <div className="space-y-4">
-          <video
-            src={video.url}
-            controls
-            playsInline
-            className="aspect-video w-full max-w-xl rounded-xl border border-tan/15 bg-black"
-          />
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              disabled={busy}
-              className={btnCls}
-            >
-              {busy ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Upload className="h-4 w-4" />
-              )}
-              {busy ? "Working…" : "Replace video"}
-            </button>
-            <button
-              type="button"
-              onClick={onRemove}
-              disabled={busy}
-              className="inline-flex items-center gap-2 rounded-full border border-red-400/40 px-5 py-2.5 font-medium text-red-300 transition-colors hover:bg-red-500/10 disabled:opacity-50"
-            >
-              <Trash2 className="h-4 w-4" /> Remove
-            </button>
-          </div>
-        </div>
+      ) : items.length === 0 ? (
+        <p className="text-cream/60">No media yet — add photos or videos above.</p>
       ) : (
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          disabled={busy}
-          className={btnCls}
-        >
-          {busy ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Upload className="h-4 w-4" />
-          )}
-          {busy ? "Uploading…" : "Upload video"}
-        </button>
+        <ul className="space-y-3">
+          {items.map((it, idx) => (
+            <li
+              key={it.name}
+              className="flex items-center gap-4 rounded-xl border border-tan/15 bg-white/5 p-3"
+            >
+              <div className="h-16 w-28 shrink-0 overflow-hidden rounded-lg bg-black">
+                {it.type === "video" ? (
+                  <video
+                    src={it.url}
+                    muted
+                    playsInline
+                    preload="metadata"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <img src={it.url} alt="" className="h-full w-full object-cover" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="inline-flex items-center gap-1 rounded-full bg-maroon/20 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-maroon">
+                  {it.type === "video" ? (
+                    <Film className="h-3 w-3" />
+                  ) : (
+                    <Images className="h-3 w-3" />
+                  )}
+                  {it.type}
+                </span>
+                <p className="mt-1 truncate text-xs text-cream/50">{it.name}</p>
+              </div>
+              <div className="flex shrink-0 items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => move(idx, -1)}
+                  disabled={busy || idx === 0}
+                  aria-label="Move up"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-tan/20 text-cream transition-colors hover:border-maroon disabled:opacity-30"
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => move(idx, 1)}
+                  disabled={busy || idx === items.length - 1}
+                  aria-label="Move down"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-tan/20 text-cream transition-colors hover:border-maroon disabled:opacity-30"
+                >
+                  <ArrowDown className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onDelete(it.name)}
+                  disabled={busy}
+                  aria-label="Delete"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-400/40 text-red-300 transition-colors hover:bg-red-500/10 disabled:opacity-50"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
       )}
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
-
       <input
-        ref={fileRef}
+        ref={photoRef}
         type="file"
-        accept="video/mp4,video/webm,video/quicktime,video/ogg,video/*"
+        accept="image/*"
+        multiple
         className="hidden"
         onChange={(e) => {
-          const f = e.target.files?.[0]
-          if (f) onUpload(f)
+          const f = e.target.files
+          if (f && f.length) onUpload(f, "photo")
+        }}
+      />
+      <input
+        ref={videoRef}
+        type="file"
+        accept="video/mp4,video/webm,video/quicktime,video/ogg,video/*"
+        multiple
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files
+          if (f && f.length) onUpload(f, "video")
         }}
       />
     </div>
