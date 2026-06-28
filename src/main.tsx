@@ -7,6 +7,15 @@ import App from './App.tsx'
 
 const rootEl = document.getElementById('root')!
 
+// The static/prerendered HTML carries SEO tags (description, canonical, og:*,
+// twitter:*) marked data-prerendered-seo so crawlers see them without JS. Once
+// the SPA boots, the <SEO> component (react-helmet-async) renders its own copies
+// — and React 19 hoists those natively without deduping against ours — so we
+// remove the prerendered ones here to avoid duplicate meta/canonical tags.
+document
+  .querySelectorAll('head [data-prerendered-seo]')
+  .forEach((el) => el.remove())
+
 // Fade out and remove the static app-shell splash (see index.html) once React
 // has painted its first content into #root.
 function hideSplash() {

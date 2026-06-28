@@ -4,29 +4,33 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="Genesis Kreations — Chennai media house: Media Academy, Digital Marketing, Production, Studio Rental and Broadcasting."
-    />
-    
+    <!-- Tags the <SEO> component (react-helmet-async) also renders are marked
+         data-prerendered-seo. They serve crawlers in the static/prerendered HTML;
+         once the SPA boots, main.tsx removes them so the client helmet is the
+         sole owner of these tags (React 19 hoists helmet's tags natively and
+         won't dedupe against ours, so we must remove ours to avoid duplicates).
+         Keep the attribute AFTER content="" so the prerender content-swap regex
+         still matches. -->
+    <meta name="description" content="Genesis Kreations — Chennai media house: Media Academy, Digital Marketing, Production, Studio Rental and Broadcasting." data-prerendered-seo />
+
     <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://genesiskreationsmedia.com/" />
-    <meta property="og:title" content="Genesis Kreations — Chennai Media House" />
-    <meta property="og:description" content="Genesis Kreations — Chennai media house: Media Academy, Digital Marketing, Production, Studio Rental and Broadcasting." />
-    <meta property="og:image" content="https://genesiskreationsmedia.com/og-image.jpg" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Genesis Kreations — Chennai Media House" />
+    <meta property="og:type" content="website" data-prerendered-seo />
+    <meta property="og:url" content="https://genesiskreationsmedia.com/" data-prerendered-seo />
+    <meta property="og:title" content="Genesis Kreations — Chennai Media House" data-prerendered-seo />
+    <meta property="og:description" content="Genesis Kreations — Chennai media house: Media Academy, Digital Marketing, Production, Studio Rental and Broadcasting." data-prerendered-seo />
+    <meta property="og:image" content="https://genesiskreationsmedia.com/og-image.jpg" data-prerendered-seo />
+    <meta property="og:image:width" content="1200" data-prerendered-seo />
+    <meta property="og:image:height" content="630" data-prerendered-seo />
+    <meta property="og:image:alt" content="Genesis Kreations — Chennai Media House" data-prerendered-seo />
     <meta property="og:site_name" content="Genesis Kreations" />
     <meta property="og:locale" content="en_IN" />
 
     <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://genesiskreationsmedia.com/" />
-    <meta property="twitter:title" content="Genesis Kreations — Chennai Media House" />
-    <meta property="twitter:description" content="Genesis Kreations — Chennai media house: Media Academy, Digital Marketing, Production, Studio Rental and Broadcasting." />
-    <meta property="twitter:image" content="https://genesiskreationsmedia.com/og-image.jpg" />
+    <meta property="twitter:card" content="summary_large_image" data-prerendered-seo />
+    <meta property="twitter:url" content="https://genesiskreationsmedia.com/" data-prerendered-seo />
+    <meta property="twitter:title" content="Genesis Kreations — Chennai Media House" data-prerendered-seo />
+    <meta property="twitter:description" content="Genesis Kreations — Chennai media house: Media Academy, Digital Marketing, Production, Studio Rental and Broadcasting." data-prerendered-seo />
+    <meta property="twitter:image" content="https://genesiskreationsmedia.com/og-image.jpg" data-prerendered-seo />
 
     <!-- Organization / LocalBusiness structured data. Kept static here (not
          injected by React) so it's present in the served HTML for crawlers and
@@ -72,7 +76,7 @@
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap"
       />
     </noscript>
-    <title>Genesis Kreations — Chennai Media House</title>
+    <title data-prerendered-seo>Genesis Kreations — Chennai Media House</title>
     <!-- Static app-shell splash. It paints instantly from HTML+inline CSS (no
          JS, no webfont needed), giving a fast First Contentful Paint on the
          otherwise-empty SPA shell, then fades out once React has rendered (see

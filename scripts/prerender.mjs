@@ -76,19 +76,33 @@ function setMeta(html, key, value) {
   return html.replace(re, `$1${esc(value)}$2`)
 }
 
+// Remove head-only tags that react-helmet-async renders INLINE into the body
+// under React 19's concurrent prerender (it doesn't hoist them to <head> or mark
+// them data-rh here). Left in #root they'd duplicate the template's head tags.
+// The app body legitimately contains no <title>/<meta>/canonical, so this is safe.
+function stripHeadTags(body) {
+  return body
+    .replace(/<title[^>]*>[\s\S]*?<\/title>/gi, '')
+    .replace(/<meta\b[^>]*>/gi, '')
+    .replace(/<link\b[^>]*\brel="canonical"[^>]*>/gi, '')
+}
+
 const { render } = await import(pathToFileURL(join(root, '.ssr-tmp', 'entry-server.js')).href)
 const template = readFileSync(join(dist, 'index.html'), 'utf8')
 
 let count = 0
 for (const [route, meta] of Object.entries(ROUTES)) {
-  const body = await render(route)
+  const body = stripHeadTags(await render(route))
   const canonical = route === '/' ? `${ORIGIN}/` : `${ORIGIN}${route}`
 
   let html = template
   // Body content into #root (empty in the template).
   html = html.replace('<div id="root"></div>', `<div id="root">${body}</div>`)
   // Per-route head.
-  html = html.replace(/<title>[^<]*<\/title>/, `<title>${esc(meta.title)}</title>`)
+  html = html.replace(
+    /<title[^>]*>[^<]*<\/title>/,
+    `<title data-prerendered-seo>${esc(meta.title)}</title>`,
+  )
   html = setMeta(html, 'description', meta.description)
   html = setMeta(html, 'og:title', meta.title)
   html = setMeta(html, 'og:description', meta.description)
@@ -97,9 +111,11 @@ for (const [route, meta] of Object.entries(ROUTES)) {
   html = setMeta(html, 'twitter:description', meta.description)
   html = setMeta(html, 'twitter:url', canonical)
   // Canonical link (not in the template; insert right after <title>).
+  // data-prerendered-seo so main.tsx removes it once the client helmet (which
+  // renders its own canonical) takes over — avoids a duplicate canonical.
   html = html.replace(
-    /(<title>[^<]*<\/title>)/,
-    `$1\n    <link rel="canonical" href="${canonical}" />`,
+    /(<title[^>]*>[^<]*<\/title>)/,
+    `$1\n    <link rel="canonical" href="${canonical}" data-prerendered-seo />`,
   )
 
   writeFileSync(join(dist, meta.out), html, 'utf8')
