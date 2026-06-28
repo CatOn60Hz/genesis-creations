@@ -98,8 +98,23 @@ export function MenuItem({
 export function MenuContainer({ children }: { children: React.ReactNode }) {
   const [isExpanded, setIsExpanded] = useState(false)
   const childrenArray = React.Children.toArray(children)
+  const menuId = React.useId()
 
   const handleToggle = () => setIsExpanded((v) => !v)
+
+  // The first child is the toggle, not a menu item: override its role so it's a
+  // native button trigger (aria-haspopup/expanded) instead of an orphan
+  // role="menuitem". The remaining children are wrapped in a role="menu" below
+  // so their menuitem roles have the required menu parent.
+  const toggleChild = childrenArray[0]
+  const toggle = React.isValidElement(toggleChild)
+    ? React.cloneElement(toggleChild as React.ReactElement<Record<string, unknown>>, {
+        role: undefined,
+        "aria-haspopup": "menu",
+        "aria-expanded": isExpanded,
+        "aria-controls": menuId,
+      })
+    : toggleChild
 
   return (
     <div className="relative w-[52px]" data-expanded={isExpanded}>
@@ -110,12 +125,15 @@ export function MenuContainer({ children }: { children: React.ReactNode }) {
           className="relative w-[52px] h-[52px] bg-maroon cursor-pointer rounded-full group will-change-transform z-50 shadow-lg ring-1 ring-tan/30"
           onClick={handleToggle}
         >
-          {childrenArray[0]}
+          {toggle}
         </div>
 
         {/* Other items. The animated wrapper carries the translate/opacity; the
             circle inside keeps the clip-path, and the label sits outside it so
-            it isn't clipped. */}
+            it isn't clipped. The role="menu" wrapper gives the menuitem children
+            their required parent without affecting layout (it isn't positioned,
+            so the absolute items still resolve against the outer .relative). */}
+        <div role="menu" id={menuId} aria-orientation="vertical" aria-label="Site navigation">
         {childrenArray.slice(1).map((child, index) => {
           const label = React.isValidElement<MenuItemProps>(child)
             ? child.props.label
@@ -166,6 +184,7 @@ export function MenuContainer({ children }: { children: React.ReactNode }) {
             </div>
           )
         })}
+        </div>
       </div>
     </div>
   )
