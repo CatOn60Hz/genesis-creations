@@ -78,7 +78,12 @@
   </head>
   <body>
     <div id="root"></div>
-    <div id="app-splash"><h1 class="gc-brand">Genesis Kreations</h1></div>
+    <!-- Decorative loading screen: aria-hidden so it never enters the
+         accessibility tree, and a plain <p> (not an <h1>) so it doesn't pollute
+         the heading outline or duplicate the real <h1> React renders. -->
+    <div id="app-splash" aria-hidden="true" role="presentation">
+      <p class="gc-brand">Genesis Kreations</p>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
