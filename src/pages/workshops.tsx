@@ -51,6 +51,7 @@ import { Reveal } from "@/components/ui/reveal"
 import { LampContainer } from "@/components/ui/lamp"
 import { SEO } from "@/components/seo"
 import workshopsHero from "@/assets/workshops-hero.jpg"
+import { usePageBackground } from "@/lib/use-page-background"
 
 // Strong ease-out curve — matches the shared Reveal component (Emil Kowalski:
 // the built-in easings are too weak to feel intentional).
@@ -342,6 +343,7 @@ const Workshops: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<Workshop | null>(null)
   const heroRef = useRef<HTMLDivElement>(null)
+  const heroBg = usePageBackground("workshops", workshopsHero)
 
   useEffect(() => {
     fetchWorkshops()
@@ -371,7 +373,7 @@ const Workshops: React.FC = () => {
       {/* Hero: workshop photo background under a dark scrim, full viewport height */}
       <section className="relative flex min-h-[100dvh] items-center overflow-hidden px-6 py-24 text-cream">
         <img
-          src={workshopsHero}
+          src={heroBg}
           alt=""
           aria-hidden
           className="absolute inset-0 h-full w-full object-cover object-[center_30%]"

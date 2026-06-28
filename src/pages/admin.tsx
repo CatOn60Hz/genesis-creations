@@ -1964,6 +1964,7 @@ const BG_SLOTS: { id: BackgroundSlot; label: string; hint: string }[] = [
     hint: "Hero background on the Digital Marketing page",
   },
   { id: "about", label: "About Us", hint: "Hero background on the About page" },
+  { id: "workshops", label: "Workshops", hint: "Hero background on the Workshops page" },
 ]
 
 function BackgroundsManager({

@@ -270,7 +270,12 @@ export async function reorderCertCourses(
 
 // Admin-editable hero/background images, keyed by a named page slot. Pages fall
 // back to their bundled image when a slot is unset.
-export type BackgroundSlot = "academy" | "services" | "digital-marketing" | "about"
+export type BackgroundSlot =
+  | "academy"
+  | "services"
+  | "digital-marketing"
+  | "about"
+  | "workshops"
 
 type BgImage = { name: string; url: string }
 

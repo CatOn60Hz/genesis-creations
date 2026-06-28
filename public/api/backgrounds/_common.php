@@ -8,7 +8,7 @@ require_once __DIR__ . '/../_shared.php';
 
 // Slots a page background may be set for. Keep in sync with the frontend
 // BackgroundSlot type and usePageBackground() calls.
-const GC_BG_SLOTS = ['academy', 'services', 'digital-marketing', 'about'];
+const GC_BG_SLOTS = ['academy', 'services', 'digital-marketing', 'about', 'workshops'];
 
 function backgrounds_store(): string
 {
