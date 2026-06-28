@@ -3,6 +3,7 @@ import { MapPin, Phone, Mail, Send, Loader2, CheckCircle2, MessageCircle } from 
 
 import { Reveal } from "@/components/ui/reveal"
 import { SEO } from "@/components/seo"
+import { InstagramIcon, FacebookIcon } from "@/components/ui/social-icons"
 import contactHero from "@/assets/contact-hero.jpg"
 
 // Web3Forms access key — submissions are emailed to the address registered with
@@ -122,6 +123,26 @@ export function Contact() {
               >
                 <MessageCircle className="h-5 w-5 shrink-0 text-maroon" />
                 Chat on WhatsApp
+              </a>
+
+              <a
+                href="https://www.instagram.com/genesiscreationsmedia"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-3 text-cream/80 transition-colors hover:text-maroon"
+              >
+                <InstagramIcon className="h-5 w-5 shrink-0 text-maroon" />
+                @genesiscreationsmedia
+              </a>
+
+              <a
+                href="https://www.facebook.com/share/1bEZrS1VUJ/"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-3 text-cream/80 transition-colors hover:text-maroon"
+              >
+                <FacebookIcon className="h-5 w-5 shrink-0 text-maroon" />
+                Genesis Creations Media Academy
               </a>
             </div>
           </Reveal>

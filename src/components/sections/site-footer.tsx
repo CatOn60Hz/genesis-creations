@@ -74,14 +74,18 @@ const SiteFooter: React.FC = () => {
 
           <div className="flex items-center gap-4 pt-2">
             <a
-              href="#"
+              href="https://www.facebook.com/share/1bEZrS1VUJ/"
+              target="_blank"
+              rel="noreferrer"
               aria-label="Facebook"
               className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-maroon"
             >
               <FacebookIcon />
             </a>
             <a
-              href="#"
+              href="https://www.instagram.com/genesiscreationsmedia"
+              target="_blank"
+              rel="noreferrer"
               aria-label="Instagram"
               className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-maroon"
             >
