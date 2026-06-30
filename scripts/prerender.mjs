@@ -87,6 +87,12 @@ const ROUTES = {
     description:
       'Refund and cancellation terms for Genesis Kreations courses, workshops, studio rentals and media services.',
   },
+  '/shipping-policy': {
+    out: 'shipping-policy.html',
+    title: 'Shipping & Delivery Policy - Genesis Kreations',
+    description:
+      'How Genesis Kreations Media Private Limited delivers its courses, workshops and media services. No physical products are shipped.',
+  },
 }
 
 const esc = (s) =>
