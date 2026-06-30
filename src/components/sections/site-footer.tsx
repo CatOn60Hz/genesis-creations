@@ -28,7 +28,9 @@ const SiteFooter: React.FC = () => {
   return (
     <footer
       id="contact"
-      className="gc-dark-section gc-sep relative overflow-hidden px-6 py-16 text-cream"
+      // Extra bottom padding on desktop clears the floating dock nav
+      // (fixed bottom-6, ~104px tall) so the footer's link row never sits under it.
+      className="gc-dark-section gc-sep relative overflow-hidden px-6 pt-16 pb-16 text-cream md:pb-40"
     >
       <Grain />
       <div className="relative z-10 mx-auto grid max-w-6xl gap-12 md:grid-cols-2">
