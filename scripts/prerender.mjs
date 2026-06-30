@@ -69,6 +69,24 @@ const ROUTES = {
     description:
       'Get in touch with Genesis Kreations, a Chennai media house. Reach us about our academy, digital marketing, production, studio rental and broadcasting services.',
   },
+  '/terms-and-conditions': {
+    out: 'terms-and-conditions.html',
+    title: 'Terms and Conditions - Genesis Kreations',
+    description:
+      'Terms and Conditions for Genesis Kreations Media Private Limited — services, payments, intellectual property and use of our website.',
+  },
+  '/privacy-policy': {
+    out: 'privacy-policy.html',
+    title: 'Privacy Policy - Genesis Kreations',
+    description:
+      'How Genesis Kreations Media Private Limited collects, uses and protects your personal information.',
+  },
+  '/refund-policy': {
+    out: 'refund-policy.html',
+    title: 'Refund & Cancellation Policy - Genesis Kreations',
+    description:
+      'Refund and cancellation terms for Genesis Kreations courses, workshops, studio rentals and media services.',
+  },
 }
 
 const esc = (s) =>

@@ -118,6 +118,15 @@ const SiteFooter: React.FC = () => {
           <Link to="/academy" className="transition-colors hover:text-maroon">
             Academy
           </Link>
+          <Link to="/terms-and-conditions" className="transition-colors hover:text-maroon">
+            Terms
+          </Link>
+          <Link to="/privacy-policy" className="transition-colors hover:text-maroon">
+            Privacy
+          </Link>
+          <Link to="/refund-policy" className="transition-colors hover:text-maroon">
+            Refund
+          </Link>
         </nav>
         <p className="text-center text-xs text-cream/50">
           © {new Date().getFullYear()} Genesis Kreations · genesiskreationsmedia.com

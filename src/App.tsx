@@ -21,6 +21,15 @@ const Gallery = lazy(() => import("@/pages/gallery").then((m) => ({ default: m.G
 const Workshops = lazy(() => import("@/pages/workshops").then((m) => ({ default: m.Workshops })))
 const About = lazy(() => import("@/pages/about").then((m) => ({ default: m.About })))
 const Contact = lazy(() => import("@/pages/contact").then((m) => ({ default: m.Contact })))
+const TermsAndConditions = lazy(() =>
+  import("@/pages/terms-and-conditions").then((m) => ({ default: m.TermsAndConditions }))
+)
+const PrivacyPolicy = lazy(() =>
+  import("@/pages/privacy-policy").then((m) => ({ default: m.PrivacyPolicy }))
+)
+const RefundPolicy = lazy(() =>
+  import("@/pages/refund-policy").then((m) => ({ default: m.RefundPolicy }))
+)
 const AdminDashboard = lazy(() =>
   import("@/pages/admin").then((m) => ({ default: m.AdminDashboard }))
 )
@@ -126,6 +135,9 @@ function App() {
       <Route path="/workshops" element={<Workshops />} />
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
+      <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+      <Route path="/refund-policy" element={<RefundPolicy />} />
       {/* Unified admin dashboard (gallery-admin kept as an alias). */}
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/gallery-admin" element={<AdminDashboard />} />

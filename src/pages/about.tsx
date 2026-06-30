@@ -394,7 +394,7 @@ const About: React.FC = () => {
                       alt="Jerophin Deril S, Founder & Managing Director of Genesis Kreations"
                       loading="lazy"
                       className="h-full w-full object-cover"
-                      style={{ objectPosition: "62% 22%" }}
+                      style={{ objectPosition: "38% 30%" }}
                     />
                     <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 bg-gradient-to-t from-black/85 via-black/40 to-transparent p-5">
                       <div>
