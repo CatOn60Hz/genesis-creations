@@ -296,7 +296,7 @@ export function ProjectorScreen({ className }: { className?: string }) {
             <motion.img
               key={current.name + index}
               src={current.url}
-              alt=""
+              alt="Genesis Kreations media production work"
               draggable={false}
               className="absolute inset-0 h-full w-full object-cover"
               initial={{ opacity: 0, scale: 1.06 }}

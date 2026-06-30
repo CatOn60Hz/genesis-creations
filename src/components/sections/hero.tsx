@@ -51,6 +51,9 @@ const Hero: React.FC = () => {
           <div className="flex w-full min-w-0 flex-col items-center text-center lg:w-[30rem] lg:flex-none lg:-translate-x-20">
             <h1 className="text-3xl md:text-5xl uppercase tracking-[0.2em] text-maroon-dark">
               Genesis Kreations
+              <span className="mt-3 block text-xs font-medium tracking-[0.3em] text-maroon-dark/70 md:text-sm">
+                Chennai Media House
+              </span>
             </h1>
 
             <GooeyText
