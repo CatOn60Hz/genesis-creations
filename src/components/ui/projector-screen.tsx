@@ -122,6 +122,16 @@ const FALLBACK_ITEMS: ProjectorItem[] = Object.keys(FALLBACK_MODULES)
   .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
   .map((k) => ({ name: k, type: "photo", url: FALLBACK_MODULES[k] }))
 
+// Admin-uploaded photos come through media.php, which can downscale on the fly
+// (?w=). Hand the browser a srcset so phones fetch a ~600px image instead of the
+// full upload — a big LCP win. Bundled fallbacks (Vite assets) are left as-is.
+const SRCSET_WIDTHS = [480, 768, 1200, 1600]
+function projectorSrcSet(url: string): string | undefined {
+  return url.includes("media.php")
+    ? SRCSET_WIDTHS.map((w) => `${url}&w=${w} ${w}w`).join(", ")
+    : undefined
+}
+
 export function ProjectorScreen({ className }: { className?: string }) {
   const [slides, setSlides] = useState<ProjectorItem[]>(FALLBACK_ITEMS)
   const [index, setIndex] = useState(0)
@@ -296,8 +306,12 @@ export function ProjectorScreen({ className }: { className?: string }) {
             <motion.img
               key={current.name + index}
               src={current.url}
+              srcSet={projectorSrcSet(current.url)}
+              sizes="(max-width: 768px) 100vw, 60vw"
               alt="Genesis Kreations media production work"
               draggable={false}
+              fetchPriority="high"
+              decoding="async"
               className="absolute inset-0 h-full w-full object-cover"
               initial={{ opacity: 0, scale: 1.06 }}
               animate={{ opacity: 1, scale: 1 }}
