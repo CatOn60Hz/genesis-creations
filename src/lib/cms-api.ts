@@ -615,14 +615,19 @@ export async function reorderProjector(
   return absItems(data.items ?? [])
 }
 
-/* ----------------------------- Reels (videos) --------------------------- */
+/* -------------------------------- Reels --------------------------------- */
 
 // Short vertical videos shown on the home page as a reel wall, played in a
-// lightbox. Self-hosted (uploaded via /admin), streamed through media.php.
-export type ReelItem = { name: string; url: string }
+// lightbox. Each reel is either a YouTube embed or a self-hosted upload
+// (streamed through media.php). Managed in /admin → Reels.
+export type ReelItem =
+  | { id: string; kind: "youtube"; videoId: string }
+  | { id: string; kind: "file"; name: string; url: string }
 
 function absReels(items: ReelItem[]): ReelItem[] {
-  return (items ?? []).map((i) => ({ ...i, url: abs(i.url) }))
+  return (items ?? []).map((i) =>
+    i.kind === "file" ? { ...i, url: abs(i.url) } : i
+  )
 }
 
 export async function fetchReels(): Promise<ReelItem[]> {
@@ -656,13 +661,26 @@ export async function uploadReels(
   return { items: absReels(data.items ?? []), errors: data.errors ?? [] }
 }
 
+// Add a YouTube reel from any watch / Shorts / youtu.be URL (or a bare id).
+export async function saveReelYoutube(
+  url: string,
+  password: string
+): Promise<ReelItem[]> {
+  const data = await postForm<{ items: ReelItem[] }>(
+    "/reels/save-youtube.php",
+    { url },
+    password
+  )
+  return absReels(data.items ?? [])
+}
+
 export async function deleteReel(
-  name: string,
+  id: string,
   password: string
 ): Promise<ReelItem[]> {
   const data = await postForm<{ items: ReelItem[] }>(
     "/reels/delete.php",
-    { name },
+    { id },
     password
   )
   return absReels(data.items ?? [])

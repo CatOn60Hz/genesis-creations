@@ -13,11 +13,14 @@ import { Grain } from "@/components/ui/grain"
 import { Reveal } from "@/components/ui/reveal"
 import { type ReelItem } from "@/lib/cms-api"
 
-// A horizontal wall of short vertical videos ("reels"). Cards show the video's
-// first frame; tapping one opens a lightbox that plays it full-size with sound.
-// Content is self-hosted and managed in /admin → Reels. The parent (home.tsx)
-// fetches the videos and only mounts this section when there are some, so it can
-// register as a snap target and there's no empty stop when the wall is empty.
+// A horizontal wall of short vertical videos ("reels"). Each reel is either a
+// YouTube embed or a self-hosted upload; cards show a thumbnail and tapping one
+// opens a lightbox that plays it full-size. Managed in /admin → Reels. The
+// parent (home.tsx) fetches the reels and only mounts this section when there
+// are some, so it registers as a snap target with no empty stop when bare.
+const ytThumb = (videoId: string) =>
+  `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
+
 const Reels: React.FC<{ items: ReelItem[] }> = ({ items }) => {
   const [active, setActive] = useState<ReelItem | null>(null)
 
@@ -56,7 +59,7 @@ const Reels: React.FC<{ items: ReelItem[] }> = ({ items }) => {
           <CarouselContent className="-ml-3">
             {items.map((reel) => (
               <CarouselItem
-                key={reel.name}
+                key={reel.id}
                 className="basis-[58%] pl-3 sm:basis-[40%] md:basis-[30%] lg:basis-[23%] xl:basis-[19%]"
               >
                 <button
@@ -65,16 +68,25 @@ const Reels: React.FC<{ items: ReelItem[] }> = ({ items }) => {
                   aria-label="Play video"
                   className="group relative block aspect-[9/16] w-full overflow-hidden rounded-2xl bg-black ring-1 ring-white/10 transition-[transform,box-shadow,ring-color] duration-300 hover:-translate-y-1 hover:shadow-[0_18px_45px_-12px_rgba(203,41,87,0.55)] hover:ring-maroon/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-maroon"
                 >
-                  {/* First frame as the thumbnail; #t hint nudges browsers that
-                      otherwise render a blank poster. */}
-                  <video
-                    src={`${reel.url}#t=0.1`}
-                    muted
-                    playsInline
-                    preload="metadata"
-                    tabIndex={-1}
-                    className="h-full w-full object-cover"
-                  />
+                  {reel.kind === "youtube" ? (
+                    <img
+                      src={ytThumb(reel.videoId)}
+                      alt=""
+                      loading="lazy"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    // First frame as the thumbnail; #t hint nudges browsers that
+                    // otherwise render a blank poster.
+                    <video
+                      src={`${reel.url}#t=0.1`}
+                      muted
+                      playsInline
+                      preload="metadata"
+                      tabIndex={-1}
+                      className="h-full w-full object-cover"
+                    />
+                  )}
                   <span className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/15" />
                   <span className="absolute inset-0 flex items-center justify-center">
                     <span className="flex h-14 w-14 items-center justify-center rounded-full bg-maroon/90 text-cream shadow-lg backdrop-blur-sm transition-transform duration-300 group-hover:scale-110">
@@ -104,23 +116,37 @@ const Reels: React.FC<{ items: ReelItem[] }> = ({ items }) => {
               type="button"
               onClick={() => setActive(null)}
               aria-label="Close"
-              className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-cream transition-colors hover:bg-maroon"
+              className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-cream transition-colors hover:bg-maroon"
             >
               <X className="h-5 w-5" />
             </button>
-            <motion.video
-              key={active.name}
-              src={active.url}
-              autoPlay
-              controls
-              playsInline
+            <motion.div
+              key={active.id}
               onClick={(e) => e.stopPropagation()}
-              className="max-h-[88vh] w-auto max-w-full rounded-2xl bg-black shadow-2xl aspect-[9/16] object-contain"
+              className="aspect-[9/16] max-h-[88vh] w-auto max-w-full overflow-hidden rounded-2xl bg-black shadow-2xl"
               initial={{ scale: 0.94, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.94, opacity: 0 }}
               transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            />
+            >
+              {active.kind === "youtube" ? (
+                <iframe
+                  src={`https://www.youtube.com/embed/${active.videoId}?autoplay=1&rel=0&playsinline=1`}
+                  title="YouTube video player"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="h-full w-full"
+                />
+              ) : (
+                <video
+                  src={active.url}
+                  autoPlay
+                  controls
+                  playsInline
+                  className="h-full w-full object-contain"
+                />
+              )}
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -1,7 +1,9 @@
 <?php
-// Shared helpers for the home-page "reels" video wall (short vertical videos,
-// played in a lightbox). Videos live in uploads/reels/; the display order is an
-// explicit list of filenames in reels.json. Not a routable endpoint.
+// Shared helpers for the home-page "reels" wall (short vertical videos played in
+// a lightbox). Each reel is a record in data/reels.json and is one of two kinds:
+//   - "youtube": { id, kind, videoId, order }       (embedded from YouTube)
+//   - "file":    { id, kind, file, order }           (uploaded to uploads/reels/)
+// Self-hosted files are streamed through media.php. Not a routable endpoint.
 require_once __DIR__ . '/../_shared.php';
 
 function reels_dir(): string
@@ -9,48 +11,89 @@ function reels_dir(): string
     return GC_UPLOADS_DIR . '/reels';
 }
 
-// All reel videos as [{ name, type, url }], in the saved display order. Files
-// not yet in the order (just uploaded) are appended, newest first. Videos are
-// streamed through media.php (Range-capable) so they seek/scrub correctly.
-function reels_items(): array
+function reels_store(): string
 {
-    $dir     = reels_dir();
-    $urlBase = GC_UPLOADS_URL . '/reels';
-    $byName  = [];
+    return GC_DATA_DIR . '/reels.json';
+}
 
-    if (is_dir($dir)) {
-        foreach (scandir($dir) as $f) {
-            if ($f === '' || $f[0] === '.') {
+// All reel records (unsorted). Starts empty — there are no seeded reels.
+function reels_load(): array
+{
+    $data = json_load(reels_store(), []);
+    if (!is_array($data)) {
+        return [];
+    }
+    return array_values(array_filter($data, 'is_array'));
+}
+
+function reels_sorted(array $list): array
+{
+    usort($list, static function ($a, $b) {
+        return ((int) ($a['order'] ?? 0)) <=> ((int) ($b['order'] ?? 0));
+    });
+    return $list;
+}
+
+// Highest order value in the store, or -1 when empty (so the next is 0).
+function reels_max_order(array $list): int
+{
+    $max = -1;
+    foreach ($list as $r) {
+        $max = max($max, (int) ($r['order'] ?? 0));
+    }
+    return $max;
+}
+
+// Pull an 11-char YouTube id out of a watch/shorts/youtu.be/embed URL, or accept
+// a bare id. Returns null when nothing video-id-shaped is found.
+function reels_youtube_id(string $url): ?string
+{
+    $url = trim($url);
+    if ($url === '') {
+        return null;
+    }
+    if (preg_match('~^[A-Za-z0-9_-]{11}$~', $url)) {
+        return $url;
+    }
+    if (preg_match(
+        '~(?:youtube\.com/(?:watch\?(?:.*&)?v=|shorts/|embed/|live/|v/)|youtu\.be/)([A-Za-z0-9_-]{11})~',
+        $url,
+        $m
+    )) {
+        return $m[1];
+    }
+    return null;
+}
+
+// Map stored records to the public shape the frontend consumes, in display
+// order. Drops file records whose upload has gone missing and youtube records
+// with no id.
+function reels_public(array $records): array
+{
+    $out = [];
+    foreach (reels_sorted($records) as $r) {
+        $kind = $r['kind'] ?? '';
+        if ($kind === 'youtube') {
+            if (empty($r['videoId'])) {
                 continue;
             }
-            $ext = strtolower(pathinfo($f, PATHINFO_EXTENSION));
-            if (!array_key_exists($ext, GC_ALLOWED_VIDEO)) {
+            $out[] = [
+                'id'      => $r['id'] ?? '',
+                'kind'    => 'youtube',
+                'videoId' => $r['videoId'],
+            ];
+        } elseif ($kind === 'file') {
+            $file = (string) ($r['file'] ?? '');
+            if ($file === '' || !is_file(reels_dir() . '/' . $file)) {
                 continue;
             }
-            $byName[$f] = [
-                'name' => $f,
-                'type' => 'video',
-                'url'  => $urlBase . '/' . rawurlencode($f),
+            $out[] = [
+                'id'   => $r['id'] ?? '',
+                'kind' => 'file',
+                'name' => $file,
+                'url'  => GC_UPLOADS_URL . '/reels/' . rawurlencode($file),
             ];
         }
     }
-
-    $order   = json_load(GC_DATA_DIR . '/reels.json', [])['order'] ?? [];
-    $ordered = [];
-    if (is_array($order)) {
-        foreach ($order as $name) {
-            if (is_string($name) && isset($byName[$name])) {
-                $ordered[] = $byName[$name];
-                unset($byName[$name]);
-            }
-        }
-    }
-
-    // Leftovers (uploaded but not yet ordered): newest first.
-    $rest = array_values($byName);
-    usort($rest, static function ($a, $b) use ($dir) {
-        return filemtime("$dir/{$b['name']}") <=> filemtime("$dir/{$a['name']}");
-    });
-
-    return array_merge($ordered, $rest);
+    return $out;
 }

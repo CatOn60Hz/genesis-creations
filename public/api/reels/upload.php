@@ -1,7 +1,7 @@
 <?php
 // POST /api/reels/upload.php (multipart: videos[] + X-Gallery-Password)
 // -> { saved: [...], errors: [...], items: [...] }
-// Short vertical videos for the home-page reel wall.
+// Saves each video to uploads/reels/ and appends a "file" reel record.
 require_once __DIR__ . '/_common.php';
 
 send_cors();
@@ -11,8 +11,10 @@ require_post();
 $dir = reels_dir();
 ensure_dir($dir, true);
 
-$saved  = [];
-$errors = [];
+$records = reels_load();
+$order   = reels_max_order($records);
+$saved   = [];
+$errors  = [];
 
 if (!empty($_FILES['videos']) && is_array($_FILES['videos']['name'])) {
     $f = $_FILES['videos'];
@@ -39,6 +41,14 @@ if (!empty($_FILES['videos']) && is_array($_FILES['videos']['name'])) {
         $final = $base . '-' . bin2hex(random_bytes(4)) . '.' . $ext;
         if (move_uploaded_file($f['tmp_name'][$i], "$dir/$final")) {
             @chmod("$dir/$final", 0644);
+            $records[] = [
+                'id'        => bin2hex(random_bytes(6)),
+                'kind'      => 'file',
+                'file'      => $final,
+                'order'     => ++$order,
+                'createdAt' => date('c'),
+                'updatedAt' => date('c'),
+            ];
             $saved[] = $final;
         } else {
             $errors[] = "$name: could not save";
@@ -46,8 +56,10 @@ if (!empty($_FILES['videos']) && is_array($_FILES['videos']['name'])) {
     }
 }
 
+json_save(reels_store(), $records);
+
 json_out([
     'saved'  => $saved,
     'errors' => $errors,
-    'items'  => reels_items(),
+    'items'  => reels_public($records),
 ]);

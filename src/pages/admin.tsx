@@ -12,6 +12,7 @@ import {
   HelpCircle,
   Film,
   Clapperboard,
+  Video,
   ArrowUp,
   ArrowDown,
   Upload,
@@ -47,6 +48,7 @@ import {
   type ProjectorItem,
   fetchReels,
   uploadReels,
+  saveReelYoutube,
   deleteReel,
   reorderReels,
   type ReelItem,
@@ -2686,7 +2688,7 @@ function SlideshowManager({
   )
 }
 
-/* ------------------------------ Reels (videos) --------------------------- */
+/* ---------------------------------- Reels -------------------------------- */
 
 function ReelsManager({
   password,
@@ -2699,6 +2701,7 @@ function ReelsManager({
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState("")
+  const [ytUrl, setYtUrl] = useState("")
   const videoRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -2729,11 +2732,25 @@ function ReelsManager({
     }
   }
 
-  async function onDelete(name: string) {
+  async function onAddYoutube() {
+    if (!ytUrl.trim()) return
     setBusy(true)
     setError("")
     try {
-      setItems(await deleteReel(name, password))
+      setItems(await saveReelYoutube(ytUrl.trim(), password))
+      setYtUrl("")
+    } catch (e) {
+      handleErr(e)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function onDelete(id: string) {
+    setBusy(true)
+    setError("")
+    try {
+      setItems(await deleteReel(id, password))
     } catch (e) {
       handleErr(e)
     } finally {
@@ -2750,7 +2767,7 @@ function ReelsManager({
     setBusy(true)
     setError("")
     try {
-      setItems(await reorderReels(next.map((i) => i.name), password))
+      setItems(await reorderReels(next.map((i) => i.id), password))
     } catch (e) {
       handleErr(e)
       try {
@@ -2767,10 +2784,35 @@ function ReelsManager({
     <div className="space-y-6">
       <p className="text-sm text-cream/70">
         Short vertical videos for the “Watch our latest reels” wall on the home
-        page, in the order shown — use the arrows to reorder. MP4, WebM, MOV or
-        OGG · up to 50 MB each · they play in a pop-up when a visitor taps one. If
-        there are no reels, the section is hidden on the site.
+        page, in the order shown — use the arrows to reorder. Add a YouTube /
+        Shorts link, or upload your own video (MP4, WebM, MOV or OGG · up to 50 MB).
+        They play in a pop-up when a visitor taps one. If there are no reels, the
+        section is hidden on the site.
       </p>
+
+      {/* Add a YouTube reel */}
+      <div className="flex flex-col gap-3 rounded-2xl bg-white/5 p-4 ring-1 ring-white/10 sm:flex-row sm:items-center">
+        <input
+          className={`${inputCls} flex-1`}
+          placeholder="Paste a YouTube or Shorts link…"
+          value={ytUrl}
+          onChange={(e) => setYtUrl(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault()
+              onAddYoutube()
+            }
+          }}
+        />
+        <button
+          type="button"
+          onClick={onAddYoutube}
+          disabled={busy || !ytUrl.trim()}
+          className={btnCls}
+        >
+          <Video className="h-4 w-4" /> Add YouTube reel
+        </button>
+      </div>
 
       <div className="flex flex-wrap items-center gap-3">
         <button
@@ -2779,7 +2821,7 @@ function ReelsManager({
           disabled={busy}
           className={btnCls}
         >
-          <Upload className="h-4 w-4" /> Add videos
+          <Upload className="h-4 w-4" /> Upload a video
         </button>
         {busy && (
           <span className="flex items-center gap-2 text-sm text-cream/60">
@@ -2795,22 +2837,38 @@ function ReelsManager({
           <Loader2 className="h-4 w-4 animate-spin" /> Loading…
         </div>
       ) : items.length === 0 ? (
-        <p className="text-cream/60">No reels yet — add videos above.</p>
+        <p className="text-cream/60">No reels yet — add one above.</p>
       ) : (
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
           {items.map((it, idx) => (
             <li
-              key={it.name}
+              key={it.id}
               className="overflow-hidden rounded-xl border border-tan/15 bg-white/5"
             >
-              <div className="aspect-[9/16] w-full bg-black">
-                <video
-                  src={`${it.url}#t=0.1`}
-                  muted
-                  playsInline
-                  preload="metadata"
-                  className="h-full w-full object-cover"
-                />
+              <div className="relative aspect-[9/16] w-full bg-black">
+                {it.kind === "youtube" ? (
+                  <img
+                    src={`https://i.ytimg.com/vi/${it.videoId}/hqdefault.jpg`}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <video
+                    src={`${it.url}#t=0.1`}
+                    muted
+                    playsInline
+                    preload="metadata"
+                    className="h-full w-full object-cover"
+                  />
+                )}
+                <span className="absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-black/70 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-cream">
+                  {it.kind === "youtube" ? (
+                    <Video className="h-3 w-3" />
+                  ) : (
+                    <Film className="h-3 w-3" />
+                  )}
+                  {it.kind === "youtube" ? "YouTube" : "File"}
+                </span>
               </div>
               <div className="flex items-center justify-between gap-1 p-2">
                 <button
@@ -2833,7 +2891,7 @@ function ReelsManager({
                 </button>
                 <button
                   type="button"
-                  onClick={() => onDelete(it.name)}
+                  onClick={() => onDelete(it.id)}
                   disabled={busy}
                   aria-label="Delete"
                   className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-400/40 text-red-300 transition-colors hover:bg-red-500/10 disabled:opacity-50"
