@@ -614,3 +614,68 @@ export async function reorderProjector(
   )
   return absItems(data.items ?? [])
 }
+
+/* ----------------------------- Reels (videos) --------------------------- */
+
+// Short vertical videos shown on the home page as a reel wall, played in a
+// lightbox. Self-hosted (uploaded via /admin), streamed through media.php.
+export type ReelItem = { name: string; url: string }
+
+function absReels(items: ReelItem[]): ReelItem[] {
+  return (items ?? []).map((i) => ({ ...i, url: abs(i.url) }))
+}
+
+export async function fetchReels(): Promise<ReelItem[]> {
+  const data = await getJSON<{ items: ReelItem[] }>("/reels/list.php")
+  return absReels(data.items ?? [])
+}
+
+export async function uploadReels(
+  files: FileList | File[],
+  password: string
+): Promise<{ items: ReelItem[]; errors: string[] }> {
+  const form = new FormData()
+  Array.from(files).forEach((f) => form.append("videos[]", f))
+  const res = await fetch(`${API_BASE}/reels/upload.php`, {
+    method: "POST",
+    headers: { "X-Gallery-Password": password },
+    body: form,
+  })
+  if (res.status === 401) throw new Error("Wrong password")
+  if (!res.ok) {
+    let msg = `Upload failed: ${res.status}`
+    try {
+      const d = await res.json()
+      if (d?.error) msg = d.error
+    } catch {
+      /* ignore */
+    }
+    throw new Error(msg)
+  }
+  const data = await res.json()
+  return { items: absReels(data.items ?? []), errors: data.errors ?? [] }
+}
+
+export async function deleteReel(
+  name: string,
+  password: string
+): Promise<ReelItem[]> {
+  const data = await postForm<{ items: ReelItem[] }>(
+    "/reels/delete.php",
+    { name },
+    password
+  )
+  return absReels(data.items ?? [])
+}
+
+export async function reorderReels(
+  order: string[],
+  password: string
+): Promise<ReelItem[]> {
+  const data = await postForm<{ items: ReelItem[] }>(
+    "/reels/reorder.php",
+    { order: JSON.stringify(order) },
+    password
+  )
+  return absReels(data.items ?? [])
+}

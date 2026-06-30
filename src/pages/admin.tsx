@@ -11,6 +11,7 @@ import {
   BookOpen,
   HelpCircle,
   Film,
+  Clapperboard,
   ArrowUp,
   ArrowDown,
   Upload,
@@ -44,6 +45,11 @@ import {
   deleteProjectorItem,
   reorderProjector,
   type ProjectorItem,
+  fetchReels,
+  uploadReels,
+  deleteReel,
+  reorderReels,
+  type ReelItem,
   fetchTestimonials,
   saveTestimonial,
   deleteTestimonial,
@@ -91,6 +97,7 @@ type Tab =
   | "faq"
   | "gallery"
   | "projector"
+  | "reels"
   | "backgrounds"
 type Img = { name: string; url: string }
 
@@ -103,6 +110,7 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "faq", label: "FAQ", icon: <HelpCircle className="h-4 w-4" /> },
   { id: "gallery", label: "Gallery", icon: <Images className="h-4 w-4" /> },
   { id: "projector", label: "Home Screen", icon: <Projector className="h-4 w-4" /> },
+  { id: "reels", label: "Reels", icon: <Clapperboard className="h-4 w-4" /> },
   { id: "backgrounds", label: "Backgrounds", icon: <ImagePlus className="h-4 w-4" /> },
 ]
 
@@ -2454,6 +2462,9 @@ const AdminDashboard: React.FC = () => {
         {tab === "projector" && (
           <SlideshowManager password={password} onAuthError={onAuthError} />
         )}
+        {tab === "reels" && (
+          <ReelsManager password={password} onAuthError={onAuthError} />
+        )}
         {tab === "backgrounds" && (
           <BackgroundsManager password={password} onAuthError={onAuthError} />
         )}
@@ -2669,6 +2680,181 @@ function SlideshowManager({
         onChange={(e) => {
           const f = e.target.files
           if (f && f.length) onUpload(f, "video")
+        }}
+      />
+    </div>
+  )
+}
+
+/* ------------------------------ Reels (videos) --------------------------- */
+
+function ReelsManager({
+  password,
+  onAuthError,
+}: {
+  password: string
+  onAuthError: () => void
+}) {
+  const [items, setItems] = useState<ReelItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState("")
+  const videoRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    fetchReels()
+      .then(setItems)
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  function handleErr(e: unknown) {
+    const m = e instanceof Error ? e.message : "Something went wrong"
+    setError(m)
+    if (m === "Wrong password") onAuthError()
+  }
+
+  async function onUpload(files: FileList) {
+    setBusy(true)
+    setError("")
+    try {
+      const r = await uploadReels(files, password)
+      setItems(r.items)
+      if (r.errors.length) setError(r.errors.join(" · "))
+    } catch (e) {
+      handleErr(e)
+    } finally {
+      setBusy(false)
+      if (videoRef.current) videoRef.current.value = ""
+    }
+  }
+
+  async function onDelete(name: string) {
+    setBusy(true)
+    setError("")
+    try {
+      setItems(await deleteReel(name, password))
+    } catch (e) {
+      handleErr(e)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function move(idx: number, dir: -1 | 1) {
+    const j = idx + dir
+    if (j < 0 || j >= items.length) return
+    const next = items.slice()
+    ;[next[idx], next[j]] = [next[j], next[idx]]
+    setItems(next) // optimistic
+    setBusy(true)
+    setError("")
+    try {
+      setItems(await reorderReels(next.map((i) => i.name), password))
+    } catch (e) {
+      handleErr(e)
+      try {
+        setItems(await fetchReels())
+      } catch {
+        /* ignore */
+      }
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <p className="text-sm text-cream/70">
+        Short vertical videos for the “Watch our latest reels” wall on the home
+        page, in the order shown — use the arrows to reorder. MP4, WebM, MOV or
+        OGG · up to 50 MB each · they play in a pop-up when a visitor taps one. If
+        there are no reels, the section is hidden on the site.
+      </p>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={() => videoRef.current?.click()}
+          disabled={busy}
+          className={btnCls}
+        >
+          <Upload className="h-4 w-4" /> Add videos
+        </button>
+        {busy && (
+          <span className="flex items-center gap-2 text-sm text-cream/60">
+            <Loader2 className="h-4 w-4 animate-spin" /> Working…
+          </span>
+        )}
+      </div>
+
+      {error && <p className="text-sm text-red-400">{error}</p>}
+
+      {loading ? (
+        <div className="flex items-center gap-2 text-cream/60">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+        </div>
+      ) : items.length === 0 ? (
+        <p className="text-cream/60">No reels yet — add videos above.</p>
+      ) : (
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+          {items.map((it, idx) => (
+            <li
+              key={it.name}
+              className="overflow-hidden rounded-xl border border-tan/15 bg-white/5"
+            >
+              <div className="aspect-[9/16] w-full bg-black">
+                <video
+                  src={`${it.url}#t=0.1`}
+                  muted
+                  playsInline
+                  preload="metadata"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div className="flex items-center justify-between gap-1 p-2">
+                <button
+                  type="button"
+                  onClick={() => move(idx, -1)}
+                  disabled={busy || idx === 0}
+                  aria-label="Move earlier"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-tan/20 text-cream transition-colors hover:border-maroon disabled:opacity-30"
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => move(idx, 1)}
+                  disabled={busy || idx === items.length - 1}
+                  aria-label="Move later"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-tan/20 text-cream transition-colors hover:border-maroon disabled:opacity-30"
+                >
+                  <ArrowDown className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onDelete(it.name)}
+                  disabled={busy}
+                  aria-label="Delete"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-400/40 text-red-300 transition-colors hover:bg-red-500/10 disabled:opacity-50"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <input
+        ref={videoRef}
+        type="file"
+        accept="video/mp4,video/webm,video/quicktime,video/ogg,video/*"
+        multiple
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files
+          if (f && f.length) onUpload(f)
         }}
       />
     </div>
