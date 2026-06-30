@@ -530,12 +530,17 @@ export async function reorderHomeCourses(
 
 /* ------------------------- Home-screen slideshow ------------------------ */
 
-// Photos and videos share one ordered slideshow ("projector"). Items carry a
-// type so the home screen knows whether to render an <img> or a <video>.
-export type ProjectorItem = { name: string; type: "photo" | "video"; url: string }
+// Photos, videos and YouTube embeds share one ordered slideshow ("projector").
+// Items carry a type so the home screen knows whether to render an <img>, a
+// <video> or a YouTube player.
+export type ProjectorItem =
+  | { name: string; type: "photo" | "video"; url: string }
+  | { name: string; type: "youtube"; videoId: string }
 
 function absItems(items: ProjectorItem[]): ProjectorItem[] {
-  return (items ?? []).map((i) => ({ ...i, url: abs(i.url) }))
+  return (items ?? []).map((i) =>
+    i.type === "youtube" ? i : { ...i, url: abs(i.url) }
+  )
 }
 
 export async function fetchProjectorItems(): Promise<ProjectorItem[]> {
@@ -588,6 +593,19 @@ export function uploadProjectorVideos(
     files,
     password
   )
+}
+
+// Add a YouTube video to the slideshow from any watch / Shorts / youtu.be URL.
+export async function addProjectorYoutube(
+  url: string,
+  password: string
+): Promise<ProjectorItem[]> {
+  const data = await postForm<{ items: ProjectorItem[] }>(
+    "/projector/add-youtube.php",
+    { url },
+    password
+  )
+  return absItems(data.items ?? [])
 }
 
 export async function deleteProjectorItem(

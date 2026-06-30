@@ -6,6 +6,112 @@ import { cn } from "@/lib/utils"
 import { fetchProjectorItems, type ProjectorItem } from "@/lib/cms-api"
 import { useIsTouch } from "@/components/hooks/use-is-touch"
 
+/* ----------------------------- YouTube player ---------------------------- */
+
+// Load the YouTube IFrame API once (shared promise). Resolves immediately once
+// window.YT is ready, so multiple players reuse the same script.
+let ytApiPromise: Promise<void> | null = null
+function loadYouTubeApi(): Promise<void> {
+  if (typeof window === "undefined") return Promise.resolve()
+  const w = window as unknown as {
+    YT?: { Player: unknown }
+    onYouTubeIframeAPIReady?: () => void
+  }
+  if (w.YT && w.YT.Player) return Promise.resolve()
+  if (ytApiPromise) return ytApiPromise
+  ytApiPromise = new Promise<void>((resolve) => {
+    const prev = w.onYouTubeIframeAPIReady
+    w.onYouTubeIframeAPIReady = () => {
+      prev?.()
+      resolve()
+    }
+    const tag = document.createElement("script")
+    tag.src = "https://www.youtube.com/iframe_api"
+    document.head.appendChild(tag)
+  })
+  return ytApiPromise
+}
+
+// A chrome-less YouTube player styled to match the projector: autoplays muted,
+// no controls, and reports when it ends so the slideshow can advance. A lone
+// video loops instead of ending. Mute follows the shared `muted` state.
+function ProjectorYouTube({
+  videoId,
+  muted,
+  single,
+  onEnded,
+}: {
+  videoId: string
+  muted: boolean
+  single: boolean
+  onEnded: () => void
+}) {
+  const hostRef = useRef<HTMLDivElement>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const playerRef = useRef<any>(null)
+  const onEndedRef = useRef(onEnded)
+  onEndedRef.current = onEnded
+
+  useEffect(() => {
+    let destroyed = false
+    loadYouTubeApi().then(() => {
+      if (destroyed || !hostRef.current) return
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const YT = (window as any).YT
+      playerRef.current = new YT.Player(hostRef.current, {
+        width: "100%",
+        height: "100%",
+        videoId,
+        playerVars: {
+          autoplay: 1,
+          mute: 1,
+          controls: 0,
+          rel: 0,
+          playsinline: 1,
+          modestbranding: 1,
+          disablekb: 1,
+          fs: 0,
+          iv_load_policy: 3,
+          loop: single ? 1 : 0,
+          playlist: single ? videoId : undefined,
+        },
+        events: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          onReady: (e: any) => {
+            muted ? e.target.mute() : e.target.unMute()
+            e.target.playVideo()
+          },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          onStateChange: (e: any) => {
+            if (e.data === 0 && !single) onEndedRef.current() // 0 = ENDED
+          },
+        },
+      })
+    })
+    return () => {
+      destroyed = true
+      try {
+        playerRef.current?.destroy()
+      } catch {
+        /* ignore */
+      }
+      playerRef.current = null
+    }
+  }, [videoId, single]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Apply mute changes from the shared control.
+  useEffect(() => {
+    const p = playerRef.current
+    if (p?.mute) muted ? p.mute() : p.unMute()
+  }, [muted])
+
+  return (
+    <div className="absolute inset-0 h-full w-full">
+      <div ref={hostRef} className="h-full w-full" />
+    </div>
+  )
+}
+
 // Bundled fallback so the projector is never blank (used in dev where PHP isn't
 // running, or before the backend responds). Managed set lives in the backend.
 const FALLBACK_MODULES = import.meta.glob<string>(
@@ -37,7 +143,12 @@ export function ProjectorScreen({ className }: { className?: string }) {
   }, [])
 
   const current = slides[index % Math.max(slides.length, 1)]
-  const hasVideo = useMemo(() => slides.some((s) => s.type === "video"), [slides])
+  // Both uploaded videos and YouTube items can carry sound, so the mute control
+  // shows when either is present.
+  const hasVideo = useMemo(
+    () => slides.some((s) => s.type === "video" || s.type === "youtube"),
+    [slides]
+  )
 
   // React doesn't reliably reflect the `muted` prop onto the video DOM property,
   // so set it imperatively whenever the mute state or active slide changes.
@@ -46,11 +157,11 @@ export function ProjectorScreen({ className }: { className?: string }) {
     if (videoRef.current) videoRef.current.muted = muted
   }, [muted, current])
 
-  // Advance: photos auto-advance on a timer; videos advance when they end (so
-  // each plays in full). A lone video just loops.
+  // Advance: photos auto-advance on a timer; videos (uploaded or YouTube)
+  // advance when they end, so each plays in full. A lone video just loops.
   useEffect(() => {
     if (slides.length <= 1) return
-    if (current?.type === "video") return
+    if (current?.type === "video" || current?.type === "youtube") return
     const t = setTimeout(
       () => setIndex((p) => (p + 1) % slides.length),
       3800
@@ -149,7 +260,7 @@ export function ProjectorScreen({ className }: { className?: string }) {
         <AnimatePresence>
           {current?.type === "video" ? (
             <motion.video
-              key={current.url + index}
+              key={current.name + index}
               ref={videoRef}
               src={current.url}
               autoPlay
@@ -165,9 +276,25 @@ export function ProjectorScreen({ className }: { className?: string }) {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.9, ease: "easeInOut" }}
             />
+          ) : current?.type === "youtube" ? (
+            <motion.div
+              key={current.name + index}
+              className="absolute inset-0 h-full w-full"
+              initial={{ opacity: 0, scale: 1.06 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.9, ease: "easeInOut" }}
+            >
+              <ProjectorYouTube
+                videoId={current.videoId}
+                muted={muted}
+                single={slides.length === 1}
+                onEnded={() => setIndex((p) => (p + 1) % slides.length)}
+              />
+            </motion.div>
           ) : current ? (
             <motion.img
-              key={current.url + index}
+              key={current.name + index}
               src={current.url}
               alt=""
               draggable={false}

@@ -43,6 +43,7 @@ import {
   fetchProjectorItems,
   uploadProjectorImages,
   uploadProjectorVideos,
+  addProjectorYoutube,
   deleteProjectorItem,
   reorderProjector,
   type ProjectorItem,
@@ -2488,6 +2489,7 @@ function SlideshowManager({
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState("")
+  const [ytUrl, setYtUrl] = useState("")
   const photoRef = useRef<HTMLInputElement>(null)
   const videoRef = useRef<HTMLInputElement>(null)
 
@@ -2520,6 +2522,20 @@ function SlideshowManager({
       setBusy(false)
       if (photoRef.current) photoRef.current.value = ""
       if (videoRef.current) videoRef.current.value = ""
+    }
+  }
+
+  async function onAddYoutube() {
+    if (!ytUrl.trim()) return
+    setBusy(true)
+    setError("")
+    try {
+      setItems(await addProjectorYoutube(ytUrl.trim(), password))
+      setYtUrl("")
+    } catch (e) {
+      handleErr(e)
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -2560,10 +2576,35 @@ function SlideshowManager({
   return (
     <div className="space-y-6">
       <p className="text-sm text-cream/70">
-        Photos and videos play in the home-screen slideshow, in the order shown
-        below — use the arrows to reorder. Videos: MP4, WebM, MOV or OGG · up to
-        50 MB · they autoplay muted with an unmute button on the site.
+        Photos, videos and YouTube videos play in the home-screen slideshow, in
+        the order shown below — use the arrows to reorder. Videos: MP4, WebM, MOV
+        or OGG · up to 50 MB · they autoplay muted with an unmute button on the
+        site. YouTube videos autoplay muted and advance when they finish.
       </p>
+
+      {/* Add a YouTube video */}
+      <div className="flex flex-col gap-3 rounded-2xl bg-white/5 p-4 ring-1 ring-white/10 sm:flex-row sm:items-center">
+        <input
+          className={`${inputCls} flex-1`}
+          placeholder="Paste a YouTube or Shorts link…"
+          value={ytUrl}
+          onChange={(e) => setYtUrl(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault()
+              onAddYoutube()
+            }
+          }}
+        />
+        <button
+          type="button"
+          onClick={onAddYoutube}
+          disabled={busy || !ytUrl.trim()}
+          className={btnCls}
+        >
+          <Video className="h-4 w-4" /> Add YouTube video
+        </button>
+      </div>
 
       <div className="flex flex-wrap items-center gap-3">
         <button
@@ -2613,6 +2654,12 @@ function SlideshowManager({
                     preload="metadata"
                     className="h-full w-full object-cover"
                   />
+                ) : it.type === "youtube" ? (
+                  <img
+                    src={`https://i.ytimg.com/vi/${it.videoId}/hqdefault.jpg`}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   <img src={it.url} alt="" className="h-full w-full object-cover" />
                 )}
@@ -2621,6 +2668,8 @@ function SlideshowManager({
                 <span className="inline-flex items-center gap-1 rounded-full bg-maroon/20 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-maroon">
                   {it.type === "video" ? (
                     <Film className="h-3 w-3" />
+                  ) : it.type === "youtube" ? (
+                    <Video className="h-3 w-3" />
                   ) : (
                     <Images className="h-3 w-3" />
                   )}
