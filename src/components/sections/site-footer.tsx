@@ -129,9 +129,7 @@ const SiteFooter: React.FC = () => {
           <Link to="/refund-policy" className="transition-colors hover:text-maroon">
             Refund
           </Link>
-          <Link to="/shipping-policy" className="transition-colors hover:text-maroon">
-            Shipping
-          </Link>
+
         </nav>
         <p className="text-center text-xs text-cream/50">
           © {new Date().getFullYear()} Genesis Kreations · genesiskreationsmedia.com
