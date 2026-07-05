@@ -9,3 +9,16 @@
 
 # Let media.php receive /api/media.php/<section>/<file> via PATH_INFO.
 AcceptPathInfo On
+
+# PhonePe's webhook authenticates via the Authorization header, which some
+# Apache/CGI setups strip from PHP so payments/webhook.php would always see an
+# empty header and reject every callback. Pass it through explicitly.
+# (LiteSpeed's LSAPI passes it by default; these are guarded no-ops there.)
+<IfModule mod_setenvif.c>
+  SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+</IfModule>
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTP:Authorization} .
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>

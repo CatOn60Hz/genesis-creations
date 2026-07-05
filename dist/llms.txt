@@ -1,0 +1,18 @@
+# Genesis Kreations
+
+> Genesis Kreations is a Chennai-based media house offering a media academy, digital marketing, video/film production, studio rental, and broadcasting services.
+
+## Pages
+
+- [Home](https://genesiskreationsmedia.com/): Overview of Genesis Kreations and its media services.
+- [About](https://genesiskreationsmedia.com/about): The studio's vision, team, and story.
+- [Services](https://genesiskreationsmedia.com/services): Production, studio rental, broadcasting and other media services.
+- [Academy](https://genesiskreationsmedia.com/academy): Media academy courses and training programs.
+- [Digital Marketing](https://genesiskreationsmedia.com/digital-marketing): Digital marketing offerings for brands and creators.
+- [Workshops](https://genesiskreationsmedia.com/workshops): Upcoming and ongoing hands-on workshops.
+- [Gallery](https://genesiskreationsmedia.com/gallery): Photo gallery of work, events, and the studio.
+
+## Contact
+
+- Website: https://genesiskreationsmedia.com/
+- Location: Chennai, India

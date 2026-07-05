@@ -10,6 +10,91 @@
 // carry a long cache lifetime.
 require_once __DIR__ . '/_shared.php';
 
+// On-the-fly downscale for images (?w=NNN). Produces a smaller — and where the
+// browser advertises support, WebP — variant, cached under gc-data/cache so it's
+// generated once. Returns true after serving it. Any problem (no GD, would
+// upscale, decode/encode failure) returns false so the caller falls through to
+// streaming the original untouched — this can never break image delivery.
+function media_serve_resized(string $real, string $ext, int $w, string $rel): bool
+{
+    if ($w < 1 || $w > 4000 || !function_exists('imagecreatetruecolor')) {
+        return false;
+    }
+    $info = @getimagesize($real);
+    if ($info === false) {
+        return false;
+    }
+    $ow = (int) $info[0];
+    $oh = (int) $info[1];
+    if ($ow <= 0 || $oh <= 0 || $w >= $ow) {
+        return false; // never upscale; serve the original instead
+    }
+
+    $accept  = $_SERVER['HTTP_ACCEPT'] ?? '';
+    $useWebp = function_exists('imagewebp') && strpos($accept, 'image/webp') !== false;
+    $outExt  = $useWebp ? 'webp' : ($ext === 'png' ? 'png' : 'jpg');
+    $outMime = $useWebp ? 'image/webp' : ($ext === 'png' ? 'image/png' : 'image/jpeg');
+
+    $cacheDir = GC_PERSIST_DIR . '/cache';
+    if (!is_dir($cacheDir)) {
+        @mkdir($cacheDir, 0775, true);
+    }
+    $cacheFile = $cacheDir . '/' . preg_replace('/[^A-Za-z0-9._-]/', '_', $rel) . ".$w.$outExt";
+
+    if (!is_file($cacheFile)) {
+        switch ($ext) {
+            case 'jpg':
+            case 'jpeg':
+                $srcImg = @imagecreatefromjpeg($real);
+                break;
+            case 'png':
+                $srcImg = @imagecreatefrompng($real);
+                break;
+            case 'webp':
+                $srcImg = function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($real) : false;
+                break;
+            case 'gif':
+                $srcImg = @imagecreatefromgif($real);
+                break;
+            default:
+                $srcImg = false;
+        }
+        if (!$srcImg) {
+            return false;
+        }
+
+        $nh  = (int) round($oh * ($w / $ow));
+        $dst = imagecreatetruecolor($w, max(1, $nh));
+        if ($outExt === 'png' || $outExt === 'webp') {
+            imagealphablending($dst, false);
+            imagesavealpha($dst, true);
+        }
+        imagecopyresampled($dst, $srcImg, 0, 0, 0, 0, $w, $nh, $ow, $oh);
+
+        if ($outExt === 'webp') {
+            $ok = @imagewebp($dst, $cacheFile, 80);
+        } elseif ($outExt === 'png') {
+            $ok = @imagepng($dst, $cacheFile, 8);
+        } else {
+            $ok = @imagejpeg($dst, $cacheFile, 82);
+        }
+        imagedestroy($srcImg);
+        imagedestroy($dst);
+
+        if (!$ok || !is_file($cacheFile) || filesize($cacheFile) === 0) {
+            @unlink($cacheFile);
+            return false;
+        }
+    }
+
+    header('Content-Type: ' . $outMime);
+    header('Cache-Control: public, max-age=31536000, immutable');
+    header('Vary: Accept');
+    header('Content-Length: ' . filesize($cacheFile));
+    readfile($cacheFile);
+    return true;
+}
+
 // Accept either PATH_INFO (/api/media.php/gallery/x.jpg) or ?f=gallery/x.jpg.
 $rel = $_SERVER['PATH_INFO'] ?? '';
 if ($rel === '' && isset($_GET['f'])) {
@@ -38,14 +123,72 @@ if ($real === false || $baseReal === false ||
     exit;
 }
 
-$ext = strtolower(pathinfo($real, PATHINFO_EXTENSION));
-if (!array_key_exists($ext, GC_ALLOWED)) {
+$ext  = strtolower(pathinfo($real, PATHINFO_EXTENSION));
+$mime = GC_ALLOWED[$ext] ?? (GC_ALLOWED_VIDEO[$ext] ?? null);
+if ($mime === null) {
     http_response_code(404);
     exit;
 }
 
-header('Content-Type: ' . GC_ALLOWED[$ext]);
-header('Content-Length: ' . filesize($real));
+// Optional downscaled/WebP variant for images: /api/media.php?f=...&w=800
+// Falls through to the full-size stream below if it can't (e.g. GD missing).
+if (isset($_GET['w']) && array_key_exists($ext, GC_ALLOWED)) {
+    if (media_serve_resized($real, $ext, (int) $_GET['w'], $rel)) {
+        exit;
+    }
+}
+
+$size  = filesize($real);
+$start = 0;
+$end   = $size - 1;
+
+header('Content-Type: ' . $mime);
+header('Accept-Ranges: bytes');
 header('Cache-Control: public, max-age=31536000, immutable');
-readfile($real);
+
+// Honour a single byte-range request (bytes=start-end). Required for <video>
+// playback in Safari/iOS and for seeking; harmless for images (which are
+// usually requested whole).
+$range = $_SERVER['HTTP_RANGE'] ?? '';
+if ($range !== '' && preg_match('/bytes=(\d*)-(\d*)/', $range, $m)) {
+    if ($m[1] !== '') {
+        $start = (int) $m[1];
+    }
+    if ($m[2] !== '') {
+        $end = (int) $m[2];
+    }
+    if ($start > $end || $start >= $size) {
+        header('Content-Range: bytes */' . $size);
+        http_response_code(416);
+        exit;
+    }
+    $end = min($end, $size - 1);
+    http_response_code(206);
+    header('Content-Range: bytes ' . $start . '-' . $end . '/' . $size);
+}
+
+$length = $end - $start + 1;
+header('Content-Length: ' . $length);
+
+if ($start === 0 && $end === $size - 1) {
+    readfile($real);
+    exit;
+}
+
+$fp = fopen($real, 'rb');
+if ($fp === false) {
+    http_response_code(500);
+    exit;
+}
+fseek($fp, $start);
+$bufSize   = 8192;
+$remaining = $length;
+while ($remaining > 0 && !feof($fp)) {
+    $read = $remaining > $bufSize ? $bufSize : $remaining;
+    echo fread($fp, $read);
+    $remaining -= $read;
+    @ob_flush();
+    @flush();
+}
+fclose($fp);
 exit;

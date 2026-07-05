@@ -1,30 +1,35 @@
 <?php
 // POST /api/projector/delete.php (form: name + X-Gallery-Password)
-// -> { images: [...] }
-require_once __DIR__ . '/../_shared.php';
+// -> { items: [...] }. `name` is a filename, or "yt:<id>" for a YouTube item.
+require_once __DIR__ . '/_common.php';
 
 send_cors();
 require_auth();
 require_post();
 
-$dir = GC_UPLOADS_DIR . '/projector';
-$url = GC_UPLOADS_URL . '/projector';
+$name  = (string) ($_POST['name'] ?? '');
+$store = GC_DATA_DIR . '/projector.json';
+$meta  = json_load($store, []);
 
-$name = (string) ($_POST['name'] ?? '');
-if (!delete_named($dir, $name)) {
+if (strpos($name, 'yt:') === 0) {
+    $id = substr($name, 3);
+    if (isset($meta['youtube']) && is_array($meta['youtube'])) {
+        $meta['youtube'] = array_values(array_filter(
+            $meta['youtube'],
+            static fn($n) => $n !== $id
+        ));
+    }
+} elseif (!delete_named(projector_dir(), $name)) {
     json_out(['error' => 'Invalid name'], 400);
 }
 
-// If the removed image was pinned to show first, forget that choice.
-$store = GC_DATA_DIR . '/projector.json';
-$meta = json_load($store, []);
-if (($meta['first'] ?? null) === $name) {
-    unset($meta['first']);
-    json_save($store, $meta);
+// Drop the deleted item from the saved order.
+if (isset($meta['order']) && is_array($meta['order'])) {
+    $meta['order'] = array_values(array_filter(
+        $meta['order'],
+        static fn($n) => $n !== $name
+    ));
 }
-$first = $meta['first'] ?? null;
+json_save($store, $meta);
 
-json_out([
-    'images' => order_first(list_images($dir, $url), $first),
-    'first'  => $first,
-]);
+json_out(['items' => projector_items()]);

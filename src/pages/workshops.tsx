@@ -44,7 +44,13 @@ import {
   type LucideIcon,
 } from "lucide-react"
 
-import { fetchWorkshops, type Workshop, type WorkshopSession } from "@/lib/cms-api"
+import {
+  fetchWorkshops,
+  createWorkshopOrder,
+  type Workshop,
+  type WorkshopSession,
+} from "@/lib/cms-api"
+import { PaymentRegistration } from "@/components/payment-registration"
 import { PixelTrail } from "@/components/ui/pixel-trail"
 import TextCursorProximity from "@/components/ui/text-cursor-proximity"
 import { Reveal } from "@/components/ui/reveal"
@@ -139,6 +145,10 @@ function WorkshopCard({ w, index }: { w: Workshop; index: number }) {
   const learn = w.learn ?? []
   const included = w.included ?? []
   const reduce = useReducedMotion()
+  // Paid workshops open the in-app PhonePe registration form instead of the
+  // external registerUrl link.
+  const [registering, setRegistering] = useState(false)
+  const fee = w.fee ?? 0
 
   return (
     <motion.article
@@ -252,19 +262,42 @@ function WorkshopCard({ w, index }: { w: Workshop; index: number }) {
           </p>
         )}
 
-        {/* CTA */}
-        {w.registerUrl && (
-          <a
-            href={w.registerUrl}
-            target="_blank"
-            rel="noreferrer"
+        {/* CTA — paid workshops pay via PhonePe in-app; free ones keep the
+            external registration link. */}
+        {fee > 0 ? (
+          <button
+            type="button"
+            onClick={() => setRegistering(true)}
             className="mt-auto inline-flex items-center justify-center gap-2 rounded-full bg-maroon px-6 py-3.5 text-sm font-semibold text-cream transition-transform hover:scale-[1.02]"
           >
-            <Ticket className="h-4 w-4" /> Register now
+            <Ticket className="h-4 w-4" /> Register — ₹{fee.toLocaleString("en-IN")}
             <ArrowRight className="h-4 w-4" />
-          </a>
+          </button>
+        ) : (
+          w.registerUrl && (
+            <a
+              href={w.registerUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-auto inline-flex items-center justify-center gap-2 rounded-full bg-maroon px-6 py-3.5 text-sm font-semibold text-cream transition-transform hover:scale-[1.02]"
+            >
+              <Ticket className="h-4 w-4" /> Register now
+              <ArrowRight className="h-4 w-4" />
+            </a>
+          )
         )}
       </div>
+
+      {registering && (
+        <PaymentRegistration
+          title={w.title}
+          fee={fee}
+          feeLabel="Workshop fee"
+          sessions={w.sessions}
+          onClose={() => setRegistering(false)}
+          createOrder={(f) => createWorkshopOrder({ workshopId: w.id, ...f })}
+        />
+      )}
     </motion.article>
   )
 }

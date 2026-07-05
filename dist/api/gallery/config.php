@@ -1,5 +1,5 @@
 <?php
-// Genesis Creations — gallery backend configuration.
+// Genesis Kreations — gallery backend configuration.
 //
 // The admin password now lives in one place (../config.php, GC_ADMIN_PASSWORD)
 // so the whole admin dashboard shares a single secret. Change it there.
