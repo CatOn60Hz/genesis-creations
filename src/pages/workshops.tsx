@@ -134,7 +134,7 @@ function sessionsOf(w: Workshop): WorkshopSession[] {
   return []
 }
 
-function WorkshopCard({ w, index }: { w: Workshop; index: number }) {
+export function WorkshopCard({ w, index }: { w: Workshop; index: number }) {
   const sessions = sessionsOf(w)
   const learn = w.learn ?? []
   const included = w.included ?? []
@@ -177,7 +177,17 @@ function WorkshopCard({ w, index }: { w: Workshop; index: number }) {
       {/* Body */}
       <div className="flex flex-1 flex-col gap-6 p-7">
         {w.description && (
-          <p className="text-sm leading-relaxed text-cream/75">{w.description}</p>
+          <div className="flex flex-col gap-3 text-sm leading-relaxed text-cream/75">
+            {w.description
+              .split(/\n\s*\n/)
+              .map((para) => para.trim())
+              .filter(Boolean)
+              .map((para, i) => (
+                <p key={i} className="whitespace-pre-line">
+                  {para}
+                </p>
+              ))}
+          </div>
         )}
 
         {/* Sessions */}

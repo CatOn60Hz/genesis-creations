@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import {
   Megaphone,
   CalendarDays,
@@ -30,6 +30,7 @@ import {
 } from "lucide-react"
 
 import { SEO } from "@/components/seo"
+import { WorkshopCard } from "@/pages/workshops"
 
 import {
   fetchAnnouncement,
@@ -299,6 +300,44 @@ function WorkshopsManager({
   const [confirmId, setConfirmId] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
+  // Object URL for a freshly-picked banner file, so the live preview can show
+  // it before it's uploaded. Revoked when the file changes or clears.
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null)
+  useEffect(() => {
+    if (!banner) {
+      setBannerPreview(null)
+      return
+    }
+    const url = URL.createObjectURL(banner)
+    setBannerPreview(url)
+    return () => URL.revokeObjectURL(url)
+  }, [banner])
+
+  // Build a Workshop from the current form so the preview renders the exact
+  // same card the public Workshops page shows. Falls back to the already-saved
+  // banner when editing and no new file has been picked.
+  const previewWorkshop: Workshop = useMemo(() => {
+    const existing = form.id ? items.find((w) => w.id === form.id) : undefined
+    return {
+      id: form.id || "preview",
+      title: form.title.trim() || "Workshop title",
+      description: form.description,
+      date: form.date,
+      location: form.location,
+      banner: bannerPreview
+        ? { name: "preview", url: bannerPreview }
+        : existing?.banner ?? null,
+      tagline: form.tagline,
+      badge: form.badge,
+      icon: form.icon,
+      registerUrl: form.registerUrl,
+      note: form.note,
+      sessions: cleanSessions(form.sessions),
+      learn: cleanList(form.learn),
+      included: cleanList(form.included),
+    }
+  }, [form, items, bannerPreview])
+
   useEffect(() => {
     fetchWorkshops()
       .then(setItems)
@@ -421,8 +460,9 @@ function WorkshopsManager({
 
   return (
     <div className="space-y-10">
-      {/* Editor */}
-      <div className="max-w-2xl space-y-4 rounded-2xl bg-white/5 p-6 ring-1 ring-white/10">
+      {/* Editor form with a live preview of the public workshop card beside it */}
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] xl:items-start">
+        <div className="space-y-4 rounded-2xl bg-white/5 p-6 ring-1 ring-white/10">
         <h3 className="flex items-center gap-2 text-lg font-semibold">
           {form.id ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
           {form.id ? "Edit workshop" : "Add a workshop"}
@@ -477,13 +517,22 @@ function WorkshopsManager({
             onChange={(e) => setForm({ ...form, icon: e.target.value })}
           />
         )}
-        <textarea
-          className={inputCls}
-          rows={3}
-          placeholder="Intro paragraph (description)"
-          value={form.description}
-          onChange={(e) => setForm({ ...form, description: e.target.value })}
-        />
+        <div className="space-y-1.5">
+          <label className="block text-sm text-cream/70">Description</label>
+          <textarea
+            className={inputCls}
+            rows={8}
+            placeholder={
+              "Description\n\nPress Enter for a new line.\nLeave a blank line between paragraphs."
+            }
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+          />
+          <p className="text-xs text-cream/50">
+            Tip: leave a blank line between blocks to split the text into separate
+            paragraphs. Watch the live preview to see how it will look.
+          </p>
+        </div>
 
         {/* Sessions — one block per city, mirroring the card rows */}
         <div className="space-y-3">
@@ -656,6 +705,18 @@ function WorkshopsManager({
             </button>
           )}
           {error && <span className="text-sm text-red-400">{error}</span>}
+        </div>
+        </div>
+
+        {/* Live preview — the exact card visitors see on the Workshops page */}
+        <div className="space-y-3 xl:sticky xl:top-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cream/50">
+            Live preview
+          </p>
+          <WorkshopCard w={previewWorkshop} index={0} />
+          <p className="text-xs text-cream/40">
+            Updates as you edit — this is exactly how visitors see the workshop.
+          </p>
         </div>
       </div>
 
