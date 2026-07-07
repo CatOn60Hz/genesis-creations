@@ -468,6 +468,18 @@ export async function deleteWorkshop(
   return (data.workshops ?? []).map(normalizeWorkshop)
 }
 
+export async function reorderWorkshops(
+  order: string[],
+  password: string
+): Promise<Workshop[]> {
+  const data = await postForm<{ workshops: Workshop[] }>(
+    "/workshops/reorder.php",
+    { order: JSON.stringify(order) },
+    password
+  )
+  return (data.workshops ?? []).map(normalizeWorkshop)
+}
+
 /* --------------------- Home "Workshops & Courses" list ------------------ */
 
 export type HomeCourseKind = "gimbal" | "drone" | "aerial" | "clapper" | "camera"

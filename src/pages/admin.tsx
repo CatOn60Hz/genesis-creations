@@ -39,6 +39,7 @@ import {
   fetchWorkshops,
   saveWorkshop,
   deleteWorkshop,
+  reorderWorkshops,
   type Workshop,
   type WorkshopSession,
   fetchProjectorItems,
@@ -458,6 +459,32 @@ function WorkshopsManager({
   const removeListItem = (key: "learn" | "included", i: number) =>
     setForm((f) => ({ ...f, [key]: f[key].filter((_, si) => si !== i) }))
 
+  // Swap a workshop with its neighbour and persist the new order. Optimistic,
+  // with a refetch fallback if the save fails.
+  const move = async (idx: number, dir: -1 | 1) => {
+    const j = idx + dir
+    if (j < 0 || j >= items.length) return
+    const next = items.slice()
+    ;[next[idx], next[j]] = [next[j], next[idx]]
+    setItems(next)
+    setBusy(true)
+    setError(null)
+    try {
+      setItems(await reorderWorkshops(next.map((w) => w.id), password))
+    } catch (e) {
+      const m = e instanceof Error ? e.message : "Reorder failed"
+      setError(m)
+      handleAuthErr(m)
+      try {
+        setItems(await fetchWorkshops())
+      } catch {
+        /* keep optimistic order if refetch also fails */
+      }
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <div className="space-y-10">
       {/* Editor form with a live preview of the public workshop card beside it */}
@@ -727,7 +754,7 @@ function WorkshopsManager({
         <p className="text-cream/50">No workshops yet.</p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((w) => (
+          {items.map((w, idx) => (
             <div
               key={w.id}
               className="flex flex-col overflow-hidden rounded-xl bg-white/5 ring-1 ring-white/10"
@@ -757,7 +784,25 @@ function WorkshopsManager({
                 <p className="line-clamp-2 text-sm text-cream/70">
                   {w.description}
                 </p>
-                <div className="mt-3 flex gap-2">
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => move(idx, -1)}
+                    disabled={busy || idx === 0}
+                    aria-label="Move earlier"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-30"
+                  >
+                    <ArrowUp className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => move(idx, 1)}
+                    disabled={busy || idx === items.length - 1}
+                    aria-label="Move later"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-30"
+                  >
+                    <ArrowDown className="h-3.5 w-3.5" />
+                  </button>
                   <button
                     type="button"
                     onClick={() => edit(w)}
@@ -768,7 +813,8 @@ function WorkshopsManager({
                   <button
                     type="button"
                     onClick={() => setConfirmId(w.id)}
-                    className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1.5 text-xs text-red-300 hover:bg-red-600 hover:text-white"
+                    disabled={busy}
+                    className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1.5 text-xs text-red-300 hover:bg-red-600 hover:text-white disabled:opacity-50"
                   >
                     <Trash2 className="h-3.5 w-3.5" /> Delete
                   </button>
