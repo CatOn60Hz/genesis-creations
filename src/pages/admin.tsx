@@ -15,6 +15,8 @@ import {
   Video,
   ArrowUp,
   ArrowDown,
+  ArrowLeft,
+  ArrowRight,
   Upload,
   Trash2,
   LogOut,
@@ -792,7 +794,7 @@ function WorkshopsManager({
                     aria-label="Move earlier"
                     className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-30"
                   >
-                    <ArrowUp className="h-3.5 w-3.5" />
+                    <ArrowLeft className="h-3.5 w-3.5" />
                   </button>
                   <button
                     type="button"
@@ -801,7 +803,7 @@ function WorkshopsManager({
                     aria-label="Move later"
                     className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-30"
                   >
-                    <ArrowDown className="h-3.5 w-3.5" />
+                    <ArrowRight className="h-3.5 w-3.5" />
                   </button>
                   <button
                     type="button"
