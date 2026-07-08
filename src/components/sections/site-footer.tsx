@@ -40,7 +40,7 @@ const SiteFooter: React.FC = () => {
             Start your media career today
           </h2>
           <p className="mt-4 max-w-md leading-relaxed text-cream/65">
-            Join Genesis Kreations Media Academy and learn from working
+            Join Genesis Kreations Media and learn from working
             professionals in a fully equipped studio environment.
           </p>
           <a

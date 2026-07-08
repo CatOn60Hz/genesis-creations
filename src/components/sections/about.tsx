@@ -37,7 +37,7 @@ const About: React.FC = () => {
               <span className="text-maroon">career in media</span>
             </h2>
             <p className="mx-auto mt-6 max-w-3xl text-base md:text-lg leading-relaxed text-cream/85">
-              We at Genesis Kreation's Academy provide you with all the necessary skills
+              We at Genesis Kreation's provide you with all the necessary skills
               tailored for a solid grounding to help you jumpstart your career as a media
               professional. Gaining the right balance of knowledge and skill is much
               required in any career — our courses combine theoretical and practical
