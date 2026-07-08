@@ -7,7 +7,7 @@ import logo from "@/assets/logo-mark.png"
 
 // Defined once at module scope so its identity is stable across re-renders —
 // otherwise GooeyText's effect tears down and restarts the morph each render.
-const MORPH_WORDS = ["Create", "Capture", "Produce", "Broadcast"]
+const MORPH_WORDS = ["Script", "Create", "Capture", "Edit", "Produce", "Broadcast"]
 
 const Hero: React.FC = () => {
   const screenSize = useScreenSize()
