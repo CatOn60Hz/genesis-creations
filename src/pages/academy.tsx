@@ -13,8 +13,9 @@ import {
   Users,
   Sparkles,
   Rocket,
-  MapPin,
   Landmark,
+  Briefcase,
+  Compass,
   X,
   type LucideProps,
 } from "lucide-react"
@@ -354,39 +355,39 @@ const fallbackCourses: Course[] = [
 // editorial list to match the About section on the home page.
 const advantages: { icon: Icon; title: string; text: string }[] = [
   {
-    icon: Award,
-    title: "Industry-recognized certification",
-    text: "Every course ends with a certificate that carries real weight with studios, agencies, and clients.",
+    icon: Landmark,
+    title: "Government Certified Diploma Programs",
+    text: "Earn industry-recognized government certificate that supports higher education, employment opportunities, and long-term career growth.",
   },
   {
     icon: Building2,
-    title: "Full media infrastructure",
-    text: "Studios, cameras, drones, sound equipment, and editing labs, all on campus and open for practice.",
+    title: "Industry-Standard Media Infrastructure",
+    text: "Train with professional cameras, editing suites, lighting equipment, studios, and production tools used across the media industry.",
   },
   {
     icon: Users,
-    title: "Best-in-industry mentors",
-    text: "You learn from people actively working in the field, not trainers reciting theory.",
+    title: "Learn from Industry Professionals",
+    text: "Gain practical knowledge and mentorship from experienced professionals actively working in the media industry.",
   },
   {
     icon: Sparkles,
-    title: "100% hands-on teaching",
-    text: "A practical-first approach where you spend your time making real work, not memorising slides.",
+    title: "Practical-First Learning Approach",
+    text: "Spend more time creating, filming, editing, and producing real projects rather than focusing on theory alone.",
   },
   {
     icon: Rocket,
-    title: "Built to launch careers",
-    text: "Designed to lead somewhere real: freelance work, a studio job, or a venture of your own.",
+    title: "Portfolio & Career Development",
+    text: "Graduate with a professional portfolio that prepares you for employment, freelancing, and entrepreneurial opportunities.",
   },
   {
-    icon: MapPin,
-    title: "Chennai and Coimbatore campuses",
-    text: "Two fully equipped locations across Tamil Nadu, so quality training stays within reach.",
+    icon: Briefcase,
+    title: "Placement Assistance & Industry Exposure",
+    text: "Benefit from internships, workshops, industry interactions, and placement support to launch your professional media career.",
   },
   {
-    icon: Landmark,
-    title: "Partnered with TAHDCO",
-    text: "Working with a Government of Tamil Nadu initiative to deliver specialized training programs.",
+    icon: Compass,
+    title: "Multiple Media Career Pathways",
+    text: "Choose from cinematography, editing, photography, journalism, advertising, visual communication, and other creative disciplines.",
   },
 ]
 
@@ -729,9 +730,8 @@ const Academy: React.FC = () => {
           </h1>
           <Reveal delay={0.1}>
             <p className="mx-auto max-w-2xl text-lg leading-relaxed text-cream/85 [text-shadow:0_2px_14px_rgba(0,0,0,0.7)]">
-              Industry-recognized certification courses across photography,
-              film, design, and audio, taught hands-on by working
-              professionals.
+              Empowering creative minds through industry-focused education,
+              practical training, and real-world media experience.
             </p>
           </Reveal>
         </div>
@@ -748,9 +748,8 @@ const Academy: React.FC = () => {
                 Certification courses
               </h2>
               <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-cream/80 md:text-lg">
-                Seven focused programs, each built around real shoots, real
-                sessions, and a portfolio you walk away with. Tap any course to
-                see what you will learn, how it runs, and who it is for.
+                Build your future in the media industry with programs focused on
+                practical skills, creativity, and career readiness.
               </p>
             </Reveal>
 
@@ -776,7 +775,7 @@ const Academy: React.FC = () => {
               Why Genesis Kreations
             </p>
             <h2 className="font-display text-3xl font-bold tracking-tighter text-cream md:text-5xl text-balance">
-              An academy built to put you to work
+              Building Future Creative Professionals for the Media Industry
             </h2>
           </Reveal>
 
@@ -819,11 +818,12 @@ const Academy: React.FC = () => {
             </div>
             <div className="relative z-10 mx-auto max-w-2xl">
               <h2 className="font-display text-3xl font-bold tracking-tight text-cream md:text-4xl">
-                Looking for a shorter, intensive format?
+                Looking for a shorter, intensive learning experience?
               </h2>
               <p className="mx-auto mt-4 max-w-xl text-cream/75">
-                Our hands-on workshops cover drone, gimbal, and more over a few
-                focused days, with equipment, lunch, and a certificate included.
+                Our hands-on workshops are designed to help you develop practical
+                media skills in a short period through immersive training, expert
+                guidance, and real-world experience.
               </p>
               <Link
                 to="/workshops"

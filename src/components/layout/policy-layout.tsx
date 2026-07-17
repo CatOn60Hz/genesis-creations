@@ -67,7 +67,7 @@ export function PolicyContact() {
           www.genesiskreationsmedia.com
         </a>
         <br />
-        Registered Office: #340B/1A3B1, Vinayaka Avenue, Okkiyam Thoraipakkam,
+        Registered Office: #340/B1A3B1, Vinayaka Avenue, Okkiyam Thoraipakkam,
         Chennai 600097
       </p>
     </>

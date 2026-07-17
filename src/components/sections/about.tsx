@@ -7,17 +7,17 @@ const advantages = [
   {
     icon: <Wallet />,
     title: "Affordable course fees",
-    text: "Industry-grade media training that stays within reach for every aspiring creator.",
+    text: "Making quality media education accessible through affordable and career-focused diploma programs.",
   },
   {
     icon: <Building2 />,
     title: "Well-equipped infrastructure",
-    text: "Expansive classrooms and professional equipment for real, hands-on learning.",
+    text: "Train with industry-standard equipment, professional studios, and modern media infrastructure. Experience hands-on learning in a professional media production environment.",
   },
   {
     icon: <GraduationCap />,
     title: "Qualified, experienced faculty",
-    text: "Learn theory and practice from working professionals and working guest lecturers.",
+    text: "Learn from experienced industry professionals with practical expertise and real-world media experience.",
   },
 ]
 

@@ -376,9 +376,9 @@ const Workshops: React.FC = () => {
 
   return (
     <main className="min-h-screen bg-maroon-dark/40 pb-32 text-cream">
-      <SEO 
-        title="Workshops & Masterclasses - Genesis Kreations" 
-        description="Join hands-on sessions led by working professionals in gimbal operation, drone flying, cinematography, photography, and more." 
+      <SEO
+        title="Workshops - Genesis Kreations"
+        description="Short, intensive workshops led by working professionals in gimbal operation, drone flying, cinematography, photography, and more."
       />
       {/* Hero: workshop photo background under a dark scrim, full viewport height */}
       <section className="relative flex min-h-[100dvh] items-center overflow-hidden px-6 py-24 text-cream">
@@ -401,15 +401,7 @@ const Workshops: React.FC = () => {
           <h1 className="mb-8 flex flex-col items-center font-bold uppercase leading-[0.95] tracking-tight [text-shadow:0_4px_28px_rgba(0,0,0,0.6)]">
             <TextCursorProximity
               label="WORKSHOPS"
-              className="text-[2.5rem] will-change-transform sm:text-7xl md:text-9xl lg:text-[11rem]"
-              styles={PROXIMITY_STYLES}
-              falloff="gaussian"
-              radius={200}
-              containerRef={heroRef}
-            />{" "}
-            <TextCursorProximity
-              label="& MASTERCLASSES"
-              className="text-3xl will-change-transform sm:text-5xl md:text-8xl lg:text-9xl"
+              className="text-5xl will-change-transform sm:text-7xl md:text-9xl lg:text-[11rem]"
               styles={PROXIMITY_STYLES}
               falloff="gaussian"
               radius={200}
@@ -418,9 +410,8 @@ const Workshops: React.FC = () => {
           </h1>
           <Reveal delay={0.1}>
             <p className="mx-auto max-w-3xl text-lg leading-relaxed text-cream/85 [text-shadow:0_2px_14px_rgba(0,0,0,0.7)] md:text-xl">
-              Hands-on sessions led by working professionals: gimbal, drone,
-              cinematography, photography and more. Find an upcoming session and
-              register.
+              Short, intensive programs designed to help you gain practical
+              experience and industry-ready skills quickly.
             </p>
           </Reveal>
         </div>

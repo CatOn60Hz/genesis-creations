@@ -112,7 +112,7 @@ const Gallery: React.FC = () => {
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-base text-cream/80 md:text-lg">
             Moments from our shoots, studio sessions and events — captured the
-            Genesis way.
+            Genesis Kreations way.
           </p>
         </div>
 

@@ -56,6 +56,10 @@ const Hero: React.FC = () => {
               </span>
             </h1>
 
+            <p className="mt-3 text-sm font-medium uppercase tracking-[0.3em] text-maroon md:text-base">
+              Where Creativity Begins
+            </p>
+
             <GooeyText
               texts={MORPH_WORDS}
               morphTime={1.2}
@@ -77,7 +81,7 @@ const Hero: React.FC = () => {
             {/* w-full + max-w caps the width at the column, never wider — so it
                 wraps inside the column instead of spilling off the viewport. */}
             <p className="w-full max-w-2xl text-lg md:text-3xl text-maroon-dark">
-              Media Academy · Digital Marketing · Production · Studio Rental · Broadcasting
+              Media Academy | Digital Marketing | Production | Studio Rental | Broadcasting
             </p>
           </div>
 
@@ -86,7 +90,7 @@ const Hero: React.FC = () => {
               centered) but never more than 57vw, so the pair fits side-by-side. */}
           <div className="flex w-full flex-col items-center lg:w-[min(57vw,calc((100vh_-_24rem)_*_16_/_9))] lg:flex-none">
             <p className="mb-4 text-center text-xs sm:text-sm md:text-base uppercase tracking-[0.2em] text-black md:whitespace-nowrap">
-              We don't just make media. We bring it to life
+              Turning Passion Into Profession.
             </p>
             <div className="w-full">
               <ProjectorScreen className="pointer-events-auto" />

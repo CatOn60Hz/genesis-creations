@@ -113,15 +113,15 @@ const milestones = [
   { year: "2016–2017", text: "Media Professional at JC Media" },
   { year: "11 Dec 2017", text: "Founded Genesis Kreations" },
   { year: "2020", text: "Launched Genesis Kreations Media Academy" },
-  { year: "2025", text: "Partnered with TAHDCO to train 30 students" },
   { year: "2026", text: "Expanded workshops to Chennai and Coimbatore" },
+  { year: "2026", text: "Launched Government-Certified Diploma Programs" },
 ]
 
 const founderBio = [
-  "For Jerophin Deril S, media has never been just a profession — it has always been a passion. From a young age he was fascinated by photography and filmmaking, spending countless hours capturing moments on his phone and experimenting with editing long before it became a career.",
+  "For Jerophin Deril, media has never been just a profession — it has always been a passion. From a young age he was fascinated by photography and filmmaking, spending countless hours capturing moments on his phone and experimenting with editing long before it became a career.",
   "He pursued a Bachelor's in Electronics & Media Technology at Karunya Institute of Technology and Sciences (2012–2016), a program that uniquely combined engineering with professional media production. He spent much of his time in the television studio and Production Control Room, became Student Coordinator of the campus channel, built his own drone for an award-winning final-year project, and set up the department's first student-led OB Van.",
   "After gaining industry experience at JC Media, he founded Genesis Kreations on 11 December 2017 — specializing in media production, live broadcasting, streaming, and television programs. During the COVID-19 pandemic he transformed it into a media academy, redesigning his four-year engineering curriculum into an intensive three-month practical training program.",
-  "A licensed drone pilot, he introduced specialized training in drone cinematography, gimbal filmmaking, and advanced production. Today his expertise spans photography, videography, editing, live broadcasting, drone cinematography, audio production, gimbal and Steadicam operation, and creative direction.",
+  "Driven by a passion for emerging production technologies, he introduced specialized training in drone cinematography, gimbal filmmaking, and advanced production techniques. Today, his expertise spans photography, videography, editing, live broadcasting, drone cinematography, audio production, gimbal and Steadicam operation, and creative direction.",
 ]
 
 // Built-in defaults — shown until the CMS responds and as a fallback. The FAQ
@@ -248,8 +248,8 @@ const About: React.FC = () => {
           </h1>
           <Reveal delay={0.1}>
             <p className="mx-auto max-w-2xl text-lg leading-relaxed text-cream/85 [text-shadow:0_2px_14px_rgba(0,0,0,0.7)]">
-              A full-service media production company and academy — creating with
-              excellence and inspiring through innovation.
+              A full-service media production company and academy — creating
+              impactful media and nurturing future talent.
             </p>
           </Reveal>
         </div>
@@ -336,7 +336,7 @@ const About: React.FC = () => {
               The founder
             </p>
             <h2 className="font-display text-3xl font-bold tracking-tighter text-cream md:text-5xl text-balance">
-              Meet Jerophin Deril S
+              Meet Mr. Jerophin Deril
             </h2>
           </Reveal>
 
@@ -391,7 +391,7 @@ const About: React.FC = () => {
                   <div className="absolute inset-0 overflow-hidden rounded-3xl ring-1 ring-white/10 [backface-visibility:hidden]">
                     <img
                       src={founderImg}
-                      alt="Jerophin Deril S, Founder & Managing Director of Genesis Kreations"
+                      alt="Jerophin Deril, Founder & Managing Director of Genesis Kreations"
                       loading="lazy"
                       className="h-full w-full object-cover"
                       style={{ objectPosition: "38% 30%" }}
@@ -399,7 +399,7 @@ const About: React.FC = () => {
                     <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 bg-gradient-to-t from-black/85 via-black/40 to-transparent p-5">
                       <div>
                         <p className="font-display text-lg font-bold text-cream">
-                          Jerophin Deril S
+                          Jerophin Deril
                         </p>
                         <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-cream/60">
                           Founder &amp; Managing Director
@@ -452,8 +452,8 @@ const About: React.FC = () => {
                 <blockquote className="relative mt-7 rounded-2xl bg-maroon/15 p-5 pl-12 text-cream/90 ring-1 ring-maroon/30">
                   <Quote className="absolute left-4 top-5 h-5 w-5 text-maroon" />
                   <p className="italic leading-relaxed">
-                    When passion is combined with knowledge, innovation, and
-                    perseverance, creativity has the power to transform lives.
+                    The future belongs to those who dare to create, inspire, and
+                    lead.
                   </p>
                 </blockquote>
               </Reveal>

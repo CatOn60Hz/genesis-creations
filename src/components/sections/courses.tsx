@@ -31,27 +31,27 @@ const fallbackCourses: CourseRow[] = [
   {
     kind: "gimbal",
     title: "Gimbal Workshop",
-    text: "Master smooth, cinematic motion with professional gimbal stabilization.",
-  },
-  {
-    kind: "drone",
-    title: "Drone Workshop",
-    text: "Hands-on drone operation and flight fundamentals for aerial work.",
-  },
-  {
-    kind: "aerial",
-    title: "Aerial Cinematography",
-    text: "Capture breathtaking aerial shots and compose them like a pro.",
-  },
-  {
-    kind: "clapper",
-    title: "Media Technology",
-    text: "The complete toolkit — camera, lighting, audio, editing and production.",
+    text: "A 3-day immersive journey into professional cinematography.",
   },
   {
     kind: "camera",
-    title: "Digital Photography",
-    text: "From exposure to composition, build a strong photography foundation.",
+    title: "Diploma in Visual Communication",
+    text: "Master visual storytelling through design, media, and creative production.",
+  },
+  {
+    kind: "clapper",
+    title: "Diploma in Sound Engineering",
+    text: "Learn professional audio production, recording, mixing, and mastering skills.",
+  },
+  {
+    kind: "aerial",
+    title: "Diploma in Cinematography",
+    text: "Develop filmmaking expertise through cinematography, lighting, and storytelling.",
+  },
+  {
+    kind: "drone",
+    title: "Diploma in Advertising & Media Communication",
+    text: "Build powerful brands through advertising and media communication strategies.",
   },
 ]
 

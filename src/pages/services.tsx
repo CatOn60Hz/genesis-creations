@@ -57,7 +57,7 @@ const services: Service[] = [
     kind: "media-production",
     title: "Media Production",
     subtitle: "Complete production, from scratch",
-    intro: "We don't just shoot, we build your project from the ground up. Our Media Production team handles every stage of the process, indoors and outdoors, for brands, individuals, and businesses alike.",
+    intro: "From concept to final delivery, our media production team creates high-quality visual content tailored for businesses, brands, organizations, and events using industry-standard equipment and creative expertise.",
     offerLabel: "What we offer",
     offer: [
       "Script writing and story development",
@@ -85,34 +85,34 @@ const services: Service[] = [
     kind: "studio-rental",
     title: "Studio Rental",
     subtitle: "Fully equipped studio space, on your terms",
-    intro: "Need a professional studio but want to run your own production? Our soundproof, fully furnished audio and video studio is available on rent, equipped with everything you need to shoot, record, or create on your own terms.",
+    intro: "Need a professional studio but want to run your own production? Our soundproof, fully furnished video studio is available on rent, equipped with everything you need to shoot, record, or create on your own terms.",
     offerLabel: "What's included",
     offer: [
-      "Soundproof audio and video studio space",
+      "Professional video studio space for shoots and productions",
       "Professional lighting setups",
-      "Industry-standard equipment: cameras, mics, mixers, monitors",
+      "Industry-standard cameras, lighting equipment, and accessories",
       "Furnished, ready-to-shoot environment",
       "Flexible booking: hourly, half-day, or full-day slots",
       "Optional technical support and crew on request",
     ],
     choose: [
-      "Fully soundproofed for clean audio capture",
+      "Purpose-built environment designed for professional video production",
       "No need to bring your own equipment, it is all set up and ready",
-      "Suitable for video shoots, podcasts, music recording, and more",
+      "Suitable for interviews, promotional videos, product shoots, reels, training videos, and content creation",
       "Flexible rental slots that fit your shoot schedule",
       "A professional environment at accessible rates",
     ],
     perfectFor:
-      "Independent creators, filmmakers, podcasters, musicians, photographers, and brands wanting to self-produce in a professional setup.",
+      "Independent creators, filmmakers, podcasters, photographers, and brands wanting to self-produce in a professional setup.",
   },
   {
     kind: "studio-production",
     title: "Studio Production",
-    subtitle: "Guided sessions for music, interviews, podcasts, and photoshoots",
-    intro: "Unlike a plain rental, Studio Production gives you our team's support, equipment and expertise combined, for focused sessions like music recording, interviews, podcasts, and personal branding shoots.",
+    subtitle: "Guided sessions for interviews, podcasts, and photoshoots",
+    intro: "Unlike a plain rental, Studio Production gives you our team's support, equipment and expertise combined, for focused sessions like interviews, podcasts, and personal branding shoots.",
     offerLabel: "What we offer",
     offer: [
-      "Music production sessions: recording, mixing, mastering",
+      "High-quality studio production for shoots, campaigns, and creative projects",
       "Live session recording and performance capture",
       "Interview setups, single or multi-camera",
       "Podcast recording in audio and video formats",
@@ -121,13 +121,13 @@ const services: Service[] = [
     ],
     choose: [
       "Studio, crew, and creative guidance, all in one package",
-      "Ideal for first-time podcasters, musicians, and creators",
+      "Ideal for content creators, businesses, brands, and production teams",
       "Professional acoustic and lighting setup for clean output",
       "Support from experienced audio engineers and producers",
       "Flexible formats: solo sessions, panel interviews, or full bands",
     ],
     perfectFor:
-      "Musicians and bands, podcast hosts, businesses conducting interviews, individuals doing personal branding shoots, and creators needing guided studio support.",
+      "Content creators, businesses, brands, educators, and professionals looking for a high-quality production environment.",
   },
   {
     kind: "broadcasting",
@@ -403,8 +403,8 @@ const Services: React.FC = () => {
           </h1>
           <Reveal delay={0.1}>
             <p className="mx-auto max-w-2xl text-lg leading-relaxed text-cream/85">
-              From script to screen, studio to stream, we handle it all,
-              production, studio rental, guided sessions, and live broadcasting.
+              Delivering end-to-end media solutions that bring ideas to life
+              through creativity, technology, and professional expertise.
             </p>
           </Reveal>
         </div>
@@ -421,8 +421,8 @@ const Services: React.FC = () => {
                 What we do
               </h2>
               <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-cream/80 md:text-lg">
-                Four ways to work with us, end to end or on your own terms. Tap
-                any service to see exactly what is included and who it is for.
+                Explore our services and discover the right solution for your
+                project, production, or creative requirements.
               </p>
             </Reveal>
 
@@ -494,8 +494,8 @@ const Services: React.FC = () => {
                 Want to learn the craft yourself?
               </h2>
               <p className="mx-auto mt-4 max-w-xl text-cream/75">
-                The same studios and professionals behind our productions also
-                teach at the Genesis Kreations Media Academy.
+                Discover industry-focused programs and practical training
+                designed to prepare you for the media industry.
               </p>
               <Link
                 to="/academy"

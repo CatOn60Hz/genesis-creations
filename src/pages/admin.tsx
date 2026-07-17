@@ -1680,7 +1680,14 @@ function CoursesManager({
             placeholder="Certification (e.g. Certified Photographer)"
             value={form.certification}
             onChange={(e) => set({ certification: e.target.value })}
+            list="certification-options"
           />
+          {/* Preset certification types — pick one (e.g. Government
+              Certification) or type a custom value based on the course. */}
+          <datalist id="certification-options">
+            <option value="Government Certification" />
+            <option value="Genesis Kreations Certification" />
+          </datalist>
         </div>
 
         <ListField

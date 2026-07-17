@@ -56,7 +56,7 @@ const SiteFooter: React.FC = () => {
           <div className="flex items-start gap-3">
             <MapPin className="mt-1 h-5 w-5 shrink-0 text-maroon" />
             <p className="text-cream/80">
-              #340B/1A3B1, Vinayaka Avenue, Okkiyam Thoraipakkam, Chennai 600097
+              #340/B1A3B1, Vinayaka Avenue, Okkiyam Thoraipakkam, Chennai 600097
             </p>
           </div>
           <a

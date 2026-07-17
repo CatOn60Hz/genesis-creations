@@ -499,11 +499,11 @@ const DigitalMarketing: React.FC = () => {
             <div className="relative z-10 mx-auto max-w-2xl">
               <Sparkles className="mx-auto mb-4 h-7 w-7 text-tan" />
               <h2 className="font-display text-3xl font-bold tracking-tight text-cream md:text-4xl">
-                Need the content behind the strategy?
+                Great marketing starts with great content.
               </h2>
               <p className="mx-auto mt-4 max-w-xl text-cream/75">
-                The same in-house team that runs your campaigns also shoots,
-                edits, and designs everything they run on.
+                From production and design to campaign execution, everything is
+                created in-house for consistency and quality.
               </p>
               <Link
                 to="/services"

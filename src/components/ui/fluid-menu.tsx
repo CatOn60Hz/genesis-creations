@@ -143,7 +143,7 @@ export function MenuContainer({ children }: { children: React.ReactNode }) {
               key={index}
               className="absolute top-0 left-0 w-[52px] h-[52px] will-change-transform"
               style={{
-                transform: `translateY(${isExpanded ? (index + 1) * 40 : 0}px)`,
+                transform: `translateY(${isExpanded ? (index + 1) * 60 : 0}px)`,
                 opacity: isExpanded ? 1 : 0,
                 pointerEvents: isExpanded ? "auto" : "none",
                 zIndex: 40 - index,
