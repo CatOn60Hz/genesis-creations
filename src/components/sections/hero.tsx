@@ -1,13 +1,8 @@
 import { PixelTrail } from "@/components/ui/pixel-trail"
 import { ServicesMarquee } from "@/components/ui/services-marquee"
 import { ProjectorScreen } from "@/components/ui/projector-screen"
-import { GooeyText } from "@/components/ui/gooey-text-morphing"
 import { useScreenSize } from "@/components/hooks/use-screen-size"
 import logo from "@/assets/logo-mark.png"
-
-// Defined once at module scope so its identity is stable across re-renders —
-// otherwise GooeyText's effect tears down and restarts the morph each render.
-const MORPH_WORDS = ["Script", "Create", "Capture", "Edit", "Produce", "Broadcast"]
 
 const Hero: React.FC = () => {
   const screenSize = useScreenSize()
@@ -60,19 +55,14 @@ const Hero: React.FC = () => {
               Where Creativity Begins
             </p>
 
-            <GooeyText
-              texts={MORPH_WORDS}
-              morphTime={1.2}
-              cooldownTime={2.5}
-              logo={logo}
-              logoAlt="Genesis Kreations"
-              logoClassName="h-[90%] drop-shadow-sm"
-              className="mt-6 mb-6 h-[clamp(120px,18vh,180px)] w-full"
-              // `!` forces this size over GooeyText's own md:text-[60pt] default.
-              // Fluid with viewport width so the longest word ("Broadcast") stays
-              // big but never overflows the column on narrower desktops.
-              textClassName="text-maroon font-bold leading-none text-[clamp(3rem,6vw,6.5rem)]!"
-            />
+            {/* Static brand logo (replaces the previous morphing word cycle). */}
+            <div className="mt-6 mb-6 flex h-[clamp(120px,18vh,180px)] w-full items-center justify-center">
+              <img
+                src={logo}
+                alt="Genesis Kreations"
+                className="h-full w-auto max-w-full object-contain drop-shadow-sm"
+              />
+            </div>
 
             <p className="mb-5 whitespace-nowrap text-sm md:text-base uppercase tracking-[0.3em] text-black">
               Chennai | Coimbatore | Nagercoil
