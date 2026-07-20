@@ -13,19 +13,22 @@ require_once __DIR__ . '/../config.php';
 // Prefers the Resend HTTPS API (domain-authenticated, reliable); falls back to
 // PHP mail() when no Resend key is set. Never throws — a failed send must not
 // break the payment flow.
-function gc_send_mail(string $to, string $subject, string $html): bool
+function gc_send_mail(string $to, string $subject, string $html, ?array &$debug = null): bool
 {
     if (GC_MAIL_FROM === '' || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
+        $debug = ['transport' => 'none', 'reason' => GC_MAIL_FROM === '' ? 'GC_MAIL_FROM is empty' : 'invalid recipient'];
         return false;
     }
     return GC_RESEND_API_KEY !== ''
-        ? gc_send_via_resend($to, $subject, $html)
-        : gc_send_via_phpmail($to, $subject, $html);
+        ? gc_send_via_resend($to, $subject, $html, $debug)
+        : gc_send_via_phpmail($to, $subject, $html, $debug);
 }
 
 // Resend API: POST https://api.resend.com/emails with a Bearer key. "from"
-// must be on a domain verified in the Resend dashboard.
-function gc_send_via_resend(string $to, string $subject, string $html): bool
+// must be on a domain verified in the Resend dashboard. Fills $debug with the
+// HTTP code / response body and logs to the PHP error log on failure, so a
+// silent non-delivery (unverified domain, bad key, from-mismatch) is diagnosable.
+function gc_send_via_resend(string $to, string $subject, string $html, ?array &$debug = null): bool
 {
     $from = GC_MAIL_FROM_NAME !== ''
         ? GC_MAIL_FROM_NAME . ' <' . GC_MAIL_FROM . '>'
@@ -51,12 +54,28 @@ function gc_send_via_resend(string $to, string $subject, string $html): bool
     ]);
     $raw = curl_exec($ch);
     $code = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+    $curlErr = curl_error($ch);
     curl_close($ch);
-    return $raw !== false && $code >= 200 && $code < 300;
+    $ok = $raw !== false && $code >= 200 && $code < 300;
+    $debug = [
+        'transport'  => 'resend',
+        'from'       => $from,
+        'to'         => $to,
+        'httpCode'   => $code,
+        'curlError'  => $curlErr,
+        'response'   => is_string($raw) ? $raw : null,
+    ];
+    if (!$ok) {
+        error_log('gc_send_via_resend failed: HTTP ' . $code
+            . ($curlErr !== '' ? ' curl=' . $curlErr : '')
+            . ' from=' . $from . ' to=' . $to
+            . ' body=' . (is_string($raw) ? $raw : '(none)'));
+    }
+    return $ok;
 }
 
 // Fallback transport: PHP mail() with a UTF-8 HTML body.
-function gc_send_via_phpmail(string $to, string $subject, string $html): bool
+function gc_send_via_phpmail(string $to, string $subject, string $html, ?array &$debug = null): bool
 {
     $fromName = mb_encode_mimeheader(GC_MAIL_FROM_NAME);
     $headers = implode("\r\n", [
@@ -67,7 +86,12 @@ function gc_send_via_phpmail(string $to, string $subject, string $html): bool
         'X-Mailer: GenesisKreations',
     ]);
     $encodedSubject = '=?UTF-8?B?' . base64_encode($subject) . '?=';
-    return @mail($to, $encodedSubject, $html, $headers);
+    $ok = @mail($to, $encodedSubject, $html, $headers);
+    $debug = ['transport' => 'phpmail', 'from' => GC_MAIL_FROM, 'to' => $to, 'ok' => $ok];
+    if (!$ok) {
+        error_log('gc_send_via_phpmail failed: from=' . GC_MAIL_FROM . ' to=' . $to);
+    }
+    return $ok;
 }
 
 // Brand palette (from src/index.css): crimson primary + deep maroon-black.
