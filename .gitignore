@@ -30,3 +30,7 @@ dist/uploads/
 
 # Throwaway SSR bundle used by scripts/prerender.mjs
 .ssr-tmp
+
+# Real secrets live in GC_PERSIST_DIR/secrets.php on the server (outside the
+# web root); only secrets.php.example is committed.
+secrets.php

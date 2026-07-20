@@ -33,6 +33,9 @@ const RefundPolicy = lazy(() =>
 const ShippingPolicy = lazy(() =>
   import("@/pages/shipping-policy").then((m) => ({ default: m.ShippingPolicy }))
 )
+const PaymentStatus = lazy(() =>
+  import("@/pages/payment-status").then((m) => ({ default: m.PaymentStatus }))
+)
 const AdminDashboard = lazy(() =>
   import("@/pages/admin").then((m) => ({ default: m.AdminDashboard }))
 )
@@ -142,6 +145,7 @@ function App() {
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/refund-policy" element={<RefundPolicy />} />
       <Route path="/shipping-policy" element={<ShippingPolicy />} />
+      <Route path="/payment-status" element={<PaymentStatus />} />
       {/* Unified admin dashboard (gallery-admin kept as an alias). */}
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/gallery-admin" element={<AdminDashboard />} />

@@ -17,10 +17,14 @@ import {
   Briefcase,
   Compass,
   X,
+  IndianRupee,
+  Lock,
+  Ticket,
   type LucideProps,
 } from "lucide-react"
 
 import { Reveal, RevealStagger, RevealItem } from "@/components/ui/reveal"
+import { PaymentRegistration } from "@/components/payment-registration"
 import { PixelTrail } from "@/components/ui/pixel-trail"
 import { Grain } from "@/components/ui/grain"
 import { LampContainer } from "@/components/ui/lamp"
@@ -32,7 +36,7 @@ import {
 import { SEO } from "@/components/seo"
 import academyHero from "@/assets/academy-hero.jpg"
 import { usePageBackground } from "@/lib/use-page-background"
-import { fetchCertCourses } from "@/lib/cms-api"
+import { fetchCertCourses, createCourseOrder } from "@/lib/cms-api"
 
 const EASE_OUT = [0.16, 1, 0.3, 1] as const
 
@@ -61,6 +65,12 @@ interface Course {
   modules?: { title: string; items: string[] }[]
   careers?: string[]
   badge?: string
+  // Admin-set price ("₹45,000", "Contact us"…), online admission fee (rupees;
+  // > 0 enables PhonePe enrolment) and admissions state — all optional; older/
+  // seed records simply omit them.
+  price?: string
+  fee?: number
+  admissionClosed?: boolean
   choose: string[]
   who: string
 }
@@ -440,9 +450,18 @@ function CourseCard({
         </div>
 
         <div>
-          {course.badge && (
-            <span className="mb-2 inline-block rounded-full bg-maroon/20 px-2.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-[0.15em] text-maroon ring-1 ring-maroon/40">
-              {course.badge}
+          {(course.badge || course.admissionClosed) && (
+            <span className="mb-2 flex flex-wrap gap-1.5">
+              {course.badge && (
+                <span className="inline-block rounded-full bg-maroon/20 px-2.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-[0.15em] text-maroon ring-1 ring-maroon/40">
+                  {course.badge}
+                </span>
+              )}
+              {course.admissionClosed && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-[0.15em] text-cream/70 ring-1 ring-white/20">
+                  <Lock className="h-2.5 w-2.5" /> Admissions closed
+                </span>
+              )}
             </span>
           )}
           <h3 className="font-display text-2xl font-bold tracking-tight text-cream">
@@ -466,6 +485,13 @@ function CourseCard({
             <Award className="h-3.5 w-3.5 text-maroon" />
             Certification
           </span>
+          {course.price && (
+            <span className="inline-flex items-center gap-1.5 font-semibold text-cream/80">
+              <IndianRupee className="h-3.5 w-3.5 text-maroon" />
+              {/* Icon already shows ₹ — drop a typed one to avoid "₹₹". */}
+              {course.price.replace(/^₹\s*/, "")}
+            </span>
+          )}
         </div>
 
         <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-maroon transition-transform duration-300 group-hover:translate-x-1">
@@ -478,11 +504,20 @@ function CourseCard({
 }
 
 function CourseDetail({ course, onClose }: { course: Course; onClose: () => void }) {
+  // Courses with an admin-set online admission fee enrol through the shared
+  // PhonePe modal (fallback courses have no id, so they can never be payable).
+  const [enrolling, setEnrolling] = useState(false)
+  const fee = course.fee ?? 0
+  const canEnroll = !!course.id && fee > 0 && !course.admissionClosed
   const meta = [
     { icon: CalendarDays, label: course.duration },
     { icon: Clock, label: course.schedule },
     { icon: Film, label: course.format },
     { icon: Award, label: course.certification },
+    // Icon already shows ₹ — drop a typed one to avoid "₹₹".
+    ...(course.price
+      ? [{ icon: IndianRupee, label: course.price.replace(/^₹\s*/, "") }]
+      : []),
   ]
 
   return (
@@ -522,6 +557,11 @@ function CourseDetail({ course, onClose }: { course: Course; onClose: () => void
                   {course.badge}
                 </span>
               )}
+              {course.admissionClosed && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-black/30 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.15em] text-cream/80 ring-1 ring-white/20">
+                  <Lock className="h-3 w-3" /> Admissions closed
+                </span>
+              )}
             </div>
             <h2 className="relative z-10 mt-5 font-display text-2xl font-bold text-cream">
               {course.title}
@@ -533,6 +573,18 @@ function CourseDetail({ course, onClose }: { course: Course; onClose: () => void
 
           {/* Body */}
           <div className="flex flex-col gap-8 p-7">
+            {course.admissionClosed && (
+              <p className="flex items-start gap-2.5 rounded-2xl bg-white/[0.04] p-4 text-sm leading-relaxed text-cream/75 ring-1 ring-white/15">
+                <Lock className="mt-0.5 h-4 w-4 shrink-0 text-maroon" />
+                <span>
+                  Admissions for this course are currently closed.{" "}
+                  <Link to="/contact" className="font-semibold text-maroon underline-offset-2 hover:underline">
+                    Contact us
+                  </Link>{" "}
+                  to hear when the next batch opens.
+                </span>
+              </p>
+            )}
             <p className="text-sm leading-relaxed text-cream/75">{course.why}</p>
 
             {/* Meta strip */}
@@ -647,9 +699,42 @@ function CourseDetail({ course, onClose }: { course: Course; onClose: () => void
               <span className="font-semibold text-cream">Who should join. </span>
               {course.who}
             </p>
+
+            {/* Online admission (PhonePe) */}
+            {canEnroll && (
+              <button
+                type="button"
+                onClick={() => setEnrolling(true)}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-maroon px-6 py-3.5 text-sm font-semibold text-cream transition-transform hover:scale-[1.02]"
+              >
+                <Ticket className="h-4 w-4" /> Enroll — pay ₹{fee.toLocaleString("en-IN")}
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </div>
       </div>
+
+      {enrolling && (
+        // stopPropagation so backdrop clicks close only the payment modal,
+        // not the course detail behind it.
+        <div onClick={(e) => e.stopPropagation()}>
+          <PaymentRegistration
+            title={course.title}
+            fee={fee}
+            feeLabel="Admission fee"
+            onClose={() => setEnrolling(false)}
+            createOrder={(f) =>
+              createCourseOrder({
+                courseId: course.id!,
+                name: f.name,
+                email: f.email,
+                phone: f.phone,
+              })
+            }
+          />
+        </div>
+      )}
     </div>
   )
 }

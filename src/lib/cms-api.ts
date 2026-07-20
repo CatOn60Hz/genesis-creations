@@ -236,6 +236,14 @@ export type CertCourse = {
   certification: string
   badge?: string
   who: string
+  // Free-text price shown on the card/detail ("₹45,000", "Contact us"…).
+  price?: string
+  // Online admission/booking fee in whole rupees. > 0 shows an "Enroll — pay
+  // ₹X" button on the course detail that goes through the PhonePe flow.
+  fee?: number
+  // Closed courses show an "Admissions closed" state on the Academy page
+  // (and the backend refuses to create payment orders for them).
+  admissionClosed?: boolean
   learn?: string[]
   modules?: CourseModule[]
   choose: string[]
@@ -263,6 +271,9 @@ export async function saveCertCourse(
     certification: string
     badge?: string
     who: string
+    price?: string
+    fee?: number
+    admissionClosed?: boolean
     learn?: string[]
     modules?: CourseModule[]
     choose: string[]
@@ -284,6 +295,9 @@ export async function saveCertCourse(
       certification: fields.certification,
       badge: fields.badge ?? "",
       who: fields.who,
+      price: fields.price ?? "",
+      fee: String(fields.fee ?? 0),
+      admissionClosed: fields.admissionClosed ? "1" : "0",
       // Lists/objects travel as JSON strings (FormData is flat).
       learn: JSON.stringify(fields.learn ?? []),
       modules: JSON.stringify(fields.modules ?? []),
@@ -397,6 +411,9 @@ export type Workshop = {
   icon?: string
   registerUrl?: string
   note?: string
+  // Whole rupees. > 0 switches the card to the in-app PhonePe pay-to-register
+  // flow; 0/absent keeps the external registerUrl button.
+  fee?: number
   sessions?: WorkshopSession[]
   learn?: string[]
   included?: string[]
@@ -425,6 +442,7 @@ export async function saveWorkshop(
     icon?: string
     registerUrl?: string
     note?: string
+    fee?: number
     sessions?: WorkshopSession[]
     learn?: string[]
     included?: string[]
@@ -445,6 +463,7 @@ export async function saveWorkshop(
       icon: fields.icon ?? "",
       registerUrl: fields.registerUrl ?? "",
       note: fields.note ?? "",
+      fee: String(fields.fee ?? 0),
       // Lists/objects travel as JSON strings (FormData is flat).
       sessions: JSON.stringify(fields.sessions ?? []),
       learn: JSON.stringify(fields.learn ?? []),
@@ -478,6 +497,99 @@ export async function reorderWorkshops(
     password
   )
   return (data.workshops ?? []).map(normalizeWorkshop)
+}
+
+/* --------------------- Workshop payments (PhonePe) ----------------------- */
+
+// Public POST — visitor-facing payment calls carry no admin password.
+async function postPublic<T>(
+  path: string,
+  fields: Record<string, string>
+): Promise<T> {
+  const form = new FormData()
+  for (const [k, v] of Object.entries(fields)) form.append(k, v)
+  const res = await fetch(`${API_BASE}${path}`, { method: "POST", body: form })
+  let data: { error?: string } & T
+  try {
+    data = await res.json()
+  } catch {
+    throw new Error(`Request failed: ${res.status}`)
+  }
+  if (!res.ok) throw new Error(data?.error || `Request failed: ${res.status}`)
+  return data
+}
+
+export type PaymentStatus = "PENDING" | "COMPLETED" | "FAILED"
+
+// One store covers workshop registrations and course admissions.
+export type Registration = {
+  id: string
+  type: "workshop" | "course"
+  itemId: string
+  itemTitle: string
+  sessionCity: string
+  name: string
+  email: string
+  phone: string
+  amountPaise: number
+  merchantOrderId: string
+  phonepeOrderId?: string
+  status: PaymentStatus
+  createdAt: string
+  updatedAt: string
+}
+
+// Create a PhonePe order; resolves to the hosted-checkout URL the caller
+// should navigate to. The fee/amount is decided server-side.
+export async function createWorkshopOrder(fields: {
+  workshopId: string
+  sessionCity: string
+  name: string
+  email: string
+  phone: string
+}): Promise<string> {
+  const data = await postPublic<{ redirectUrl: string }>(
+    "/payments/create-order.php",
+    fields
+  )
+  return data.redirectUrl
+}
+
+export async function createCourseOrder(fields: {
+  courseId: string
+  name: string
+  email: string
+  phone: string
+}): Promise<string> {
+  const data = await postPublic<{ redirectUrl: string }>(
+    "/payments/create-order.php",
+    fields
+  )
+  return data.redirectUrl
+}
+
+export async function fetchOrderStatus(order: string): Promise<{
+  status: PaymentStatus
+  type: "workshop" | "course"
+  title: string
+  sessionCity: string
+  amountPaise: number
+}> {
+  return getJSON(`/payments/order-status.php?order=${encodeURIComponent(order)}`)
+}
+
+export async function fetchRegistrations(
+  password: string
+): Promise<Registration[]> {
+  const sep = "?"
+  const res = await fetch(
+    `${API_BASE}/payments/registrations.php${sep}t=${Date.now()}`,
+    { cache: "no-store", headers: { "X-Gallery-Password": password } }
+  )
+  if (res.status === 401) throw new Error("Wrong password")
+  if (!res.ok) throw new Error(`Request failed: ${res.status}`)
+  const data = await res.json()
+  return data.registrations ?? []
 }
 
 /* --------------------- Home "Workshops & Courses" list ------------------ */

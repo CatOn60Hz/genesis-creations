@@ -1,11 +1,9 @@
 <?php
 // Genesis Kreations — shared backend configuration (single source of truth).
 //
-// SECURITY: change GC_ADMIN_PASSWORD to your own secret before going live.
-// This one password gates the whole /admin dashboard (announcements, workshops,
-// gallery, projector).
-
-const GC_ADMIN_PASSWORD = 'gcweb@2026';
+// SECURITY: real secrets (admin password, PhonePe keys) belong in
+// GC_PERSIST_DIR/secrets.php — outside the web root and never in git; see
+// secrets.php.example. The define() calls below are fallback defaults only.
 
 // Allowed image types: extension => expected MIME.
 const GC_ALLOWED = [
@@ -54,3 +52,28 @@ define('GC_UPLOADS_DIR', GC_PERSIST_DIR . '/uploads');
 // Image URL base. Callers append "/<section>/<file>", giving e.g.
 // /api/media.php?f=/projector/abc.jpg — media.php strips the leading slash.
 const GC_UPLOADS_URL = '/api/media.php?f=';
+
+// ---------------------------------------------------------------------------
+// Secrets. Loaded from GC_PERSIST_DIR/secrets.php when present (outside the
+// web root, so it survives deploys and never lands in git — see
+// secrets.php.example). Everything below is a fallback default so endpoints
+// never fatal when secrets.php is missing.
+if (is_file(GC_PERSIST_DIR . '/secrets.php')) {
+    require GC_PERSIST_DIR . '/secrets.php';
+}
+
+// Admin password gating all /admin write endpoints.
+defined('GC_ADMIN_PASSWORD') || define('GC_ADMIN_PASSWORD', 'gcweb@2026');
+
+// PhonePe Standard Checkout V2 (OAuth). Empty credentials mean "payments not
+// configured" — the payment endpoints respond 503 until secrets.php provides
+// real values from the PhonePe Business dashboard.
+defined('GC_PHONEPE_ENV') || define('GC_PHONEPE_ENV', 'sandbox'); // 'sandbox' | 'production'
+defined('GC_PHONEPE_CLIENT_ID') || define('GC_PHONEPE_CLIENT_ID', '');
+defined('GC_PHONEPE_CLIENT_SECRET') || define('GC_PHONEPE_CLIENT_SECRET', '');
+defined('GC_PHONEPE_CLIENT_VERSION') || define('GC_PHONEPE_CLIENT_VERSION', '1');
+defined('GC_PHONEPE_WEBHOOK_USER') || define('GC_PHONEPE_WEBHOOK_USER', '');
+defined('GC_PHONEPE_WEBHOOK_PASS') || define('GC_PHONEPE_WEBHOOK_PASS', '');
+
+// Absolute origin used to build the PhonePe redirect URL back to the site.
+defined('GC_SITE_ORIGIN') || define('GC_SITE_ORIGIN', 'https://genesiskreationsmedia.com');

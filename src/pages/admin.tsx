@@ -29,6 +29,8 @@ import {
   Clock,
   CircleCheck,
   X,
+  Ticket,
+  Download,
 } from "lucide-react"
 
 import { SEO } from "@/components/seo"
@@ -84,6 +86,9 @@ import {
   deleteFaq,
   reorderFaqs,
   type FaqItem,
+  fetchRegistrations,
+  type Registration,
+  type PaymentStatus,
 } from "@/lib/cms-api"
 import {
   fetchGalleryPhotos,
@@ -98,6 +103,7 @@ const PW_KEY = "gc-admin-pw"
 type Tab =
   | "announcement"
   | "workshops"
+  | "registrations"
   | "courses"
   | "testimonials"
   | "homeCourses"
@@ -111,6 +117,7 @@ type Img = { name: string; url: string }
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "announcement", label: "Announcement", icon: <Megaphone className="h-4 w-4" /> },
   { id: "workshops", label: "Workshops", icon: <CalendarDays className="h-4 w-4" /> },
+  { id: "registrations", label: "Registrations", icon: <Ticket className="h-4 w-4" /> },
   { id: "courses", label: "Courses", icon: <BookOpen className="h-4 w-4" /> },
   { id: "testimonials", label: "Testimonials", icon: <MessageSquareQuote className="h-4 w-4" /> },
   { id: "homeCourses", label: "Home Courses", icon: <GraduationCap className="h-4 w-4" /> },
@@ -244,6 +251,8 @@ const EMPTY_FORM = {
   icon: "",
   registerUrl: "",
   note: "",
+  // Whole rupees, kept as a string for the input; "" / "0" = free workshop.
+  fee: "",
   // Structured, field-by-field inputs that mirror the workshop card.
   learn: [] as string[],
   included: [] as string[],
@@ -379,6 +388,7 @@ function WorkshopsManager({
           icon: form.icon,
           registerUrl: form.registerUrl,
           note: form.note,
+          fee: Math.max(0, Math.floor(Number(form.fee))) || 0,
           sessions: cleanSessions(form.sessions),
           learn: cleanList(form.learn),
           included: cleanList(form.included),
@@ -409,6 +419,7 @@ function WorkshopsManager({
       icon: w.icon ?? "",
       registerUrl: w.registerUrl ?? "",
       note: w.note ?? "",
+      fee: w.fee ? String(w.fee) : "",
       learn: [...(w.learn ?? [])],
       included: [...(w.included ?? [])],
       sessions: sessionsToRows(w.sessions),
@@ -693,12 +704,33 @@ function WorkshopsManager({
           </div>
         </div>
 
-        <input
-          className={inputCls}
-          placeholder="Register link (https://forms.gle/…)"
-          value={form.registerUrl}
-          onChange={(e) => setForm({ ...form, registerUrl: e.target.value })}
-        />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="mb-1 block text-sm text-cream/70">
+              Fee (₹) — set to enable PhonePe payment; leave 0 for free / external link
+            </label>
+            <input
+              type="number"
+              min={0}
+              step={1}
+              className={inputCls}
+              placeholder="0"
+              value={form.fee}
+              onChange={(e) => setForm({ ...form, fee: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm text-cream/70">
+              Register link (used only when the fee is 0)
+            </label>
+            <input
+              className={inputCls}
+              placeholder="https://forms.gle/…"
+              value={form.registerUrl}
+              onChange={(e) => setForm({ ...form, registerUrl: e.target.value })}
+            />
+          </div>
+        </div>
         <textarea
           className={inputCls}
           rows={2}
@@ -839,6 +871,176 @@ function WorkshopsManager({
         onConfirm={confirmRemove}
         onCancel={() => setConfirmId(null)}
       />
+    </div>
+  )
+}
+
+/* --------------------- Workshop registrations (PhonePe) ------------------ */
+
+const STATUS_FILTERS: { value: "" | PaymentStatus; label: string }[] = [
+  { value: "", label: "All" },
+  { value: "COMPLETED", label: "Paid" },
+  { value: "PENDING", label: "Pending" },
+  { value: "FAILED", label: "Failed" },
+]
+
+const STATUS_BADGE: Record<PaymentStatus, string> = {
+  COMPLETED: "bg-green-500/15 text-green-300 ring-green-500/30",
+  PENDING: "bg-yellow-500/15 text-yellow-300 ring-yellow-500/30",
+  FAILED: "bg-red-500/15 text-red-300 ring-red-500/30",
+}
+
+// Escape a CSV cell (quotes, commas, newlines).
+const csvCell = (v: string | number): string => {
+  const s = String(v)
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
+}
+
+function RegistrationsManager({
+  password,
+  onAuthError,
+}: {
+  password: string
+  onAuthError: () => void
+}) {
+  const [items, setItems] = useState<Registration[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+  const [filter, setFilter] = useState<"" | PaymentStatus>("")
+
+  const request = () =>
+    fetchRegistrations(password)
+      .then(setItems)
+      .catch((e) => {
+        const m = e instanceof Error ? e.message : "Couldn't load registrations."
+        setError(m)
+        if (m === "Wrong password") onAuthError()
+      })
+      .finally(() => setLoading(false))
+
+  useEffect(() => {
+    void request()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const load = () => {
+    setLoading(true)
+    setError("")
+    void request()
+  }
+
+  const visible = filter ? items.filter((r) => r.status === filter) : items
+
+  const exportCsv = () => {
+    const header = [
+      "Type", "Course / Workshop", "Session", "Name", "Email", "Phone",
+      "Amount (₹)", "Status", "Order ID", "Date",
+    ]
+    const rows = visible.map((r) => [
+      r.type ?? "workshop", r.itemTitle, r.sessionCity, r.name, r.email, r.phone,
+      r.amountPaise / 100, r.status, r.merchantOrderId,
+      new Date(r.createdAt).toLocaleString("en-IN"),
+    ])
+    const csv = [header, ...rows]
+      .map((row) => row.map(csvCell).join(","))
+      .join("\n")
+    const a = document.createElement("a")
+    // BOM so Excel opens the ₹/UTF-8 content correctly.
+    a.href = URL.createObjectURL(new Blob(["﻿" + csv], { type: "text/csv" }))
+    a.download = `registrations-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(a.href)
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center gap-3">
+        {STATUS_FILTERS.map((f) => (
+          <button
+            key={f.value}
+            type="button"
+            onClick={() => setFilter(f.value)}
+            className={`rounded-full px-4 py-2 text-sm transition-colors ${
+              filter === f.value
+                ? "bg-maroon text-cream"
+                : "bg-white/5 text-cream/70 hover:bg-white/10"
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
+        <div className="ml-auto flex items-center gap-2">
+          <button type="button" onClick={load} className={btnCls}>
+            <RotateCcw className="h-4 w-4" /> Refresh
+          </button>
+          <button
+            type="button"
+            onClick={exportCsv}
+            disabled={visible.length === 0}
+            className={btnCls}
+          >
+            <Download className="h-4 w-4" /> Export CSV
+          </button>
+        </div>
+      </div>
+
+      {error && <p className="text-sm text-red-400">{error}</p>}
+
+      {loading ? (
+        <Loader2 className="h-6 w-6 animate-spin text-maroon" />
+      ) : visible.length === 0 ? (
+        <p className="text-cream/50">
+          {items.length === 0
+            ? "No registrations yet. They appear here once someone pays for a workshop."
+            : "No registrations match this filter."}
+        </p>
+      ) : (
+        <div className="overflow-x-auto rounded-xl ring-1 ring-white/10">
+          <table className="w-full min-w-[760px] text-left text-sm">
+            <thead className="bg-white/5 text-xs uppercase tracking-wider text-cream/60">
+              <tr>
+                <th className="px-4 py-3">Course / Workshop</th>
+                <th className="px-4 py-3">Attendee</th>
+                <th className="px-4 py-3">Contact</th>
+                <th className="px-4 py-3">Amount</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Date</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {visible.map((r) => (
+                <tr key={r.id} className="align-top">
+                  <td className="px-4 py-3">
+                    <p className="font-medium text-cream">{r.itemTitle}</p>
+                    <p className="text-xs text-cream/60">
+                      {r.type === "course" ? "Course" : "Workshop"}
+                      {r.sessionCity ? ` · ${r.sessionCity}` : ""}
+                    </p>
+                  </td>
+                  <td className="px-4 py-3 text-cream/85">{r.name}</td>
+                  <td className="px-4 py-3">
+                    <p className="text-cream/85">{r.email}</p>
+                    <p className="text-xs text-cream/60">{r.phone}</p>
+                  </td>
+                  <td className="px-4 py-3 text-cream/85">
+                    ₹{(r.amountPaise / 100).toLocaleString("en-IN")}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`inline-block rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${STATUS_BADGE[r.status] ?? STATUS_BADGE.PENDING}`}
+                    >
+                      {r.status === "COMPLETED" ? "PAID" : r.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-xs text-cream/60">
+                    {new Date(r.createdAt).toLocaleString("en-IN")}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   )
 }
@@ -1447,6 +1649,10 @@ type CourseForm = {
   format: string
   certification: string
   who: string
+  price: string
+  // Whole rupees, kept as a string for the input; "" / "0" = not payable.
+  fee: string
+  admissionClosed: boolean
   learn: string[]
   choose: string[]
   careers: string[]
@@ -1465,6 +1671,9 @@ const EMPTY_COURSE: CourseForm = {
   format: "",
   certification: "",
   who: "",
+  price: "",
+  fee: "",
+  admissionClosed: false,
   learn: [],
   choose: [],
   careers: [],
@@ -1483,6 +1692,9 @@ const courseToForm = (c: CertCourse): CourseForm => ({
   format: c.format ?? "",
   certification: c.certification ?? "",
   who: c.who ?? "",
+  price: c.price ?? "",
+  fee: c.fee ? String(c.fee) : "",
+  admissionClosed: c.admissionClosed ?? false,
   learn: [...(c.learn ?? [])],
   choose: [...(c.choose ?? [])],
   careers: [...(c.careers ?? [])],
@@ -1539,6 +1751,9 @@ function CoursesManager({
           certification: form.certification,
           badge: form.badge,
           who: form.who,
+          price: form.price,
+          fee: Math.max(0, Math.floor(Number(form.fee))) || 0,
+          admissionClosed: form.admissionClosed,
           learn: form.learn,
           modules: form.modules,
           choose: form.choose,
@@ -1690,6 +1905,48 @@ function CoursesManager({
           </datalist>
         </div>
 
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="mb-1 block text-sm text-cream/70">
+              Price — display only, free text; empty shows no price
+            </label>
+            <input
+              className={inputCls}
+              placeholder="e.g. ₹45,000 or Contact us"
+              value={form.price}
+              onChange={(e) => set({ price: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm text-cream/70">
+              Admission fee (₹) — enables “Enroll &amp; pay” via PhonePe; 0 disables
+            </label>
+            <input
+              type="number"
+              min={0}
+              step={1}
+              className={inputCls}
+              placeholder="0"
+              value={form.fee}
+              onChange={(e) => set({ fee: e.target.value })}
+            />
+          </div>
+        </div>
+        <label className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            checked={form.admissionClosed}
+            onChange={(e) => set({ admissionClosed: e.target.checked })}
+            className="h-5 w-5 accent-maroon"
+          />
+          <span className="text-sm">
+            Admissions closed{" "}
+            <span className="text-cream/50">
+              (shows a “closed” badge on the Academy page and blocks online enrolment)
+            </span>
+          </span>
+        </label>
+
         <ListField
           label="What you’ll learn"
           hint="Used for single-skill courses. Leave empty if you fill Modules below."
@@ -1775,9 +2032,16 @@ function CoursesManager({
                       {c.badge}
                     </span>
                   ) : null}
+                  {c.admissionClosed ? (
+                    <span className="ml-2 rounded-full bg-white/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-cream/70 ring-1 ring-white/20">
+                      Closed
+                    </span>
+                  ) : null}
                 </p>
                 <p className="mt-0.5 truncate text-xs text-cream/55">
                   {c.kind} · {c.duration}
+                  {c.price ? ` · ${c.price}` : ""}
+                  {c.fee ? ` · pay online ₹${c.fee}` : ""}
                   {c.subtitle ? ` · ${c.subtitle}` : ""}
                 </p>
               </div>
@@ -2552,6 +2816,9 @@ const AdminDashboard: React.FC = () => {
         )}
         {tab === "workshops" && (
           <WorkshopsManager password={password} onAuthError={onAuthError} />
+        )}
+        {tab === "registrations" && (
+          <RegistrationsManager password={password} onAuthError={onAuthError} />
         )}
         {tab === "courses" && (
           <CoursesManager password={password} onAuthError={onAuthError} />
