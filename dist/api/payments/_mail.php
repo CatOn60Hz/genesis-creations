@@ -70,48 +70,91 @@ function gc_send_via_phpmail(string $to, string $subject, string $html): bool
     return @mail($to, $encodedSubject, $html, $headers);
 }
 
-// Shared HTML shell for both emails.
-function gc_mail_shell(string $heading, string $bodyHtml): string
+// Brand palette (from src/index.css): crimson primary + deep maroon-black.
+const GC_MAROON = '#cb2957';
+const GC_MAROON_DEEP = '#7d1a33';
+
+// Branded HTML shell — a light card with a crimson gradient header and a
+// no-reply footer. $heading/$subheading fill the header band.
+function gc_mail_shell(string $heading, string $subheading, string $bodyHtml): string
 {
-    return '<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;'
-        . 'margin:0 auto;color:#1a1a1a;">'
-        . '<div style="background:#cb2957;color:#fff;padding:20px 24px;'
-        . 'border-radius:8px 8px 0 0;">'
-        . '<div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;'
-        . 'opacity:.85;">Genesis Kreations</div>'
-        . '<div style="font-size:20px;font-weight:bold;margin-top:4px;">'
-        . htmlspecialchars($heading) . '</div></div>'
-        . '<div style="border:1px solid #eee;border-top:0;border-radius:0 0 8px 8px;'
-        . 'padding:24px;">' . $bodyHtml . '</div></div>';
+    return '<div style="margin:0;padding:24px 12px;background:#f4f2f3;'
+        . 'font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">'
+        . '<div style="max-width:560px;margin:0 auto;background:#ffffff;'
+        . 'border:1px solid #ececec;border-radius:14px;overflow:hidden;">'
+        // Header
+        . '<div style="background:linear-gradient(135deg,' . GC_MAROON . ' 0%,'
+        . GC_MAROON_DEEP . ' 100%);padding:28px 28px 24px;color:#ffffff;">'
+        . '<div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;'
+        . 'opacity:.8;">Genesis Kreations</div>'
+        . '<div style="font-size:22px;font-weight:700;margin-top:8px;line-height:1.2;">'
+        . htmlspecialchars($heading) . '</div>'
+        . ($subheading !== ''
+            ? '<div style="font-size:14px;margin-top:6px;opacity:.9;">'
+                . htmlspecialchars($subheading) . '</div>'
+            : '')
+        . '</div>'
+        // Body
+        . '<div style="padding:28px;color:#1f1f1f;font-size:15px;line-height:1.55;">'
+        . $bodyHtml . '</div>'
+        // Footer (no-reply)
+        . '<div style="padding:18px 28px;background:#faf7f8;border-top:1px solid #f0e9eb;'
+        . 'color:#8a8a8a;font-size:12px;line-height:1.6;">'
+        . 'This is an automated message from a no-reply address — please don\'t reply. '
+        . 'For any help, email <a href="mailto:info@genesiskreationsmedia.com" '
+        . 'style="color:' . GC_MAROON . ';text-decoration:none;">info@genesiskreationsmedia.com</a> '
+        . 'or visit <a href="' . GC_SITE_ORIGIN . '" '
+        . 'style="color:' . GC_MAROON . ';text-decoration:none;">genesiskreationsmedia.com</a>.<br>'
+        . '&copy; ' . date('Y') . ' Genesis Kreations, Chennai.'
+        . '</div></div></div>';
 }
 
-// Render the registration detail rows shared by both emails.
+// A rounded status pill for the top of the body.
+function gc_mail_pill(string $text, string $bg, string $fg): string
+{
+    return '<div style="margin:0 0 18px;"><span style="display:inline-block;'
+        . 'padding:6px 14px;border-radius:999px;background:' . $bg . ';color:' . $fg
+        . ';font-size:12px;font-weight:700;letter-spacing:.5px;">'
+        . htmlspecialchars($text) . '</span></div>';
+}
+
+// A crimson call-to-action button.
+function gc_mail_button(string $href, string $label): string
+{
+    return '<div style="margin:20px 0 4px;"><a href="' . htmlspecialchars($href)
+        . '" style="display:inline-block;background:' . GC_MAROON . ';color:#ffffff;'
+        . 'text-decoration:none;font-weight:600;font-size:14px;padding:12px 26px;'
+        . 'border-radius:999px;">' . htmlspecialchars($label) . '</a></div>';
+}
+
+// Render the registration detail rows shared by all emails, in a soft card.
 function gc_mail_details(array $reg): string
 {
-    $amount = '₹' . number_format(((int) ($reg['amountPaise'] ?? 0)) / 100, 2);
+    $amount = '&#8377;' . number_format(((int) ($reg['amountPaise'] ?? 0)) / 100, 2);
     $kind = ($reg['type'] ?? 'workshop') === 'course' ? 'Course' : 'Workshop';
-    $rows = [
-        [$kind, (string) ($reg['itemTitle'] ?? '')],
-    ];
+    $rows = [[$kind, htmlspecialchars((string) ($reg['itemTitle'] ?? ''))]];
     if (($reg['sessionCity'] ?? '') !== '') {
-        $rows[] = ['Session', (string) $reg['sessionCity']];
+        $rows[] = ['Session', htmlspecialchars((string) $reg['sessionCity'])];
     }
-    $rows[] = ['Name', (string) ($reg['name'] ?? '')];
-    $rows[] = ['Email', (string) ($reg['email'] ?? '')];
-    $rows[] = ['Phone', (string) ($reg['phone'] ?? '')];
+    $rows[] = ['Name', htmlspecialchars((string) ($reg['name'] ?? ''))];
+    $rows[] = ['Email', htmlspecialchars((string) ($reg['email'] ?? ''))];
+    $rows[] = ['Phone', htmlspecialchars((string) ($reg['phone'] ?? ''))];
     if (($reg['dob'] ?? '') !== '') {
-        $rows[] = ['Date of birth', (string) $reg['dob']];
+        $rows[] = ['Date of birth', htmlspecialchars((string) $reg['dob'])];
     }
-    $rows[] = ['Amount paid', $amount];
-    $rows[] = ['Order ID', (string) ($reg['merchantOrderId'] ?? '')];
+    $rows[] = ['Amount', $amount];
+    $rows[] = ['Order ID', htmlspecialchars((string) ($reg['merchantOrderId'] ?? ''))];
 
-    $html = '<table style="width:100%;border-collapse:collapse;font-size:14px;">';
-    foreach ($rows as [$label, $value]) {
+    $html = '<table style="width:100%;border-collapse:separate;border-spacing:0;'
+        . 'background:#faf9f9;border:1px solid #f0eef0;border-radius:10px;'
+        . 'font-size:14px;overflow:hidden;">';
+    foreach ($rows as $i => [$label, $value]) {
+        $border = $i > 0 ? 'border-top:1px solid #f0eef0;' : '';
         $html .= '<tr>'
-            . '<td style="padding:6px 0;color:#777;width:120px;vertical-align:top;">'
-            . htmlspecialchars($label) . '</td>'
-            . '<td style="padding:6px 0;font-weight:600;">'
-            . htmlspecialchars($value) . '</td></tr>';
+            . '<td style="padding:11px 16px;color:#8a8a8a;width:130px;'
+            . 'vertical-align:top;' . $border . '">' . $label . '</td>'
+            . '<td style="padding:11px 16px;font-weight:600;color:#1f1f1f;'
+            . $border . '">' . $value . '</td></tr>';
     }
     return $html . '</table>';
 }
@@ -123,32 +166,61 @@ function gc_notify_admin(array $reg): void
         return;
     }
     $kind = ($reg['type'] ?? 'workshop') === 'course' ? 'course admission' : 'workshop registration';
-    $body = '<p style="margin:0 0 16px;">A new paid ' . $kind . ' just came in:</p>'
+    $body = gc_mail_pill('NEW PAID ' . strtoupper($kind), '#eafaf0', '#137a45')
+        . '<p style="margin:0 0 16px;">A new paid ' . $kind . ' just came in:</p>'
         . gc_mail_details($reg);
     gc_send_mail(
         GC_ADMIN_NOTIFY_EMAIL,
         'New paid ' . $kind . ' — ' . (string) ($reg['itemTitle'] ?? ''),
-        gc_mail_shell('New registration', $body)
+        gc_mail_shell('New registration', (string) ($reg['name'] ?? ''), $body)
     );
 }
 
-// Confirmation to the attendee who paid.
+// Success confirmation to the attendee who paid.
 function gc_notify_attendee(array $reg): void
 {
     $to = (string) ($reg['email'] ?? '');
     $isCourse = ($reg['type'] ?? 'workshop') === 'course';
     $what = $isCourse ? 'admission' : 'registration';
-    $body = '<p style="margin:0 0 8px;">Hi ' . htmlspecialchars((string) ($reg['name'] ?? '')) . ',</p>'
-        . '<p style="margin:0 0 16px;">Thank you! Your payment was successful and your '
-        . $what . ' is confirmed. Here are your details:</p>'
+    $body = gc_mail_pill('PAYMENT SUCCESSFUL', '#eafaf0', '#137a45')
+        . '<p style="margin:0 0 8px;">Hi ' . htmlspecialchars((string) ($reg['name'] ?? '')) . ',</p>'
+        . '<p style="margin:0 0 18px;">Thank you! Your payment went through and your '
+        . $what . ' is <b>confirmed</b>. Here are your details:</p>'
         . gc_mail_details($reg)
-        . '<p style="margin:16px 0 0;color:#555;">Our team will be in touch with any '
-        . 'further information. If you have questions, just reply to this email.</p>'
+        . '<p style="margin:18px 0 0;color:#555;">Our team will reach out with any '
+        . 'further information ahead of the ' . ($isCourse ? 'course' : 'workshop') . '. '
+        . 'We look forward to seeing you!</p>'
         . '<p style="margin:16px 0 0;">— Team Genesis Kreations</p>';
     gc_send_mail(
         $to,
-        'Your ' . ($isCourse ? 'admission' : 'registration') . ' is confirmed — '
-            . (string) ($reg['itemTitle'] ?? ''),
-        gc_mail_shell('Payment confirmed', $body)
+        'Your ' . $what . ' is confirmed — ' . (string) ($reg['itemTitle'] ?? ''),
+        gc_mail_shell(
+            $isCourse ? 'Admission confirmed' : 'You\'re registered!',
+            (string) ($reg['itemTitle'] ?? ''),
+            $body
+        )
+    );
+}
+
+// Failure notice to the attendee whose payment did not complete.
+function gc_notify_attendee_failed(array $reg): void
+{
+    $to = (string) ($reg['email'] ?? '');
+    $isCourse = ($reg['type'] ?? 'workshop') === 'course';
+    $what = $isCourse ? 'admission' : 'registration';
+    $retryUrl = GC_SITE_ORIGIN . ($isCourse ? '/academy' : '/workshops');
+    $body = gc_mail_pill('PAYMENT FAILED', '#fdecec', '#c0392b')
+        . '<p style="margin:0 0 8px;">Hi ' . htmlspecialchars((string) ($reg['name'] ?? '')) . ',</p>'
+        . '<p style="margin:0 0 16px;">Your payment for the ' . $what . ' below '
+        . '<b>did not complete</b>, so your spot isn\'t booked yet. If any amount was '
+        . 'debited, banks auto-reverse failed payments within a few working days.</p>'
+        . gc_mail_details($reg)
+        . '<p style="margin:18px 0 0;color:#555;">You can try again anytime:</p>'
+        . gc_mail_button($retryUrl, $isCourse ? 'Apply again' : 'Register again')
+        . '<p style="margin:16px 0 0;">— Team Genesis Kreations</p>';
+    gc_send_mail(
+        $to,
+        'Payment not completed — ' . (string) ($reg['itemTitle'] ?? ''),
+        gc_mail_shell('Payment not completed', (string) ($reg['itemTitle'] ?? ''), $body)
     );
 }

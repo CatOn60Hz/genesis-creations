@@ -160,7 +160,8 @@ function registration_set_status(string $merchantOrderId, string $status, array 
 {
     $updated = null;
     $justCompleted = null;
-    registrations_update(static function (array $list) use ($merchantOrderId, $status, $extra, &$updated, &$justCompleted) {
+    $justFailed = null;
+    registrations_update(static function (array $list) use ($merchantOrderId, $status, $extra, &$updated, &$justCompleted, &$justFailed) {
         foreach ($list as $i => $r) {
             if (($r['merchantOrderId'] ?? '') !== $merchantOrderId) {
                 continue;
@@ -175,12 +176,17 @@ function registration_set_status(string $merchantOrderId, string $status, array 
                 }
             }
             $r['updatedAt'] = date('c');
-            // Reserve the confirmation email inside the lock so a concurrent
-            // webhook + status poll can't both send. Fires once, on the first
-            // transition into COMPLETED.
-            if (!$wasCompleted && $r['status'] === 'COMPLETED' && empty($r['notifiedAt'])) {
-                $r['notifiedAt'] = date('c');
-                $justCompleted = $r;
+            // Reserve the notification email inside the lock so a concurrent
+            // webhook + status poll can't double-send. Fires once, on the first
+            // transition into a terminal state (COMPLETED or FAILED).
+            if (!$wasCompleted && empty($r['notifiedAt'])) {
+                if ($r['status'] === 'COMPLETED') {
+                    $r['notifiedAt'] = date('c');
+                    $justCompleted = $r;
+                } elseif ($r['status'] === 'FAILED') {
+                    $r['notifiedAt'] = date('c');
+                    $justFailed = $r;
+                }
             }
             $list[$i] = $r;
             $updated = $r;
@@ -189,10 +195,14 @@ function registration_set_status(string $merchantOrderId, string $status, array 
         return $list;
     });
     // Send outside the lock (mail can be slow); a failure never breaks payment.
-    if ($justCompleted !== null) {
+    if ($justCompleted !== null || $justFailed !== null) {
         require_once __DIR__ . '/_mail.php';
-        gc_notify_admin($justCompleted);
-        gc_notify_attendee($justCompleted);
+        if ($justCompleted !== null) {
+            gc_notify_admin($justCompleted);
+            gc_notify_attendee($justCompleted);
+        } else {
+            gc_notify_attendee_failed($justFailed);
+        }
     }
     return $updated;
 }
