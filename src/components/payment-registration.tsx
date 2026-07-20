@@ -71,19 +71,23 @@ export function PaymentRegistration({
 
   return (
     <div
-      className="fixed inset-0 z-[80] flex justify-center overflow-y-auto bg-black/80 p-4 backdrop-blur-sm sm:p-8"
+      className="fixed inset-0 z-[80] overflow-y-auto bg-black/80 backdrop-blur-sm"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       data-lenis-prevent
     >
-      <motion.div
-        initial={{ opacity: 0, y: 16, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-        className="relative my-auto w-full max-w-md overflow-hidden rounded-3xl bg-[#1a0a0f] ring-1 ring-white/10"
-        onClick={(e) => e.stopPropagation()}
-      >
+      {/* Separate scroll container (outer) from centering (this wrapper) so a
+          modal taller than the viewport still scrolls fully — margin-auto
+          centering inside an overflow container clips the top on short screens. */}
+      <div className="flex min-h-full items-center justify-center p-4 sm:p-8">
+        <motion.div
+          initial={{ opacity: 0, y: 16, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+          className="relative w-full max-w-md overflow-hidden rounded-3xl bg-[#1a0a0f] ring-1 ring-white/10"
+          onClick={(e) => e.stopPropagation()}
+        >
         <button
           type="button"
           onClick={onClose}
@@ -194,7 +198,8 @@ export function PaymentRegistration({
             <Lock className="h-3 w-3" /> Secure payment via PhonePe
           </p>
         </form>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   )
 }
