@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react"
+import { createPortal } from "react-dom"
 import { motion } from "framer-motion"
 import { Loader2, Lock, Ticket, X } from "lucide-react"
 
@@ -77,7 +78,12 @@ export function PaymentRegistration({
     }
   }
 
-  return (
+  // Portal to <body> so the fixed-position overlay is measured against the
+  // viewport, not a transformed ancestor. Call sites render this modal from
+  // inside animated cards/detail views (e.g. framer-motion's translateY leaves
+  // an inline transform), which would otherwise anchor `position: fixed` to the
+  // card and push the modal off-centre.
+  return createPortal(
     <div
       className="fixed inset-0 z-[80] overflow-y-auto bg-black/80 backdrop-blur-sm"
       onClick={onClose}
@@ -208,6 +214,7 @@ export function PaymentRegistration({
         </form>
         </motion.div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
