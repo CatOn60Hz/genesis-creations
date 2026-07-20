@@ -198,11 +198,32 @@ function registration_set_status(string $merchantOrderId, string $status, array 
     if ($justCompleted !== null || $justFailed !== null) {
         require_once __DIR__ . '/_mail.php';
         if ($justCompleted !== null) {
-            gc_notify_admin($justCompleted);
-            gc_notify_attendee($justCompleted);
+            gc_notify_admin($justCompleted); // best-effort; not gating
+            $sent = gc_notify_attendee($justCompleted);
         } else {
-            gc_notify_attendee_failed($justFailed);
+            $sent = gc_notify_attendee_failed($justFailed);
+        }
+        // If the email didn't send (e.g. mail not configured / domain not yet
+        // verified), release the reservation so a later webhook/poll retries
+        // instead of silently never sending.
+        if (!$sent) {
+            registration_clear_notified($merchantOrderId);
         }
     }
     return $updated;
+}
+
+// Drop the notifiedAt reservation for one order (used when a send fails, so the
+// confirmation can be retried on the next status update).
+function registration_clear_notified(string $merchantOrderId): void
+{
+    registrations_update(static function (array $list) use ($merchantOrderId) {
+        foreach ($list as $i => $r) {
+            if (($r['merchantOrderId'] ?? '') === $merchantOrderId) {
+                unset($list[$i]['notifiedAt']);
+                break;
+            }
+        }
+        return $list;
+    });
 }

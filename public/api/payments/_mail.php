@@ -176,8 +176,8 @@ function gc_notify_admin(array $reg): void
     );
 }
 
-// Success confirmation to the attendee who paid.
-function gc_notify_attendee(array $reg): void
+// Success confirmation to the attendee who paid. Returns whether it sent.
+function gc_notify_attendee(array $reg): bool
 {
     $to = (string) ($reg['email'] ?? '');
     $isCourse = ($reg['type'] ?? 'workshop') === 'course';
@@ -191,7 +191,7 @@ function gc_notify_attendee(array $reg): void
         . 'further information ahead of the ' . ($isCourse ? 'course' : 'workshop') . '. '
         . 'We look forward to seeing you!</p>'
         . '<p style="margin:16px 0 0;">— Team Genesis Kreations</p>';
-    gc_send_mail(
+    return gc_send_mail(
         $to,
         'Your ' . $what . ' is confirmed — ' . (string) ($reg['itemTitle'] ?? ''),
         gc_mail_shell(
@@ -202,8 +202,9 @@ function gc_notify_attendee(array $reg): void
     );
 }
 
-// Failure notice to the attendee whose payment did not complete.
-function gc_notify_attendee_failed(array $reg): void
+// Failure notice to the attendee whose payment did not complete. Returns
+// whether it sent.
+function gc_notify_attendee_failed(array $reg): bool
 {
     $to = (string) ($reg['email'] ?? '');
     $isCourse = ($reg['type'] ?? 'workshop') === 'course';
@@ -218,7 +219,7 @@ function gc_notify_attendee_failed(array $reg): void
         . '<p style="margin:18px 0 0;color:#555;">You can try again anytime:</p>'
         . gc_mail_button($retryUrl, $isCourse ? 'Apply again' : 'Register again')
         . '<p style="margin:16px 0 0;">— Team Genesis Kreations</p>';
-    gc_send_mail(
+    return gc_send_mail(
         $to,
         'Payment not completed — ' . (string) ($reg['itemTitle'] ?? ''),
         gc_mail_shell('Payment not completed', (string) ($reg['itemTitle'] ?? ''), $body)
