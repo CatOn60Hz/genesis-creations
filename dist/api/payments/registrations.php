@@ -1,5 +1,5 @@
 <?php
-// GET /api/payments/registrations.php?itemId=<id?> (X-Gallery-Password)
+// GET /api/payments/registrations.php?itemId=ID (optional) (X-Gallery-Password)
 //   -> { registrations: [...] }
 // Admin-only list for the /admin Registrations view (workshop + course
 // payments share one store). Newest first.

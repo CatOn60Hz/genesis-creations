@@ -907,6 +907,7 @@ function RegistrationsManager({
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [filter, setFilter] = useState<"" | PaymentStatus>("")
+  const [itemFilter, setItemFilter] = useState("")
 
   const request = () =>
     fetchRegistrations(password)
@@ -929,7 +930,16 @@ function RegistrationsManager({
     void request()
   }
 
-  const visible = filter ? items.filter((r) => r.status === filter) : items
+  // Distinct workshops/courses present in the data, for the per-item filter.
+  const itemOptions = Array.from(
+    new Map(items.map((r) => [r.itemId, r.itemTitle])).entries()
+  ).filter(([id]) => id)
+
+  const visible = items.filter(
+    (r) =>
+      (!filter || r.status === filter) &&
+      (!itemFilter || r.itemId === itemFilter)
+  )
 
   const exportCsv = () => {
     const header = [
@@ -969,6 +979,20 @@ function RegistrationsManager({
             {f.label}
           </button>
         ))}
+        {itemOptions.length > 1 && (
+          <select
+            value={itemFilter}
+            onChange={(e) => setItemFilter(e.target.value)}
+            className="rounded-full border-0 bg-white/5 px-4 py-2 text-sm text-cream/80 outline-none ring-1 ring-white/10 hover:bg-white/10 focus:ring-maroon"
+          >
+            <option value="">All workshops &amp; courses</option>
+            {itemOptions.map(([id, title]) => (
+              <option key={id} value={id} className="bg-maroon-dark text-cream">
+                {title}
+              </option>
+            ))}
+          </select>
+        )}
         <div className="ml-auto flex items-center gap-2">
           <button type="button" onClick={load} className={btnCls}>
             <RotateCcw className="h-4 w-4" /> Refresh
