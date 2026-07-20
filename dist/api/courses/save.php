@@ -1,7 +1,7 @@
 <?php
 // POST /api/courses/save.php (form: id?, kind, title, subtitle, why, duration,
-// schedule, format, certification, badge, who + JSON-encoded learn, choose,
-// careers, modules + auth) -> { courses: [...], saved }.
+// schedule, format, certification, badge, who, price, admissionClosed +
+// JSON-encoded learn, choose, careers, modules + auth) -> { courses, saved }.
 require_once __DIR__ . '/_common.php';
 
 send_cors();
@@ -20,6 +20,12 @@ $format        = trim((string) ($_POST['format'] ?? ''));
 $certification = trim((string) ($_POST['certification'] ?? ''));
 $badge         = trim((string) ($_POST['badge'] ?? ''));
 $who           = trim((string) ($_POST['who'] ?? ''));
+// Free-text price ("₹45,000", "₹25,000 / term", "Contact us"…); '' hides it.
+$price         = trim((string) ($_POST['price'] ?? ''));
+// Online admission/booking fee in whole rupees; > 0 enables PhonePe enrolment.
+$fee           = max(0, (int) ($_POST['fee'] ?? 0));
+// When closed, the Academy page shows an "Admissions closed" state on the card.
+$admissionClosed = ($_POST['admissionClosed'] ?? '') === '1';
 
 if ($title === '') {
     json_out(['error' => 'Title is required'], 400);
@@ -36,6 +42,9 @@ $fields = [
     'certification' => $certification,
     'badge'         => $badge,
     'who'           => $who,
+    'price'         => $price,
+    'fee'           => $fee,
+    'admissionClosed' => $admissionClosed,
     'learn'         => courses_decode_list($_POST['learn'] ?? ''),
     'modules'       => courses_decode_modules($_POST['modules'] ?? ''),
     'choose'        => courses_decode_list($_POST['choose'] ?? ''),

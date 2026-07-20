@@ -21,6 +21,8 @@ $badge       = trim((string) ($_POST['badge'] ?? ''));
 $icon        = trim((string) ($_POST['icon'] ?? ''));
 $registerUrl = trim((string) ($_POST['registerUrl'] ?? ''));
 $note        = trim((string) ($_POST['note'] ?? ''));
+// Fee in whole rupees; 0 = free / external registration (no PhonePe flow).
+$fee         = max(0, (int) ($_POST['fee'] ?? 0));
 
 if ($title === '') {
     json_out(['error' => 'Title is required'], 400);
@@ -108,6 +110,7 @@ $record = [
     'icon'        => $icon,
     'registerUrl' => $registerUrl,
     'note'        => $note,
+    'fee'         => $fee,
     'sessions'    => $sessions,
     'learn'       => $learn,
     'included'    => $included,
