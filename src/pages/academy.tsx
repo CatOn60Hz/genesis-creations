@@ -730,6 +730,7 @@ function CourseDetail({ course, onClose }: { course: Course; onClose: () => void
                 name: f.name,
                 email: f.email,
                 phone: f.phone,
+                dob: f.dob,
               })
             }
           />

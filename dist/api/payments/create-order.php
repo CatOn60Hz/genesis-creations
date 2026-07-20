@@ -17,6 +17,11 @@ $sessionCity = trim((string) ($_POST['sessionCity'] ?? ''));
 $name        = trim((string) ($_POST['name'] ?? ''));
 $email       = trim((string) ($_POST['email'] ?? ''));
 $phone       = preg_replace('/[^0-9+]/', '', (string) ($_POST['phone'] ?? ''));
+// Date of birth, kept only if it looks like YYYY-MM-DD (the form's date input).
+$dob         = trim((string) ($_POST['dob'] ?? ''));
+if ($dob !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $dob)) {
+    $dob = '';
+}
 
 // Exactly one payable item.
 if (($workshopId === '') === ($courseId === '') || $name === '') {
@@ -95,7 +100,7 @@ if ($code !== 200 || $redirectUrl === '') {
 }
 
 registrations_update(static function (array $regs) use (
-    $type, $itemId, $title, $sessionCity, $name, $email, $phone, $amountPaise, $merchantOrderId, $data
+    $type, $itemId, $title, $sessionCity, $name, $email, $phone, $dob, $amountPaise, $merchantOrderId, $data
 ) {
     array_unshift($regs, [
         'id'              => bin2hex(random_bytes(6)),
@@ -106,6 +111,7 @@ registrations_update(static function (array $regs) use (
         'name'            => $name,
         'email'           => $email,
         'phone'           => $phone,
+        'dob'             => $dob,
         'amountPaise'     => $amountPaise,
         'merchantOrderId' => $merchantOrderId,
         'phonepeOrderId'  => (string) ($data['orderId'] ?? ''),

@@ -944,11 +944,11 @@ function RegistrationsManager({
   const exportCsv = () => {
     const header = [
       "Type", "Course / Workshop", "Session", "Name", "Email", "Phone",
-      "Amount (₹)", "Status", "Order ID", "Date",
+      "Date of birth", "Amount (₹)", "Status", "Order ID", "Date",
     ]
     const rows = visible.map((r) => [
       r.type ?? "workshop", r.itemTitle, r.sessionCity, r.name, r.email, r.phone,
-      r.amountPaise / 100, r.status, r.merchantOrderId,
+      r.dob ?? "", r.amountPaise / 100, r.status, r.merchantOrderId,
       new Date(r.createdAt).toLocaleString("en-IN"),
     ])
     const csv = [header, ...rows]
@@ -979,7 +979,7 @@ function RegistrationsManager({
             {f.label}
           </button>
         ))}
-        {itemOptions.length > 1 && (
+        {itemOptions.length > 0 && (
           <select
             value={itemFilter}
             onChange={(e) => setItemFilter(e.target.value)}
@@ -1041,7 +1041,12 @@ function RegistrationsManager({
                       {r.sessionCity ? ` · ${r.sessionCity}` : ""}
                     </p>
                   </td>
-                  <td className="px-4 py-3 text-cream/85">{r.name}</td>
+                  <td className="px-4 py-3">
+                    <p className="text-cream/85">{r.name}</p>
+                    {r.dob && (
+                      <p className="text-xs text-cream/60">DOB: {r.dob}</p>
+                    )}
+                  </td>
                   <td className="px-4 py-3">
                     <p className="text-cream/85">{r.email}</p>
                     <p className="text-xs text-cream/60">{r.phone}</p>

@@ -57,6 +57,9 @@ function gc_mail_details(array $reg): string
     $rows[] = ['Name', (string) ($reg['name'] ?? '')];
     $rows[] = ['Email', (string) ($reg['email'] ?? '')];
     $rows[] = ['Phone', (string) ($reg['phone'] ?? '')];
+    if (($reg['dob'] ?? '') !== '') {
+        $rows[] = ['Date of birth', (string) $reg['dob']];
+    }
     $rows[] = ['Amount paid', $amount];
     $rows[] = ['Order ID', (string) ($reg['merchantOrderId'] ?? '')];
 

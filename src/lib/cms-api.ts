@@ -531,6 +531,7 @@ export type Registration = {
   name: string
   email: string
   phone: string
+  dob?: string
   amountPaise: number
   merchantOrderId: string
   phonepeOrderId?: string
@@ -547,6 +548,7 @@ export async function createWorkshopOrder(fields: {
   name: string
   email: string
   phone: string
+  dob: string
 }): Promise<string> {
   const data = await postPublic<{ redirectUrl: string }>(
     "/payments/create-order.php",
@@ -560,6 +562,7 @@ export async function createCourseOrder(fields: {
   name: string
   email: string
   phone: string
+  dob: string
 }): Promise<string> {
   const data = await postPublic<{ redirectUrl: string }>(
     "/payments/create-order.php",

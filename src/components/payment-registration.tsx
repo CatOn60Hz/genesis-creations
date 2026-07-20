@@ -31,12 +31,14 @@ export function PaymentRegistration({
     name: string
     email: string
     phone: string
+    dob: string
   }) => Promise<string>
 }) {
   const cities = sessions.filter((s) => s.city)
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
+  const [dob, setDob] = useState("")
   const [sessionCity, setSessionCity] = useState(cities[0]?.city ?? "")
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState("")
@@ -57,6 +59,7 @@ export function PaymentRegistration({
         name: name.trim(),
         email: email.trim(),
         phone: phone.trim(),
+        dob,
       })
       // Off to PhonePe's hosted checkout; it redirects back to /payment-status.
       window.location.assign(redirectUrl)
@@ -133,6 +136,17 @@ export function PaymentRegistration({
               placeholder="+91 98XXXXXXXX"
               minLength={10}
               className={FIELD_CLS}
+            />
+          </label>
+          <label className="flex flex-col gap-1.5 text-xs font-semibold uppercase tracking-wider text-cream/60">
+            Date of birth
+            <input
+              required
+              type="date"
+              value={dob}
+              onChange={(e) => setDob(e.target.value)}
+              max={new Date().toISOString().slice(0, 10)}
+              className={`${FIELD_CLS} [color-scheme:dark]`}
             />
           </label>
 
