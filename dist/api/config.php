@@ -1,5 +1,5 @@
 <?php
-// Genesis Creations — shared backend configuration (single source of truth).
+// Genesis Kreations — shared backend configuration (single source of truth).
 //
 // SECURITY: change GC_ADMIN_PASSWORD to your own secret before going live.
 // This one password gates the whole /admin dashboard (announcements, workshops,
@@ -14,6 +14,14 @@ const GC_ALLOWED = [
     'png'  => 'image/png',
     'webp' => 'image/webp',
     'gif'  => 'image/gif',
+];
+
+// Allowed video types for the home-screen hero video: extension => MIME.
+const GC_ALLOWED_VIDEO = [
+    'mp4'  => 'video/mp4',
+    'webm' => 'video/webm',
+    'mov'  => 'video/quicktime',
+    'ogg'  => 'video/ogg',
 ];
 
 // Maximum size per uploaded file, in bytes (50 MB). NOTE: PHP's own
