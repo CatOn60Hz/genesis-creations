@@ -46,7 +46,15 @@ export function PaymentRegistration({
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose()
     window.addEventListener("keydown", onKey)
-    return () => window.removeEventListener("keydown", onKey)
+    // Lock background scroll while the modal is open (matches the app's other
+    // modals — gallery/reels/academy). Restore the previous value on close so
+    // nesting under another already-locked modal stays correct.
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      window.removeEventListener("keydown", onKey)
+      document.body.style.overflow = prevOverflow
+    }
   }, [onClose])
 
   async function submit(e: FormEvent) {
