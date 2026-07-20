@@ -86,3 +86,7 @@ defined('GC_SITE_ORIGIN') || define('GC_SITE_ORIGIN', 'https://genesiskreationsm
 defined('GC_MAIL_FROM') || define('GC_MAIL_FROM', '');
 defined('GC_MAIL_FROM_NAME') || define('GC_MAIL_FROM_NAME', 'Genesis Kreations');
 defined('GC_ADMIN_NOTIFY_EMAIL') || define('GC_ADMIN_NOTIFY_EMAIL', '');
+// Resend API key (https://resend.com). When set, mail is sent via Resend's
+// HTTPS API (reliable, domain-authenticated); otherwise it falls back to PHP
+// mail(). GC_MAIL_FROM must be on a domain verified in the Resend dashboard.
+defined('GC_RESEND_API_KEY') || define('GC_RESEND_API_KEY', '');

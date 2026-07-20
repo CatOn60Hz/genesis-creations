@@ -10,11 +10,54 @@
 require_once __DIR__ . '/../config.php';
 
 // Send one HTML email. Returns true on success, false if disabled or failed.
+// Prefers the Resend HTTPS API (domain-authenticated, reliable); falls back to
+// PHP mail() when no Resend key is set. Never throws — a failed send must not
+// break the payment flow.
 function gc_send_mail(string $to, string $subject, string $html): bool
 {
     if (GC_MAIL_FROM === '' || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
         return false;
     }
+    return GC_RESEND_API_KEY !== ''
+        ? gc_send_via_resend($to, $subject, $html)
+        : gc_send_via_phpmail($to, $subject, $html);
+}
+
+// Resend API: POST https://api.resend.com/emails with a Bearer key. "from"
+// must be on a domain verified in the Resend dashboard.
+function gc_send_via_resend(string $to, string $subject, string $html): bool
+{
+    $from = GC_MAIL_FROM_NAME !== ''
+        ? GC_MAIL_FROM_NAME . ' <' . GC_MAIL_FROM . '>'
+        : GC_MAIL_FROM;
+    $ch = curl_init('https://api.resend.com/emails');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST           => true,
+        CURLOPT_HTTPHEADER     => [
+            'Authorization: Bearer ' . GC_RESEND_API_KEY,
+            'Content-Type: application/json',
+        ],
+        CURLOPT_POSTFIELDS     => json_encode([
+            'from'     => $from,
+            'to'       => [$to],
+            'subject'  => $subject,
+            'html'     => $html,
+            'reply_to' => GC_MAIL_FROM,
+        ]),
+        CURLOPT_SSL_VERIFYPEER => true,
+        CURLOPT_CONNECTTIMEOUT => 5,
+        CURLOPT_TIMEOUT        => 10,
+    ]);
+    $raw = curl_exec($ch);
+    $code = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+    curl_close($ch);
+    return $raw !== false && $code >= 200 && $code < 300;
+}
+
+// Fallback transport: PHP mail() with a UTF-8 HTML body.
+function gc_send_via_phpmail(string $to, string $subject, string $html): bool
+{
     $fromName = mb_encode_mimeheader(GC_MAIL_FROM_NAME);
     $headers = implode("\r\n", [
         'MIME-Version: 1.0',
@@ -24,7 +67,6 @@ function gc_send_mail(string $to, string $subject, string $html): bool
         'X-Mailer: GenesisKreations',
     ]);
     $encodedSubject = '=?UTF-8?B?' . base64_encode($subject) . '?=';
-    // Suppress warnings — a failed send must never break the payment flow.
     return @mail($to, $encodedSubject, $html, $headers);
 }
 
