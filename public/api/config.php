@@ -77,3 +77,12 @@ defined('GC_PHONEPE_WEBHOOK_PASS') || define('GC_PHONEPE_WEBHOOK_PASS', '');
 
 // Absolute origin used to build the PhonePe redirect URL back to the site.
 defined('GC_SITE_ORIGIN') || define('GC_SITE_ORIGIN', 'https://genesiskreationsmedia.com');
+
+// Email notifications for paid registrations. Sending is skipped gracefully
+// when GC_MAIL_FROM is empty, so this stays dormant until secrets.php sets it.
+// GC_MAIL_FROM should be a real mailbox on the site's domain for deliverability
+// (e.g. no-reply@genesiskreationsmedia.com). GC_ADMIN_NOTIFY_EMAIL receives the
+// "new registration" alert; leave empty to only email the attendee.
+defined('GC_MAIL_FROM') || define('GC_MAIL_FROM', '');
+defined('GC_MAIL_FROM_NAME') || define('GC_MAIL_FROM_NAME', 'Genesis Kreations');
+defined('GC_ADMIN_NOTIFY_EMAIL') || define('GC_ADMIN_NOTIFY_EMAIL', '');

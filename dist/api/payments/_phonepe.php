@@ -159,12 +159,14 @@ function phonepe_state_to_status(string $state): string
 function registration_set_status(string $merchantOrderId, string $status, array $extra = []): ?array
 {
     $updated = null;
-    registrations_update(static function (array $list) use ($merchantOrderId, $status, $extra, &$updated) {
+    $justCompleted = null;
+    registrations_update(static function (array $list) use ($merchantOrderId, $status, $extra, &$updated, &$justCompleted) {
         foreach ($list as $i => $r) {
             if (($r['merchantOrderId'] ?? '') !== $merchantOrderId) {
                 continue;
             }
-            if (($r['status'] ?? '') !== 'COMPLETED') {
+            $wasCompleted = ($r['status'] ?? '') === 'COMPLETED';
+            if (!$wasCompleted) {
                 $r['status'] = $status;
             }
             foreach ($extra as $k => $v) {
@@ -173,11 +175,24 @@ function registration_set_status(string $merchantOrderId, string $status, array 
                 }
             }
             $r['updatedAt'] = date('c');
+            // Reserve the confirmation email inside the lock so a concurrent
+            // webhook + status poll can't both send. Fires once, on the first
+            // transition into COMPLETED.
+            if (!$wasCompleted && $r['status'] === 'COMPLETED' && empty($r['notifiedAt'])) {
+                $r['notifiedAt'] = date('c');
+                $justCompleted = $r;
+            }
             $list[$i] = $r;
             $updated = $r;
             break;
         }
         return $list;
     });
+    // Send outside the lock (mail can be slow); a failure never breaks payment.
+    if ($justCompleted !== null) {
+        require_once __DIR__ . '/_mail.php';
+        gc_notify_admin($justCompleted);
+        gc_notify_attendee($justCompleted);
+    }
     return $updated;
 }
